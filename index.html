@@ -200,6 +200,10 @@ h2.ctoggle::after{content:"";width:7px;height:7px;border-right:2px solid var(--m
 #view .row:has([data-act="openMember"]) .avatar{margin-left:-40px}
 #view .row:has([data-act="openMember"]) .grow{flex:1 1 calc(100% - 12px)}
 }
+.skills{font-size:.78rem;color:var(--muted);margin-top:2px}
+.vtext{margin:0 0 10px;line-height:1.6;max-width:70ch}
+.vlist{margin:0;padding-left:20px;line-height:1.6}.vlist li{margin:4px 0}
+.vkey{font-weight:600;min-width:110px;flex:none}
 
 .toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:8px 14px;border-radius:8px;z-index:40;font-size:.88rem}
 
@@ -246,7 +250,7 @@ h2.ctoggle::after{content:"";width:7px;height:7px;border-right:2px solid var(--m
 <script>
 /* ---------- i18n ---------- */
 const T={
-de:{dashboard:"Start",songs:"Songs",tasks:"Aufgaben",sessions:"Sessions",projects:"Projekte",ideas:"Ideen",members:"Mitglieder",more:"Mehr",
+de:{dashboard:"Start",songs:"Songs",tasks:"Aufgaben",sessions:"Sessions",projects:"Projekte",ideas:"Ideen",members:"Mitglieder",vision:"Vision & Werte",more:"Mehr",
 proto:"Prototyp mit Beispieldaten",viewAs:"Ansicht als",nextSession:"Nächste Session",coming:"Kommst du?",yes:"Ja",no:"Nein",maybe:"Vielleicht",
 overdue:"Überfällig",myTasks:"Meine Aufgaben",allTasks:"Alle",open:"Offen",inprog:"In Arbeit",done:"Erledigt",songsByStage:"Songs nach Phase",
 releases:"Anstehende Releases",nothing:"Nichts offen.",due:"fällig",today:"heute",prio:{high:"Hoch",mid:"Mittel",low:"Niedrig"},priority:"Priorität",
@@ -267,7 +271,7 @@ nextStepsNote:"Die echte App lädt diese Daten aus dem Google Sheet. Änderungen
 expense:"Ausgaben",balance:"Stand",addSub:"Teilaufgabe hinzufügen",attendees:"Anwesend",yesCount:"Zusagen",
 liveNote:"Live Recording: Tracks und Click aus der Studioproduktion laufen live mit.",lineup:"Live Lineup",event:"Event",
 moveOnHint:"Weiter erst, wenn Vocal und Instrumental erledigt sind.",releasesTitle:"Releases",money:"Finanzen",invoices:"Rechnungen",invoiceNew:"Rechnung erfassen",vendor:"Von",invNr:"Rechnungsnr.",items:"Leistung",amount:"Betrag (€)",paid:"bezahlt",unpaid:"offen",startBalance:"Start",spent:"Ausgegeben",invHint:"Die PDF kommt in Drive in den Ordner Rechnungen. Bankdaten aus Rechnungen werden in der App nicht angezeigt.",forSong:"Für Song",date:"Datum",hello:"Willkommen bei Raum Worship Hub",enterCode:"Gib deinen 6 stelligen Code ein. Du bekommst ihn von der Leitung per WhatsApp.",whoAreYou:"Wer bist du?",login:"Anmelden",logout:"Abmelden",loading:"Lädt…",noLink:"Öffne bitte deinen persönlichen Link aus WhatsApp.",invite:"Einladen",inviteTitle:"Einladung",inviteHint:"Schick das per WhatsApp. Der Code gilt 14 Tage und funktioniert im Browser und in der installierten App.",copy:"Kopieren",production:"Produktion",errSave:"Nicht gespeichert",offline:"Keine Verbindung. Bitte später nochmal.",pdfDone:"PDF liegt in Protokolle › Creative Sessions",memoLink:"Sprachmemo Link (Drive)",pdfLink:"PDF Link (Drive)",installHint:"Auf dem iPhone: Teilen › Zum Home Bildschirm. Danach in der App einmal den Code eingeben.",leadDoes:"Lead Vocal baut es",celloQ:"Cello in diesem Song",links:"Drive Links",addLink:"Link hinzufügen",linkLabel:"Bezeichnung",linkUrl:"Drive Link (https://…)",myParts:"Meine Songs und Parts",quick:"Drive Ordner",noParts:"Dir ist noch kein Part zugeteilt.",exportOld:"Meine Klicks aus älteren Versionen kopieren",exportHint:"Kopiert deine Änderungen aus den vorherigen Prototyp Versionen. Füge den Text danach im Chat mit Claude ein.",copied:"Kopiert. Jetzt im Chat einfügen.",selectCopy:"Text markieren und kopieren:",badUrl:"Bitte einen Link mit https:// eingeben.",helpers:"Hilfe",vocalArr:"Vocal Arrangement",instrArr:"Instrumental Arrangement"},
-en:{dashboard:"Home",songs:"Songs",tasks:"Tasks",sessions:"Sessions",projects:"Projects",ideas:"Ideas",members:"Members",more:"More",
+en:{dashboard:"Home",songs:"Songs",tasks:"Tasks",sessions:"Sessions",projects:"Projects",ideas:"Ideas",members:"Members",vision:"Vision & values",more:"More",
 proto:"Prototype with sample data",viewAs:"View as",nextSession:"Next session",coming:"Are you coming?",yes:"Yes",no:"No",maybe:"Maybe",
 overdue:"Overdue",myTasks:"My tasks",allTasks:"All",open:"Open",inprog:"In progress",done:"Done",songsByStage:"Songs by stage",
 releases:"Upcoming releases",nothing:"Nothing open.",due:"due",today:"today",prio:{high:"High",mid:"Medium",low:"Low"},priority:"Priority",
@@ -319,6 +323,10 @@ const isLeader=()=>role()==="leader";
 const canSongs=()=>canAll()||(me().perms||[]).includes("songs");
 const partMine=(p,u)=>!!u&&(p.owner===u||(p.co||[]).includes(u));
 const AREA={dashboard:"dashboard",songs:"songs",tasks:"tasks",sessions:"sessions",projects:"projects",ideas:"ideas"};const areaOf=v=>AREA[v]||"neutral";
+// vision: kept by the leadership in the Sheet, rendered as plain sections (h heading, p paragraphs, list bullets, rows two column table)
+function visionSection(x){return `<div class="panel"><h2>${esc(x.h)}</h2>${(x.p||[]).map(t=>`<p class="vtext">${esc(t)}</p>`).join("")}${(x.list||[]).length?`<ul class="vlist">${x.list.map(i=>`<li>${esc(i)}</li>`).join("")}</ul>`:""}${(x.rows||[]).length?`<div class="rows">${x.rows.map(r=>`<div class="row" style="align-items:flex-start"><div class="vkey">${esc(r[0])}</div><div class="grow">${esc(r[1]||"")}</div></div>`).join("")}</div>`:""}</div>`}
+function visionPage(){const v=D.vision;if(!v||!v.sections)return `<div class="panel"><p class="empty">${S.lang==="de"?"Die Vision ist noch nicht hinterlegt.":"The vision has not been added yet."}</p></div>`;return `<div class="grid">${v.sections.map(visionSection).join("")}</div>`}
+function visionPanel(key){const v=D.vision;const x=v&&v.sections&&v.sections.find(y=>y.key===key);return x?`<div style="margin-top:16px">${visionSection(x)}</div>`:""}
 const sheetArea=ty=>/song/i.test(ty)?"songs":/task/i.test(ty)?"tasks":/session/i.test(ty)?"sessions":/project/i.test(ty)?"projects":/idea/i.test(ty)?"ideas":"neutral";
 const spent=()=>D.money.invoices.filter(r=>r.status==="paid").reduce((a,r)=>a+Number(r.amount||0),0);
 const balance=()=>D.money.start-spent();
@@ -341,12 +349,13 @@ projects:'<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 
 ideas:'<path d="M9 18h6M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/>',
 members:'<circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0"/><path d="M17 4a4 4 0 0 1 0 8M22 21a7 7 0 0 0-4-6.3"/>',
 money:'<rect x="2" y="6" width="20" height="13" rx="2"/><circle cx="12" cy="12.5" r="2.5"/><path d="M6 10v5M18 10v5"/>',
+vision:'<path d="M12 21s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.6-7 10-7 10z"/>',
 more:'<circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/>'};
 const icon=k=>`<svg class="ico" viewBox="0 0 24 24">${I[k]}</svg>`;
 const tick='<svg viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></svg>';
 
 /* ---------- shell ---------- */
-const NAV=()=>["dashboard","songs","tasks","sessions","projects","ideas","members",...(isLeader()?["money"]:[])];
+const NAV=()=>["dashboard","songs","tasks","sessions","projects","ideas","members","vision",...(isLeader()?["money"]:[])];
 const BOTTOM=["dashboard","songs","tasks","sessions","more"];
 function myOpenCount(){return D.tasks.filter(x=>x.owners.includes(S.me)&&(isOver(x)||isToday(x))).length}
 function shell(){
@@ -356,7 +365,7 @@ function shell(){
   const c=myOpenCount(), badge=c?`<span class="badge">${c}</span>`:"";
   document.body.dataset.area=areaOf(S.view);
   document.getElementById("sidenav").innerHTML=NAV().map(k=>`<button type="button" data-nav="${k}" data-area="${areaOf(k)}" ${S.view===k?'aria-current="page"':""}>${icon(k)}${t(k)}${k==="tasks"?badge:""}</button>`).join("");
-  const moreViews=["projects","ideas","members","money","more"];
+  const moreViews=["projects","ideas","members","vision","money","more"];
   document.getElementById("bottomnav").innerHTML=BOTTOM.map(k=>{const cur=k==="more"?moreViews.includes(S.view):S.view===k;return `<button type="button" data-nav="${k}" data-area="${areaOf(k==="more"&&cur?S.view:k)}" ${cur?'aria-current="page"':""}>${icon(k)}<span>${t(k)}</span>${k==="tasks"?badge:""}</button>`}).join("");
   document.getElementById("title").textContent=t(S.view);
 }
@@ -436,7 +445,7 @@ sessions(){
   const f=S.sessFilter, up=D.sessions.filter(s=>pd(s.date)>=TODAY).sort((a,b)=>a.date.localeCompare(b.date)), past=D.sessions.filter(s=>pd(s.date)<TODAY).sort((a,b)=>b.date.localeCompare(a.date));
   const l=f==="upcoming"?up:past;
   return `<div class="tabs"><button type="button" data-act="sessFilter" data-v="upcoming" aria-pressed="${f==="upcoming"}">${t("upcoming")}</button><button type="button" data-act="sessFilter" data-v="past" aria-pressed="${f==="past"}">${t("past")}</button></div>
-  <div class="panel"><div class="rows">${l.map(s=>{const y=Object.values(s.rsvp).filter(v=>v==="yes").length;return `<div class="row">${dateBox(s)}<div class="grow"><button type="button" class="link title" data-act="openSession" data-id="${s.id}" style="color:inherit">Creative Session</button><div class="muted" style="font-size:.85rem">${esc(s.time)} · ${esc(s.place)}</div></div>${f==="upcoming"?`<span class="chip ${s.rsvp[S.me]==="yes"?"ok":""}">${y} ${t("yesCount")}</span>`:s.pdf?`<a class="chip acc" href="${DRIVE.file(s.pdf)}" target="_blank" rel="noopener">${t("pdf")}</a>`:""}</div>`}).join("")}</div></div>`},
+  <div class="panel"><div class="rows">${l.map(s=>{const y=Object.values(s.rsvp).filter(v=>v==="yes").length;return `<div class="row">${dateBox(s)}<div class="grow"><button type="button" class="link title" data-act="openSession" data-id="${s.id}" style="color:inherit">Creative Session</button><div class="muted" style="font-size:.85rem">${esc(s.time)} · ${esc(s.place)}</div></div>${f==="upcoming"?`<span class="chip ${s.rsvp[S.me]==="yes"?"ok":""}">${y} ${t("yesCount")}${Object.values(s.rsvp).filter(v=>v==="maybe").length?` · ${Object.values(s.rsvp).filter(v=>v==="maybe").length} ${t("maybe")}`:""}</span>`:s.pdf?`<a class="chip acc" href="${DRIVE.file(s.pdf)}" target="_blank" rel="noopener">${t("pdf")}</a>`:""}</div>`}).join("")}</div></div>${visionPanel("sessions")}`},
 projects(){
   return `<div class="grid cols-2">${D.projects.map(p=>{const l=D.tasks.filter(x=>x.link&&x.link.type==="project"&&x.link.id===p.id);const d=l.filter(x=>x.status==="done").length;return `<div class="panel"><div class="panel-head"><h2>${esc(p.title)}</h2><span class="chip">${esc(p.when)}</span></div><p class="muted" style="margin:0 0 8px">${esc(p.note)}</p><div class="label">${t("tasks")} · ${d}/${l.length}</div><div class="rows">${l.map(taskRow).join("")||`<p class="empty">${t("nothing")}</p>`}</div></div>`}).join("")}
   </div>`},
@@ -451,9 +460,10 @@ ideas(){
   return `<div class="grid cols-2"><div class="panel"><h2>${t("ideaNew")}</h2><form class="form" data-form="idea"><div class="field full"><label class="label" for="ideaTitle">${t("ideaTitle")}</label><input id="ideaTitle" name="title" required></div><div class="field full"><label class="label" for="ideaText">${t("lyrics")}</label><textarea id="ideaText" name="text"></textarea></div><div class="field full"><label class="label" for="ideaMemo">${t("memoLink")}</label><input id="ideaMemo" name="memo" type="url" placeholder="https://drive.google.com/…"></div><div class="full"><button class="btn primary" type="submit">${t("add")}</button></div></form></div>
   <div class="panel"><h2>${t("ideas")}</h2><div class="rows">${D.ideas.map(i=>`<div class="row"><div class="grow"><div class="title">${esc(i.title)}</div><div class="muted" style="font-size:.85rem">${t("from")} ${esc(nm(i.by))} · ${fmt(i.date)}${i.memo?` · <a href="${esc(i.memo)}" target="_blank" rel="noopener">🎙 Memo</a>`:""}</div>${i.text?`<div style="font-size:.9rem;margin-top:4px;white-space:pre-wrap">${esc(i.text)}</div>`:""}</div>${canAll()?`<button type="button" class="btn small" data-act="ideaToSong" data-id="${i.id}">${t("toPipeline")}</button>`:""}</div>`).join("")||`<p class="empty">${t("nothing")}</p>`}</div></div></div>`},
 members(){
-  return `<div class="panel"><div class="rows">${D.members.map(m=>`<div class="row"><div class="avatar">${esc(m.name.slice(0,2))}</div><div class="grow"><button type="button" class="link title" data-act="openMember" data-id="${m.id}" style="color:inherit">${esc(m.name)}</button><div class="muted" style="font-size:.82rem">${esc(m.groups.join(", "))}</div></div>${isLeader()?`<button type="button" class="btn small" data-act="prodToggle" data-id="${m.id}" aria-pressed="${(m.perms||[]).includes("songs")}">${(m.perms||[]).includes("songs")?"✓ ":""}${t("production")}</button><button type="button" class="btn small" data-act="invite" data-id="${m.id}">${t("invite")}</button>`:((m.perms||[]).includes("songs")?`<span class="chip warn">${t("production")}</span>`:"")}<span class="chip ${m.role==="leader"?"acc":m.role==="middle"?"warn":""}">${t("roles."+m.role)}</span></div>`).join("")}</div></div>`},
+  return `<div class="panel"><div class="rows">${D.members.map(m=>`<div class="row"><div class="avatar">${esc(m.name.slice(0,2))}</div><div class="grow"><button type="button" class="link title" data-act="openMember" data-id="${m.id}" style="color:inherit">${esc(m.name)}</button>${m.full?` <span class="muted" style="font-size:.85rem">(${esc(m.full)})</span>`:""}<div class="muted" style="font-size:.82rem">${esc(m.groups.join(", "))}</div>${(m.skills||[]).length?`<div class="skills">${esc(m.skills.join(" · "))}</div>`:""}</div>${isLeader()?`<button type="button" class="btn small" data-act="prodToggle" data-id="${m.id}" aria-pressed="${(m.perms||[]).includes("songs")}">${(m.perms||[]).includes("songs")?"✓ ":""}${t("production")}</button><button type="button" class="btn small" data-act="invite" data-id="${m.id}">${t("invite")}</button>`:((m.perms||[]).includes("songs")?`<span class="chip warn">${t("production")}</span>`:"")}<span class="chip ${m.role==="leader"?"acc":m.role==="middle"?"warn":""}">${t("roles."+m.role)}</span></div>`).join("")}</div></div>`},
+vision(){return visionPage()},
 more(){
-  return `<div class="grid"><div class="panel"><div class="rows">${["projects","ideas","members",...(isLeader()?["money"]:[])].map(k=>`<div class="row"><button type="button" class="link" data-nav="${k}" style="display:flex;gap:10px;align-items:center;color:inherit">${icon(k)}${t(k)}</button></div>`).join("")}</div></div>
+  return `<div class="grid"><div class="panel"><div class="rows">${["projects","ideas","members","vision",...(isLeader()?["money"]:[])].map(k=>`<div class="row"><button type="button" class="link" data-nav="${k}" style="display:flex;gap:10px;align-items:center;color:inherit">${icon(k)}${t(k)}</button></div>`).join("")}</div></div>
   ${quickPanel()}<div class="panel"><h2>${t("settings")}</h2><p class="note">${t("installHint")}</p><button type="button" class="btn" data-act="logout">${t("logout")}</button></div></div>`}};
 
 /* ---------- sheets (detail panels) ---------- */
@@ -515,7 +525,7 @@ session(id){
   const s=D.sessions.find(x=>x.id===id);if(!s)return "";const up=pd(s.date)>=TODAY, can=canAll();
   const byV=v=>D.members.filter(m=>s.rsvp[m.id]===v).map(m=>m.name);
   return `${head("Creative Session · "+s.time,fmt(s.date)+" · "+s.place)}
-  ${up?`<div class="panel"><h3>${t("coming")}</h3>${rsvp(s)}<div class="log" style="margin-top:8px">${t("yes")}: ${esc(byV("yes").join(", ")||"–")}<br>${t("maybe")}: ${esc(byV("maybe").join(", ")||"–")}<br>${t("no")}: ${esc(byV("no").join(", ")||"–")}</div></div>`:""}
+  ${up?`<div class="panel"><h3>${t("coming")}</h3>${rsvp(s)}<div class="log" style="margin-top:8px">${t("yes")}: ${esc(byV("yes").join(", ")||"–")}<br>${t("maybe")}: ${esc(byV("maybe").join(", ")||"–")}<br>${t("no")}: ${esc(byV("no").join(", ")||"–")}<br>${S.lang==="de"?"Noch keine Antwort":"No answer yet"}: ${esc(D.members.filter(m=>m.active!==false&&!s.rsvp[m.id]).map(m=>m.name).join(", ")||"–")}</div></div>`:""}
   ${s.attendees.length?`<div class="panel"><h3>${t("attendees")} · ${s.attendees.length}</h3><div class="muted">${esc(s.attendees.map(nm).join(", "))}</div></div>`:""}
   <form class="grid" data-form="session" data-id="${s.id}" style="gap:12px">
    <div class="field"><label class="label" for="ag-${s.id}">${t("agenda")}</label><textarea id="ag-${s.id}" name="agenda" ${can?"":"readonly"}>${esc(s.agenda)}</textarea></div>
