@@ -215,6 +215,15 @@ img.avatar[data-act]{cursor:zoom-in}
 .stream .st-apple{background:#d60017;color:#fff}.stream .st-spotify{background:#1db954;color:#06210f}.stream .st-youtube{background:#cc0000;color:#fff}
 .streamedit{margin:0 0 10px;font-size:.85rem}.streamedit summary{cursor:pointer;color:var(--muted)}
 .streamedit label{display:block;margin-top:8px}.streamedit input{display:block;width:100%;margin-top:4px;padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+.proto textarea{width:100%;min-height:110px;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--surface);line-height:1.5}
+.proto h3{margin-bottom:8px}
+.attgrid{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.attchip{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border:1px solid var(--line);border-radius:999px;background:var(--surface);font-size:.85rem;cursor:pointer}
+.attchip:has(input:checked){background:var(--area-soft);border-color:var(--area);color:var(--fg)}
+.pg-row,.pt-row{display:grid;gap:6px;margin-bottom:8px;grid-template-columns:1.1fr 1.3fr .9fr 1.4fr}
+.pt-row{grid-template-columns:1fr 2fr 1fr}
+.pg-row input,.pg-row select,.pt-row input,.pt-row select{width:100%;min-width:0;padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+@media (max-width:760px){.pg-row{grid-template-columns:1fr 1fr;padding-bottom:8px;border-bottom:1px solid var(--line)}.pt-row{grid-template-columns:1fr 1fr}.pt-row .pt-title{grid-column:1/-1;order:-1}}
 
 .toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:8px 14px;border-radius:8px;z-index:40;font-size:.88rem}
 
@@ -340,10 +349,36 @@ function visionPage(){const v=D.vision;if(!v||!v.sections)return `<div class="pa
 function visionPanel(key){const v=D.vision;const x=v&&v.sections&&v.sections.find(y=>y.key===key);return x?`<div style="margin-top:16px">${visionSection(x)}</div>`:""}
 // profile pictures: small square JPEG stored with the member, shown wherever initials were
 function avatarHtml(m,size){const c="avatar"+(size?" "+size:"");return m&&m.avatar&&/^data:image\/jpeg;base64,[A-Za-z0-9+\/=]+$/.test(m.avatar)?`<img class="${c}" src="${m.avatar}" alt="${esc(m.name||"")}" data-act="avatarView" data-id="${esc(m.id||"")}" role="button" tabindex="0">`:`<div class="${c}">${esc(((m&&m.name)||"?").slice(0,2))}</div>`}
-function shrinkImage(file,S2,max){S2=S2||192;max=max||40000;return new Promise((ok,fail)=>{const u=URL.createObjectURL(file),img=new Image();img.onload=()=>{const n=Math.min(img.naturalWidth,img.naturalHeight),c=document.createElement("canvas");c.width=c.height=Math.min(S2,n);const x=c.getContext("2d");x.drawImage(img,(img.naturalWidth-n)/2,(img.naturalHeight-n)/2,n,n,0,0,c.width,c.height);URL.revokeObjectURL(u);let q=.82,d=c.toDataURL("image/jpeg",q);while(d.length>max&&q>.25){q-=.07;d=c.toDataURL("image/jpeg",q)}ok(d)};img.onerror=()=>{URL.revokeObjectURL(u);fail(new Error("Bild konnte nicht gelesen werden"))};img.src=u})}
+function shrinkImage(file,S2,max){S2=S2||192;max=max||40000;return new Promise((ok,fail)=>{const u=URL.createObjectURL(file),img=new Image();img.onload=()=>{const n=Math.min(img.naturalWidth,img.naturalHeight),c=document.createElement("canvas");c.width=c.height=Math.min(S2,n);const x=c.getContext("2d");x.drawImage(img,(img.naturalWidth-n)/2,(img.naturalHeight-n)/2,n,n,0,0,c.width,c.height);URL.revokeObjectURL(u);let q=S2>500?.9:.82,d=c.toDataURL("image/jpeg",q);while(d.length>max&&q>.25){q-=.07;d=c.toDataURL("image/jpeg",q)}ok(d)};img.onerror=()=>{URL.revokeObjectURL(u);fail(new Error("Bild konnte nicht gelesen werden"))};img.src=u})}
 // streaming links per release (Apple Music, Spotify, YouTube); production rights can edit them
 const STREAMS=[["apple","Apple Music"],["spotify","Spotify"],["youtube","YouTube"]];
 function relLinks(r,sid,ri){const L=r.links||{};const ok=STREAMS.filter(([k])=>L[k]&&/^https:\/\//.test(L[k]));return `${ok.length?`<div class="stream">${ok.map(([k,l])=>`<a class="chip st-${k}" href="${esc(L[k])}" target="_blank" rel="noopener">${l} ↗</a>`).join("")}</div>`:""}${canSongs()?`<details class="streamedit"><summary>${S.lang==="de"?"Streaming Links bearbeiten":"Edit streaming links"}</summary>${STREAMS.map(([k,l])=>`<label class="label">${l}<input type="url" data-act="relLink" data-id="${sid}" data-ri="${ri}" data-k="${k}" value="${esc(L[k]||"")}" placeholder="https://"></label>`).join("")}</details>`:""}`}
+// protocol editor, built on Richard's protocol structure (sections 1 to 5)
+const PROTO_GROUPS=[["Orga","Ricsi"],["Social Media","Iggy, Miriam, Jessy, Markus, Ricsi"],["Musikgruppe","Oti, Fini"],["Vocal Arrangement","Alin, Sarah, Salome, Tory"],["Songwriting","Melli, Dani, Fiona, Gaby"],["Gebet und Impuls","Lukas, Dave"]];
+const PST=[["open","offen"],["prog","in Bearbeitung"],["done","erledigt"]];
+function protoBase(s){if(s.proto&&s.proto.groups)return s.proto;const prev=D.sessions.filter(x=>x.date<s.date&&x.proto&&x.proto.groups&&x.proto.groups.length).sort((a,b)=>b.date.localeCompare(a.date))[0];
+  return {writer:prev&&prev.proto.writer||"ricsi",info:"",review:prev?prev.proto.groups.filter(g=>g.note).map(g=>g.t+": "+g.note).join("\n"):"",groups:prev?prev.proto.groups.map(g=>({t:g.t,who:g.who,status:g.status,note:""})):PROTO_GROUPS.map(([t,w])=>({t,who:w,status:"open",note:""}))}}
+function pgRow(g){return `<div class="pg-row"><input class="pg-t" value="${esc(g.t||"")}" placeholder="Thema" aria-label="Thema"><input class="pg-who" value="${esc(g.who||"")}" placeholder="Zuständig" aria-label="Zuständig"><select class="pg-st" aria-label="Status">${PST.map(([k,l])=>`<option value="${k}" ${g.status===k?"selected":""}>${l}</option>`).join("")}</select><input class="pg-note" value="${esc(g.note||"")}" placeholder="Notizen / Termin" aria-label="Notizen"></div>`}
+function ptRow(x){x=x||{};return `<div class="pt-row"><select class="pt-who" aria-label="Wer"><option value="">Wer?</option>${D.members.filter(m=>m.active!==false).map(m=>`<option value="${m.id}" ${x.who===m.id?"selected":""}>${esc(m.name)}</option>`).join("")}</select><input class="pt-title" placeholder="Was?" aria-label="Was" value="${esc(x.title||"")}"><input class="pt-due" type="date" aria-label="Bis wann" value="${esc(x.due||"")}"></div>`}
+// unsaved protocol text survives re-renders (ticking a task, the 45 second refresh) and app restarts
+function protoDraft(id){try{const d=JSON.parse(localStorage.getItem("rw-proto-"+id)||"null");return d}catch(e){return null}}
+function readProtoForm(f){const g=n=>{const el=f.querySelector(`[name="${n}"]`);return el?el.value:""};return {agenda:g("agenda"),writer:g("writer"),info:g("info"),review:g("review"),att:[...f.querySelectorAll('input[name="att"]:checked')].map(x=>x.value),groups:[...f.querySelectorAll(".pg-row")].map(r=>({t:r.querySelector(".pg-t").value,who:r.querySelector(".pg-who").value,status:r.querySelector(".pg-st").value,note:r.querySelector(".pg-note").value})),tasks:[...f.querySelectorAll(".pt-row")].map(r=>({who:r.querySelector(".pt-who").value,title:r.querySelector(".pt-title").value,due:r.querySelector(".pt-due").value}))}}
+function protoForm(s,can){const dr=can?protoDraft(s.id):null;const p=dr?{writer:dr.writer,info:dr.info,review:dr.review,groups:dr.groups}:protoBase(s);const att=dr?dr.att:(s.attendees&&s.attendees.length)?s.attendees:Object.keys(s.rsvp||{}).filter(k=>s.rsvp[k]==="yes");
+  const open=D.tasks.filter(t=>t.status!=="done").sort((a,b)=>(a.due||"9999").localeCompare(b.due||"9999"));
+  const next=D.sessions.filter(x=>x.date>s.date).sort((a,b)=>a.date.localeCompare(b.date))[0];
+  const ro=can?"":"readonly disabled";
+  return `<form class="grid proto" data-form="protocol" data-id="${s.id}" style="gap:12px">
+  <div class="panel"><h3>Agenda (vorab)</h3><textarea name="agenda" ${ro} placeholder="Was steht heute an?">${esc(dr?dr.agenda:(s.agenda||""))}</textarea></div>
+  <div class="panel"><h3>Kopf</h3><div class="field"><label class="label" for="pw-${s.id}">Protokoll geführt von</label><select id="pw-${s.id}" name="writer" ${ro}>${D.members.map(m=>`<option value="${m.id}" ${m.id===p.writer?"selected":""}>${esc(m.name)}</option>`).join("")}</select></div>
+   <div class="label" style="margin-top:10px">Anwesende · aus den Zusagen vorausgefüllt</div><div class="attgrid">${D.members.filter(m=>m.active!==false).map(m=>`<label class="attchip"><input type="checkbox" name="att" value="${m.id}" ${att.includes(m.id)?"checked":""} ${ro}>${esc(m.name)}</label>`).join("")}</div></div>
+  <div class="panel"><h3>1. Allgemeine Infos</h3><textarea name="info" ${ro} placeholder="Ein Punkt pro Zeile. Mit zwei Leerzeichen am Anfang wird daraus ein Unterpunkt.">${esc(p.info||"")}</textarea></div>
+  <div class="panel"><h3>2. Review letztes Treffen</h3><textarea name="review" ${ro} placeholder="Was ist seit dem letzten Treffen passiert?">${esc(p.review||"")}</textarea></div>
+  <div class="panel"><h3>3. Heutiges Treffen: Aufgaben und Zuständigkeiten</h3><div class="pg-list">${p.groups.map(pgRow).join("")}</div>${can?`<button type="button" class="btn small" data-act="addPg">+ Zeile</button>`:""}</div>
+  <div class="panel"><h3>4. Offene To-dos</h3><p class="note">Direkt hier abhaken, was erledigt ist.</p><div class="rows">${open.map(taskRow).join("")||`<p class="empty">${t("nothing")}</p>`}</div>
+   ${can?`<div class="label" style="margin-top:12px">Neue Aufgaben aus diesem Treffen · werden beim Speichern zu Aufgaben</div><div class="pt-list">${(dr&&dr.tasks&&dr.tasks.length?dr.tasks:[{},{},{}]).map(ptRow).join("")}</div>${dr?`<p class="note">Entwurf, noch nicht gespeichert.</p>`:""}<button type="button" class="btn small" data-act="addPt">+ Zeile</button>`:""}</div>
+  <div class="panel"><h3>5. Nächstes Treffen</h3>${next?`<div>${fmt(next.date)} · ${esc(next.time||"")} · ${esc(next.place||"")}</div>`:`<p class="empty">Noch kein Termin.</p>`}</div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">${can?`<button class="btn primary" type="submit">${t("save")}</button><button class="btn" type="button" data-act="exportPdf" data-id="${s.id}">${t("exportPdf")}</button>`:`<span class="log">${t("readOnly")}</span>`}${s.pdf?`<a class="link" href="${DRIVE.file(s.pdf)}" target="_blank" rel="noopener">${t("pdf")} ↗</a>`:""}</div>
+  </form>`}
 const sheetArea=ty=>/song/i.test(ty)?"songs":/task/i.test(ty)?"tasks":/session/i.test(ty)?"sessions":/project/i.test(ty)?"projects":/idea/i.test(ty)?"ideas":"neutral";
 const spent=()=>D.money.invoices.filter(r=>r.status==="paid").reduce((a,r)=>a+Number(r.amount||0),0);
 const balance=()=>D.money.start-spent();
@@ -544,12 +579,7 @@ session(id){
   return `${head("Creative Session · "+s.time,fmt(s.date)+" · "+s.place)}
   ${up?`<div class="panel"><h3>${t("coming")}</h3>${rsvp(s)}<div class="log" style="margin-top:8px">${t("yes")}: ${esc(byV("yes").join(", ")||"–")}<br>${t("maybe")}: ${esc(byV("maybe").join(", ")||"–")}<br>${t("no")}: ${esc(byV("no").join(", ")||"–")}<br>${S.lang==="de"?"Noch keine Antwort":"No answer yet"}: ${esc(D.members.filter(m=>m.active!==false&&!s.rsvp[m.id]).map(m=>m.name).join(", ")||"–")}</div></div>`:""}
   ${s.attendees.length?`<div class="panel"><h3>${t("attendees")} · ${s.attendees.length}</h3><div class="muted">${esc(s.attendees.map(nm).join(", "))}</div></div>`:""}
-  <form class="grid" data-form="session" data-id="${s.id}" style="gap:12px">
-   <div class="field"><label class="label" for="ag-${s.id}">${t("agenda")}</label><textarea id="ag-${s.id}" name="agenda" ${can?"":"readonly"}>${esc(s.agenda)}</textarea></div>
-   <div class="field"><label class="label" for="re-${s.id}">${t("protocol")}: ${t("results")}</label><textarea id="re-${s.id}" name="results" ${can?"":"readonly"}>${esc(s.results)}</textarea></div>
-   <div class="field"><label class="label" for="de-${s.id}">${t("decisions")}</label><textarea id="de-${s.id}" name="decisions" ${can?"":"readonly"}>${esc(s.decisions)}</textarea></div>
-   <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">${can?`<button class="btn primary" type="submit">${t("save")}</button><button class="btn" type="button" data-act="exportPdf" data-id="${s.id}">${t("exportPdf")}</button>`:`<span class="log">${t("readOnly")}</span>`}<span class="log">${t("protocolBy")}</span>${s.pdf?`<a class="link" href="${DRIVE.file(s.pdf)}" target="_blank" rel="noopener">${t("pdf")} ↗</a>`:""}</div>
-  </form>
+  ${protoForm(s,can)}
   ${linksPanel("session",s.id,s.links,can)}
   <div class="panel"><h3 style="margin-bottom:6px">${t("tasks")}</h3><div class="rows">${D.tasks.filter(x=>x.link&&x.link.type==="session"&&x.link.id===s.id).map(taskRow).join("")||`<p class="empty">${t("nothing")}</p>`}</div></div>`}};
 
@@ -570,7 +600,7 @@ async function renderGate(){
   <button class="btn primary" type="submit">${t("login")}</button><p class="log" id="loginErr"></p></form>`;
 }
 function cached(){try{const c=JSON.parse(LS.get("rw-data")||"null");return c&&c.me&&c.me.id===LS.get("rw-member")?c:null}catch(e){return null}}
-function forget(){LS.del("rw-token");LS.del("rw-data");D=null}
+function forget(){LS.del("rw-token");LS.del("rw-data");try{Object.keys(localStorage).filter(k=>k.startsWith("rw-proto-")).forEach(k=>localStorage.removeItem(k))}catch(e){}D=null}
 async function boot(){
   if(LS.get("rw-token")&&!D){const c=cached();if(c){D=c;S.me=D.me.id}}
   render();
@@ -630,6 +660,10 @@ function toggleCollapse(h){const p=h.closest(".panel");if(!p||!p.dataset.ckey)re
   COLL[p.dataset.ckey]=!p.classList.contains("collapsed");LS.set("rw-collapse",JSON.stringify(COLL));applyCollapse()}
 document.addEventListener("keydown",e=>{const av=e.target.closest&&e.target.closest("img[data-act='avatarView']");if(av&&(e.key==="Enter"||e.key===" ")){e.preventDefault();av.click();return}const h=e.target.closest&&e.target.closest("h2.ctoggle");if(h&&(e.key==="Enter"||e.key===" ")){e.preventDefault();toggleCollapse(h)}});
 
+/* ---------- protocol drafts ---------- */
+document.addEventListener("input",e=>{const f=e.target.closest&&e.target.closest('form[data-form="protocol"]');if(f)LS.set("rw-proto-"+f.dataset.id,JSON.stringify(readProtoForm(f)))});
+document.addEventListener("change",e=>{const f=e.target.closest&&e.target.closest('form[data-form="protocol"]');if(f)LS.set("rw-proto-"+f.dataset.id,JSON.stringify(readProtoForm(f)))});
+
 /* ---------- clicks ---------- */
 document.addEventListener("click",e=>{
   const ct=e.target.closest("h2.ctoggle");if(ct){toggleCollapse(ct);return}
@@ -670,6 +704,8 @@ document.addEventListener("click",e=>{
   case "copyInvite":{const ta=document.getElementById("inviteText");const txt=ta.value;try{navigator.clipboard.writeText(txt).then(()=>toast(t("saved")),()=>{ta.focus();ta.select()})}catch(_){ta.focus();ta.select()}return}
   case "prodToggle":{const m=mem(id);const perms=(m.perms||[]).includes("songs")?[]:["songs"];run(async()=>put(D.members,await api("saveMember",{member:Object.assign({},m,{perms})})));return}
   case "avatarView":{const m=mem(id);if(!m||!m.avatar)return;const box=document.createElement("div");box.className="lightbox";box.setAttribute("role","dialog");box.innerHTML=`<img src="${m.avatar}" alt="${esc(m.name)}"><div class="lbname">${esc(m.name)}${m.full?" ("+esc(m.full)+")":""}</div>`;box.addEventListener("click",()=>box.remove());document.addEventListener("keydown",function k(ev){if(ev.key==="Escape"){box.remove();document.removeEventListener("keydown",k)}});document.body.appendChild(box);api("getAvatar",{id}).then(r=>{if(r&&r.image){const im=box.querySelector("img");if(im)im.src=r.image}}).catch(()=>{});return}
+  case "addPg":{const l=document.querySelector(".pg-list");if(l)l.insertAdjacentHTML("beforeend",pgRow({status:"open"}));return}
+  case "addPt":{const l=document.querySelector(".pt-list");if(l)l.insertAdjacentHTML("beforeend",ptRow());return}
   case "avatarRemove":run(async()=>{const r=await api("setAvatar",{image:""});put(D.members,r)});return;
   case "logout":run(async()=>{try{await api("logout")}catch(_){}forget();S.sheet=null});return;
   default:return}
@@ -677,7 +713,7 @@ document.addEventListener("click",e=>{
 });
 document.addEventListener("change",e=>{
   const a=e.target.closest("[data-act='partOwner']");if(a&&D){const c=clone(song(a.dataset.id));c.parts[a.dataset.i].owner=a.value;saveSong(c)}
-  const af=e.target.closest("[data-act='avatarFile']");if(af&&D&&af.files&&af.files[0]){const f=af.files[0];run(async()=>{const img=await shrinkImage(f);const big=await shrinkImage(f,560,47000);const r=await api("setAvatar",{image:img,large:big});put(D.members,r);toast(t("saved"))},()=>{});return}
+  const af=e.target.closest("[data-act='avatarFile']");if(af&&D&&af.files&&af.files[0]){const f=af.files[0];run(async()=>{const img=await shrinkImage(f);const big=await shrinkImage(f,1080,400000);const r=await api("setAvatar",{image:img,large:big});put(D.members,r);toast(t("saved"))},()=>{});return}
   const rl=e.target.closest("[data-act='relLink']");if(rl&&D){const v=rl.value.trim();if(v&&!/^https:\/\//.test(v)){toast(t("badUrl"));return}const c=clone(song(rl.dataset.id));const r=c.releases[rl.dataset.ri];r.links=Object.assign({},r.links||{},{[rl.dataset.k]:v});saveSong(c);return}
   const rd=e.target.closest("[data-act='relDate']");if(rd&&D){const c=clone(song(rd.dataset.id));c.releases[rd.dataset.ri].date=rd.value;saveSong(c)}
   const co=e.target.closest("[data-act='partCo']");if(co&&D){const c=clone(song(co.dataset.id));c.parts[co.dataset.i].co=co.value?[co.value]:[];saveSong(c)}
@@ -691,6 +727,10 @@ document.addEventListener("submit",e=>{
   case "sub":{const v=(fd.get("t")||"").trim();if(!v)return;const c=clone(task(id));c.subs.push({t:v,d:false});saveTask(c);return}
   case "comment":{const v=(fd.get("text")||"").trim();if(!v)return;run(async()=>put(D.tasks,await api("commentTask",{id,text:v})));return}
   case "writers":{const raw=(fd.get("w")||"").split(",").map(x=>x.trim()).filter(Boolean);const ids=raw.map(n=>{const m=D.members.find(x=>x.name.toLowerCase()===n.toLowerCase());return m?m.id:n});songOp(id,"writers",{writers:ids});return}
+  case "protocol":{const s=sess(id);const f2=e.target.closest("form");
+    const groups=[...f2.querySelectorAll(".pg-row")].map(r=>({t:r.querySelector(".pg-t").value.trim(),who:r.querySelector(".pg-who").value.trim(),status:r.querySelector(".pg-st").value,note:r.querySelector(".pg-note").value.trim()})).filter(g=>g.t);
+    const newTasks=[...f2.querySelectorAll(".pt-row")].map(r=>({owners:r.querySelector(".pt-who").value?[r.querySelector(".pt-who").value]:[],title:r.querySelector(".pt-title").value.trim(),due:r.querySelector(".pt-due").value})).filter(x=>x.title);
+    run(async()=>{const r=await api("saveProtocol",{id,base:s.updated_at,agenda:fd.get("agenda")||"",attendees:fd.getAll("att"),proto:{writer:fd.get("writer"),info:fd.get("info")||"",review:fd.get("review")||"",groups},newTasks});put(D.sessions,r.session);r.tasks.forEach(x=>put(D.tasks,x));LS.del("rw-proto-"+id);toast(r.tasks.length?(t("saved")+" · "+r.tasks.length+(S.lang==="de"?" Aufgaben angelegt":" tasks created")):t("saved"))});return}
   case "session":{const c=clone(sess(id));c.agenda=fd.get("agenda");c.results=fd.get("results");c.decisions=fd.get("decisions");saveSession(c);toast(t("saved"));return}
   case "link":{const u=(fd.get("u")||"").trim();if(!/^https:\/\//.test(u)){toast(t("badUrl"));return}const type=f.dataset.type,lab=fd.get("l");
     if(type==="song")songOp(id,"addLink",{label:lab,url:u});
