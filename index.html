@@ -191,6 +191,9 @@ h2.ctoggle::after{content:"";width:7px;height:7px;border-right:2px solid var(--m
 .panel.collapsed{align-self:start}
 .card .chip.rel{background:var(--area-soft);color:var(--area)}
 .reldate{border:1px solid var(--line);border-radius:6px;background:var(--surface);padding:3px 6px;font-size:.85rem}
+.stagehead{font-size:1.35rem;margin:22px 0 10px;display:flex;align-items:center;gap:10px}
+.stagehead::before{content:"";width:5px;height:1.05em;border-radius:3px;background:var(--area);flex:none}
+.stagehead .cnt{font:600 .8rem var(--mono);background:var(--area-soft);color:var(--area);border-radius:999px;padding:2px 9px}
 
 .toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:8px 14px;border-radius:8px;z-index:40;font-size:.88rem}
 
@@ -414,7 +417,7 @@ dashboard(){
 songs(){
   const groups=[...STAGES,"tbd"].filter(k=>k!=="liverec"||D.songs.some(s=>s.rec==="live"));
   const board=groups.map(k=>{const l=D.songs.filter(s=>s.stage===k);return `<div class="col"><h3><span>${t("stages."+k)}</span><span class="mono muted">${l.length}</span></h3>${l.map(songCard).join("")}</div>`}).join("");
-  const list=groups.map(k=>{const l=D.songs.filter(s=>s.stage===k);if(!l.length)return "";return `<div><div class="label" style="margin-bottom:6px">${t("stages."+k)} · ${l.length}</div><div class="grid" style="gap:8px">${l.map(songCard).join("")}</div></div>`}).join("");
+  const list=groups.map(k=>{const l=D.songs.filter(s=>s.stage===k);if(!l.length)return "";return `<div><h2 class="stagehead">${t("stages."+k)}<span class="cnt">${l.length}</span></h2><div class="grid" style="gap:8px">${l.map(songCard).join("")}</div></div>`}).join("");
   return `<div class="board">${board}</div><div class="glist">${list}</div>`},
 tasks(){
   const f=S.taskFilter;let l=D.tasks.slice();
