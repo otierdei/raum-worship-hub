@@ -1,0 +1,586 @@
+<title>Raum Worship Hub</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#c4262b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Raum Hub">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: laptop = fixed sidebar + wide content (song board as columns); phone = one column + bottom navigation. */
+:root{
+  --bg:#f3f4f2; --surface:#ffffff; --sunk:#e8eae6; --line:#d6d9d3;
+  --fg:#1b1c1e; --muted:#5f6266; --accent:#c4262b; --accent-soft:#f7dedd; --on-accent:#ffffff; --brand:#c4262b;
+  --ok:#2f7a4a; --ok-soft:#dcefe2; --warn:#a86a12; --warn-soft:#f6e8cf; --bad:#8e1f5c; --bad-soft:#f3dbe8;
+  --display:"Bricolage Grotesque", "Avenir Next", "Segoe UI", sans-serif;
+  --body:"Instrument Sans", "Helvetica Neue", "Segoe UI", sans-serif;
+  --mono:"JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#121315; --surface:#1b1c1f; --sunk:#25262a; --line:#34353a;
+  --fg:#ecebea; --muted:#a09ea0; --accent:#f06a68; --accent-soft:#3a1d1e; --on-accent:#1a0b0b; --brand:#c4262b;
+  --ok:#6cc08a; --ok-soft:#1c3324; --warn:#e0a54a; --warn-soft:#3a2d16; --bad:#e783b8; --bad-soft:#3a1a2c; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#121315; --surface:#1b1c1f; --sunk:#25262a; --line:#34353a;
+  --fg:#ecebea; --muted:#a09ea0; --accent:#f06a68; --accent-soft:#3a1d1e; --on-accent:#1a0b0b; --brand:#c4262b;
+  --ok:#6cc08a; --ok-soft:#1c3324; --warn:#e0a54a; --warn-soft:#3a2d16; --bad:#e783b8; --bad-soft:#3a1a2c; color-scheme:dark}
+html,body{height:100%}
+body{background:var(--bg);color:var(--fg);font:15px/1.5 var(--body)}
+*{box-sizing:border-box}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+h1,h2,h3{font-family:var(--display);font-weight:700;line-height:1.15;text-wrap:balance;margin:0}
+h1{font-size:1.6rem} h2{font-size:1.15rem} h3{font-size:1rem}
+.mono{font-family:var(--mono);font-size:.82em;font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}
+.label{font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:600}
+
+.app{display:grid;grid-template-columns:232px 1fr;min-height:100%}
+.side{position:sticky;top:env(safe-area-inset-top,0px);height:100vh;border-right:1px solid var(--line);padding:20px 14px;display:flex;flex-direction:column;gap:22px;background:var(--surface)}
+.brand{display:flex;align-items:center;gap:10px;padding:0 6px}
+.mark{width:34px;height:34px;border-radius:50%;background:var(--brand);color:#fff;display:grid;place-items:center;font:700 .8rem var(--display);letter-spacing:.04em}
+.brand b{font-family:var(--display);font-size:1.05rem}
+.nav{display:flex;flex-direction:column;gap:2px}
+.nav button{all:unset;cursor:pointer;display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;color:var(--muted);font-weight:500}
+.nav button:hover{background:var(--sunk);color:var(--fg)}
+.nav button[aria-current="page"]{background:var(--accent-soft);color:var(--fg)}
+.nav .badge{margin-left:auto}
+.ico{width:18px;height:18px;flex:none;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+main{min-width:0;padding-inline:28px;padding-block:18px 40px}
+.top{display:flex;flex-wrap:wrap;align-items:center;gap:12px;justify-content:space-between;margin-bottom:22px}
+.who{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.who select{padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{border:0;background:var(--surface);padding:6px 10px;font-size:.85rem}
+.seg button[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
+.proto{font-size:.75rem;color:var(--warn);background:var(--warn-soft);padding:3px 8px;border-radius:999px}
+
+.bottom{display:none}
+.grid{display:grid;gap:16px}
+.cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;min-width:0}
+.panel>h2{margin-bottom:12px}
+.panel-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:12px}
+.rows{display:flex;flex-direction:column}
+.row{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line);min-width:0}
+.row:first-child{border-top:0}
+.row .grow{flex:1;min-width:0}
+.row .title{font-weight:600;overflow-wrap:anywhere}
+.chip{display:inline-flex;align-items:center;gap:4px;font-size:.75rem;padding:2px 8px;border-radius:999px;background:var(--sunk);color:var(--muted);white-space:nowrap;font-weight:500}
+.chip.ok{background:var(--ok-soft);color:var(--ok)} .chip.warn{background:var(--warn-soft);color:var(--warn)} .chip.bad{background:var(--bad-soft);color:var(--bad)} .chip.acc{background:var(--accent-soft);color:var(--accent)}
+.badge{min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:var(--bad);color:#fff;font-size:.72rem;display:inline-grid;place-items:center;font-weight:600}
+.btn{border:1px solid var(--line);background:var(--surface);padding:7px 12px;border-radius:8px;font-weight:500}
+.btn:hover{border-color:var(--muted)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.btn.small{padding:3px 9px;font-size:.82rem}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.link{all:unset;cursor:pointer;color:var(--accent);font-weight:500}
+.link:hover{text-decoration:underline}
+a{color:var(--accent)}
+
+.next{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:center}
+.date{width:66px;text-align:center;border-radius:10px;background:var(--accent);color:var(--on-accent);padding:8px 0}
+.date b{display:block;font:700 1.7rem/1 var(--display)} .date span{font-size:.75rem;text-transform:uppercase;letter-spacing:.08em}
+.rsvp{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.rsvp button{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 12px;font-size:.85rem}
+.rsvp button[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+
+.stagebar{display:flex;flex-direction:column;gap:7px}
+.sb{display:grid;grid-template-columns:120px 1fr 24px;gap:10px;align-items:center;font-size:.88rem}
+.sb .track{height:10px;background:var(--sunk);border-radius:5px;overflow:hidden}
+.sb .fill{height:100%;background:var(--accent);border-radius:5px}
+.sb .n{text-align:right}
+
+.board{display:flex;gap:12px;overflow-x:auto;padding-bottom:8px}
+.col{flex:0 0 208px;background:var(--sunk);border-radius:var(--r);padding:10px;display:flex;flex-direction:column;gap:8px;align-self:flex-start}
+.col h3{font-size:.85rem;display:flex;justify-content:space-between}
+.card{all:unset;cursor:pointer;display:block;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px}
+.card:hover{border-color:var(--accent)}
+.card .t{font-weight:600;display:block}
+.card .m{font-size:.78rem;color:var(--muted);display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
+.prog{height:4px;background:var(--sunk);border-radius:2px;margin-top:8px;overflow:hidden}
+.prog i{display:block;height:100%;background:var(--accent)}
+.glist{display:none}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.tabs button{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 12px;font-size:.88rem}
+.tabs button[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+
+.check{width:22px;height:22px;border-radius:6px;border:1.5px solid var(--muted);background:var(--surface);display:grid;place-items:center;flex:none;padding:0}
+.check.done{background:var(--ok);border-color:var(--ok);color:#fff}
+.check.prog{border-color:var(--warn);background:var(--warn-soft)}
+.check svg{width:14px;height:14px;stroke:currentColor;stroke-width:3;fill:none}
+.struck{text-decoration:line-through;color:var(--muted)}
+
+.sheet-bg{position:fixed;inset:0;background:rgba(10,14,16,.45);z-index:20;display:flex;justify-content:flex-end}
+.sheet{width:min(560px,100%);height:100%;background:var(--bg);overflow-y:auto;padding:20px 22px 40px;padding-top:calc(20px + env(safe-area-inset-top,0px));display:flex;flex-direction:column;gap:16px}
+.sheet-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.x{border:0;background:var(--sunk);border-radius:8px;width:34px;height:34px;flex:none}
+.facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.fact{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 10px;min-width:0}
+.fact b{display:block;font-family:var(--mono);font-size:.95rem;overflow-wrap:anywhere}
+.steps{display:flex;flex-wrap:wrap;gap:4px}
+.steps button{border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:4px 8px;font-size:.78rem}
+.steps button.past{background:var(--accent-soft);border-color:transparent}
+.steps button.now{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+.field{display:flex;flex-direction:column;gap:4px;min-width:0}
+.field input,.field select,.field textarea{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:8px 10px;width:100%}
+.field textarea{min-height:80px;resize:vertical}
+.form{display:grid;gap:10px;grid-template-columns:repeat(2,minmax(0,1fr))}
+.form .full{grid-column:1/-1}
+.note{font-size:.82rem;color:var(--muted);background:var(--sunk);border-radius:8px;padding:8px 10px}
+.log{font-size:.78rem;color:var(--muted)}
+.money{font:700 2rem var(--display);font-variant-numeric:tabular-nums}
+.avatar{width:30px;height:30px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-weight:600;font-size:.8rem;flex:none}
+.empty{color:var(--muted);font-size:.9rem;padding:8px 0}
+#gate{position:fixed;inset:0;z-index:50;background:var(--bg);display:grid;place-items:center;padding:24px 16px}
+.gatebox{width:min(380px,100%);display:flex;flex-direction:column;gap:14px}
+.gatebox .mark{width:56px;height:56px;font-size:1.2rem}
+.codein{font:700 1.6rem var(--mono);letter-spacing:.3em;text-align:center}
+.toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:8px 14px;border-radius:8px;z-index:40;font-size:.88rem}
+
+@media (max-width:899px){
+  .app{grid-template-columns:1fr}
+  .side{display:none}
+  main{padding-inline:16px;padding-block:12px 96px}
+  .bottom{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;left:0;right:0;bottom:0;z-index:10;background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
+  .bottom button{all:unset;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 0 6px;font-size:.7rem;color:var(--muted);position:relative}
+  .bottom button[aria-current="page"]{color:var(--accent)}
+  .bottom .badge{position:absolute;top:2px;left:calc(50% + 6px);height:16px;min-width:16px;font-size:.62rem}
+  .cols-2{grid-template-columns:1fr}
+  .board{display:none} .glist{display:flex;flex-direction:column;gap:14px}
+  .facts{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .form{grid-template-columns:1fr}
+  .sheet{padding-inline:16px}
+  h1{font-size:1.35rem}
+  .sb{grid-template-columns:96px 1fr 22px}
+}
+@media (prefers-reduced-motion:no-preference){.sheet{animation:slide .18s ease-out}@keyframes slide{from{transform:translateX(24px);opacity:.6}}}
+</style>
+
+<div class="app">
+  <aside class="side">
+    <div class="brand"><div class="mark">R</div><b>Raum Worship Hub</b></div>
+    <nav class="nav" id="sidenav"></nav>
+  </aside>
+  <main>
+    <div class="top">
+      <h1 id="title"></h1>
+      <div class="who">
+        <span class="chip acc" id="meName"></span>
+        <div class="seg" role="group" aria-label="Sprache"><button type="button" data-lang="de">DE</button><button type="button" data-lang="en">EN</button></div>
+      </div>
+    </div>
+    <section id="view"></section>
+  </main>
+  <nav class="bottom" id="bottomnav"></nav>
+</div>
+<div id="gate" hidden></div>
+<div id="sheetRoot"></div>
+<div id="toastRoot"></div>
+
+<script>
+/* ---------- i18n ---------- */
+const T={
+de:{dashboard:"Start",songs:"Songs",tasks:"Aufgaben",sessions:"Sessions",projects:"Projekte",ideas:"Ideen",members:"Mitglieder",more:"Mehr",
+proto:"Prototyp mit Beispieldaten",viewAs:"Ansicht als",nextSession:"Nächste Session",coming:"Kommst du?",yes:"Ja",no:"Nein",maybe:"Vielleicht",
+overdue:"Überfällig",myTasks:"Meine Aufgaben",allTasks:"Alle",open:"Offen",inprog:"In Arbeit",done:"Erledigt",songsByStage:"Songs nach Phase",
+releases:"Anstehende Releases",nothing:"Nichts offen.",due:"fällig",today:"heute",prio:{high:"Hoch",mid:"Mittel",low:"Niedrig"},priority:"Priorität",
+stage:"Phase",key:"Tonart",tempo:"Tempo",meter:"Takt",lead:"Lead",writers:"Writer",recording:"Aufnahme",studio:"Studio",live:"Live",
+arrangement:"Arrangement",vocal:"Vocal",instrumental:"Instrumental",parts:"Parts",owner:"Zuständig",status:"Status",drive:"Drive",
+releaseChecklist:"Release Checkliste",gema:"GEMA",ccli:"CCLI",registered:"registriert",notRegistered:"nicht registriert",
+writersLocked:"Gesperrt, weil registriert. Nur Leitung kann ändern.",changedBy:"geändert von",save:"Speichern",add:"Hinzufügen",
+newTask:"Neue Aufgabe",title:"Titel",dueDate:"Fällig bis",link:"Verknüpft mit",none:"keine",subtasks:"Teilaufgaben",comments:"Kommentare",
+comment:"Kommentar schreiben",agenda:"Agenda",protocol:"Protokoll",attendance:"Zusage",results:"Ergebnisse",decisions:"Entscheidungen",
+protocolBy:"Protokoll: Ricsi",pdf:"PDF in Drive",exportPdf:"Als PDF nach Drive",past:"Vergangen",upcoming:"Kommend",
+budget:"Budget",onlyLeaders:"Nur für Leitung sichtbar",ideaNew:"Neue Idee",ideaTitle:"Titel der Idee",lyrics:"Lyrics oder Notiz",memo:"Sprachmemo (Datei)",
+toPipeline:"In Pipeline übernehmen",from:"von",roles:{leader:"Leitung",middle:"Mittlere Leitung",member:"Mitglied"},
+readOnly:"Nur ansehen. Du kannst das nicht bearbeiten.",tbd:"Zu klären",progress:"Fortschritt",
+stages:{idea:"Idee",writing:"Songwriting",rawdemo:"Raw Demo",arrangement:"Arrangement",production:"Produktion",liverec:"Live Recording",mix:"Mix und Master",release:"Release",tbd:"Zu klären"},
+st:{open:"offen",prog:"in Arbeit",done:"erledigt"},reset:"Beispieldaten zurücksetzen",resetDone:"Beispieldaten zurückgesetzt",saved:"Gespeichert",
+settings:"Einstellungen",project:"Projekt",session:"Session",song:"Song",where:"Ort",groups:"Gruppen",extern:"extern",
+nextStepsNote:"Die echte App lädt diese Daten aus dem Google Sheet. Änderungen hier bleiben nur in deinem Browser.",
+expense:"Ausgaben",balance:"Stand",addSub:"Teilaufgabe hinzufügen",attendees:"Anwesend",yesCount:"Zusagen",
+liveNote:"Live Recording: Tracks und Click aus der Studioproduktion laufen live mit.",lineup:"Live Lineup",event:"Event",
+moveOnHint:"Weiter erst, wenn Vocal und Instrumental erledigt sind.",releasesTitle:"Releases",money:"Finanzen",invoices:"Rechnungen",invoiceNew:"Rechnung erfassen",vendor:"Von",invNr:"Rechnungsnr.",items:"Leistung",amount:"Betrag (€)",paid:"bezahlt",unpaid:"offen",startBalance:"Start",spent:"Ausgegeben",invHint:"Die PDF kommt in Drive in den Ordner Rechnungen. Bankdaten aus Rechnungen werden in der App nicht angezeigt.",forSong:"Für Song",date:"Datum",hello:"Willkommen bei Raum Worship Hub",enterCode:"Gib deinen 6 stelligen Code ein. Du bekommst ihn von der Leitung per WhatsApp.",whoAreYou:"Wer bist du?",login:"Anmelden",logout:"Abmelden",loading:"Lädt…",noLink:"Öffne bitte deinen persönlichen Link aus WhatsApp.",invite:"Einladen",inviteTitle:"Einladung",inviteHint:"Schick das per WhatsApp. Der Code gilt 14 Tage und funktioniert im Browser und in der installierten App.",copy:"Kopieren",production:"Produktion",errSave:"Nicht gespeichert",offline:"Keine Verbindung. Bitte später nochmal.",pdfDone:"PDF liegt in Protokolle › Creative Sessions",memoLink:"Sprachmemo Link (Drive)",pdfLink:"PDF Link (Drive)",installHint:"Auf dem iPhone: Teilen › Zum Home Bildschirm. Danach in der App einmal den Code eingeben.",leadDoes:"Lead Vocal baut es",celloQ:"Cello in diesem Song",links:"Drive Links",addLink:"Link hinzufügen",linkLabel:"Bezeichnung",linkUrl:"Drive Link (https://…)",myParts:"Meine Songs und Parts",quick:"Drive Ordner",noParts:"Dir ist noch kein Part zugeteilt.",exportOld:"Meine Klicks aus älteren Versionen kopieren",exportHint:"Kopiert deine Änderungen aus den vorherigen Prototyp Versionen. Füge den Text danach im Chat mit Claude ein.",copied:"Kopiert. Jetzt im Chat einfügen.",selectCopy:"Text markieren und kopieren:",badUrl:"Bitte einen Link mit https:// eingeben.",helpers:"Hilfe",vocalArr:"Vocal Arrangement",instrArr:"Instrumental Arrangement"},
+en:{dashboard:"Home",songs:"Songs",tasks:"Tasks",sessions:"Sessions",projects:"Projects",ideas:"Ideas",members:"Members",more:"More",
+proto:"Prototype with sample data",viewAs:"View as",nextSession:"Next session",coming:"Are you coming?",yes:"Yes",no:"No",maybe:"Maybe",
+overdue:"Overdue",myTasks:"My tasks",allTasks:"All",open:"Open",inprog:"In progress",done:"Done",songsByStage:"Songs by stage",
+releases:"Upcoming releases",nothing:"Nothing open.",due:"due",today:"today",prio:{high:"High",mid:"Medium",low:"Low"},priority:"Priority",
+stage:"Stage",key:"Key",tempo:"Tempo",meter:"Time",lead:"Lead",writers:"Writers",recording:"Recording",studio:"Studio",live:"Live",
+arrangement:"Arrangement",vocal:"Vocal",instrumental:"Instrumental",parts:"Parts",owner:"Owner",status:"Status",drive:"Drive",
+releaseChecklist:"Release checklist",gema:"GEMA",ccli:"CCLI",registered:"registered",notRegistered:"not registered",
+writersLocked:"Locked because registered. Only leaders can change it.",changedBy:"changed by",save:"Save",add:"Add",
+newTask:"New task",title:"Title",dueDate:"Due",link:"Linked to",none:"none",subtasks:"Subtasks",comments:"Comments",
+comment:"Write a comment",agenda:"Agenda",protocol:"Protocol",attendance:"Attendance",results:"Results",decisions:"Decisions",
+protocolBy:"Protocol: Ricsi",pdf:"PDF in Drive",exportPdf:"Export PDF to Drive",past:"Past",upcoming:"Upcoming",
+budget:"Budget",onlyLeaders:"Visible to leaders only",ideaNew:"New idea",ideaTitle:"Idea title",lyrics:"Lyrics or note",memo:"Voice memo (file)",
+toPipeline:"Move into pipeline",from:"from",roles:{leader:"Leader",middle:"Middle leader",member:"Member"},
+readOnly:"View only. You can't edit this.",tbd:"To be decided",progress:"Progress",
+stages:{idea:"Idea",writing:"Songwriting",rawdemo:"Raw Demo",arrangement:"Arrangement",production:"Production",liverec:"Live Recording",mix:"Mix and Master",release:"Release",tbd:"To be decided"},
+st:{open:"open",prog:"in progress",done:"done"},reset:"Reset sample data",resetDone:"Sample data reset",saved:"Saved",
+settings:"Settings",project:"Project",session:"Session",song:"Song",where:"Place",groups:"Groups",extern:"external",
+nextStepsNote:"The real app loads this data from the Google Sheet. Changes here stay in your browser only.",
+expense:"Expenses",balance:"Balance",addSub:"Add subtask",attendees:"Present",yesCount:"Coming",
+liveNote:"Live recording: tracks and click from the studio production run live.",lineup:"Live lineup",event:"Event",
+moveOnHint:"Moves on only when Vocal and Instrumental are done.",releasesTitle:"Releases",money:"Finances",invoices:"Invoices",invoiceNew:"Add invoice",vendor:"From",invNr:"Invoice no.",items:"Service",amount:"Amount (€)",paid:"paid",unpaid:"open",startBalance:"Start",spent:"Spent",invHint:"The PDF goes into the Drive folder Rechnungen. Bank details from invoices are not shown in the app.",forSong:"For song",date:"Date",hello:"Welcome to Raum Worship Hub",enterCode:"Enter your 6 digit code. A leader sends it to you on WhatsApp.",whoAreYou:"Who are you?",login:"Log in",logout:"Log out",loading:"Loading…",noLink:"Please open your personal link from WhatsApp.",invite:"Invite",inviteTitle:"Invitation",inviteHint:"Send this on WhatsApp. The code is valid for 14 days and works in the browser and in the installed app.",copy:"Copy",production:"Production",errSave:"Not saved",offline:"No connection. Please try again later.",pdfDone:"PDF saved in Protokolle › Creative Sessions",memoLink:"Voice memo link (Drive)",pdfLink:"PDF link (Drive)",installHint:"On iPhone: Share › Add to Home Screen. Then enter the code once in the app.",leadDoes:"lead vocal builds it",celloQ:"Cello in this song",links:"Drive links",addLink:"Add link",linkLabel:"Label",linkUrl:"Drive link (https://…)",myParts:"My songs and parts",quick:"Drive folders",noParts:"No part assigned to you yet.",exportOld:"Copy my clicks from older versions",exportHint:"Copies your changes from the earlier prototype versions. Paste the text into the chat with Claude.",copied:"Copied. Now paste it into the chat.",selectCopy:"Select and copy this text:",badUrl:"Please enter a link starting with https://.",helpers:"Help",vocalArr:"Vocal arrangement",instrArr:"Instrumental arrangement"}};
+
+/* ---------- constants ---------- */
+const STD_PARTS=[["drums","Drums","oti"],["percs","Percs","oti"],["bass","Bass","fini"],["synth","Synth","jeremy"],["egit","E-Gitarren",""],["acoustic","Akustik",""],["piano","Piano",""],["keys","Keys",""],["cello","Cello","suli"]];
+function stdParts(o){return STD_PARTS.map(([key,name,owner])=>Object.assign({key,name,owner,status:"open",note:"",ext:false},o[key]||{}))}
+const showPart=(s,p)=>p.key!=="cello"||s.cello;
+const QUICK=[["Songs","1cjMnf43ql39k00K6u5QSU3vY5Sn-iJf1"],["Demos","1YCc5Nrde_oWyvalPC2lCaWWn1S7RUaKz"],["RAW Mix","1A8qN3DhWfc1QLb9dhgKSe-jcnFFPMGU2"],["Lyrics","1NokrX4vhHQ53Pf1RWjYr_UEun6xjMp7N"],["Veröffentlichungen","1zjWj_045tyHNxG2cLvOvo2J9x3Wq7xC8"],["Protokolle","1Pm1yKYTB4GCqF7Nc-uO4JiRVqwYXNyVx"],["Fotos","1C63FxR6OCnX2SEGfP5hMKJTfr8HzsU7y"],["Videos","1lGvqXELsy3ys8MXPXLBH7jkNzOigZlLM"],["Logo","1c9ZPtto_-eHPD_v_eoe3uYskDQKTn3Bd"],["Allgemeine Dokumente","1JoS4OVlgjf2LDaPsLzeyihNm_m9Rvq4u"]];
+const STAGES=["idea","writing","rawdemo","arrangement","production","liverec","mix","release"];
+const DRIVE={songs:"https://drive.google.com/drive/folders/1cjMnf43ql39k00K6u5QSU3vY5Sn-iJf1",lyrics:"https://drive.google.com/drive/folders/1NokrX4vhHQ53Pf1RWjYr_UEun6xjMp7N",protocols:"https://drive.google.com/drive/folders/1Pm1yKYTB4GCqF7Nc-uO4JiRVqwYXNyVx",file:id=>"https://drive.google.com/file/d/"+id+"/view"};
+/* ---------- state and API ---------- */
+const API="https://script.google.com/macros/s/AKfycbzFJmuOrMno2oh26DvmYSYK1WOkmO6cNmqB06Wq-4qQFgq5A6kgbNY01wt8UBE6Gvg5/exec";
+const LS={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
+let D=null;
+const S={lang:LS.get("rw-lang")||"de",me:null,view:(location.hash||"#dashboard").slice(1),taskFilter:"mine",sessFilter:"upcoming",sheet:null,busy:false};
+function persist(){LS.set("rw-lang",S.lang)}
+async function api(action,body){
+  const r=await fetch(API,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(Object.assign({action,token:LS.get("rw-token")},body||{}))});
+  const j=await r.json();
+  if(!j.ok){const e=new Error(j.message||"Fehler");e.code=j.error;throw e}
+  return j.data;
+}
+const t=k=>{const v=k.split(".").reduce((o,p)=>o&&o[p],T[S.lang]);return v==null?k:v};
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const mem=id=>D.members.find(m=>m.id===id);
+const nm=id=>{const m=mem(id);return m?m.name:id};
+const me=()=>mem(S.me)||{id:S.me,role:"member",perms:[]};
+const role=()=>me().role;
+const canAll=()=>role()!=="member";
+const isLeader=()=>role()==="leader";
+const canSongs=()=>canAll()||(me().perms||[]).includes("songs");
+const spent=()=>D.money.invoices.filter(r=>r.status==="paid").reduce((a,r)=>a+Number(r.amount||0),0);
+const balance=()=>D.money.start-spent();
+const eur=v=>Number(v).toLocaleString("de-DE")+" €";
+const TODAY=(()=>{const d=new Date();d.setHours(0,0,0,0);return d})();
+const pd=s=>{if(!s)return null;const [y,m,d]=s.split("-").map(Number);return new Date(y,m-1,d)};
+const fmt=s=>{const d=pd(s);if(!d)return "";return d.toLocaleDateString(S.lang==="de"?"de-DE":"en-GB",{day:"2-digit",month:"2-digit",year:"numeric"})};
+const isOver=tk=>tk.status!=="done"&&tk.due&&pd(tk.due)<TODAY;
+const isToday=tk=>tk.due&&pd(tk.due).getTime()===TODAY.getTime();
+const stagesFor=s=>STAGES.filter(x=>x!=="liverec"||s.rec==="live");
+const progress=s=>{if(s.stage==="tbd")return 0;const st=stagesFor(s);let i=st.indexOf(s.stage);if(i<0)i=0;const rel=s.stage==="release"&&s.releases.some(r=>Object.values(r.checks).every(v=>v==="done"));return Math.round((rel?st.length:i)/st.length*100)};
+
+/* ---------- icons ---------- */
+const I={
+dashboard:'<path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
+songs:'<path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/>',
+tasks:'<path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9"/>',
+sessions:'<rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
+projects:'<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
+ideas:'<path d="M9 18h6M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/>',
+members:'<circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0"/><path d="M17 4a4 4 0 0 1 0 8M22 21a7 7 0 0 0-4-6.3"/>',
+money:'<rect x="2" y="6" width="20" height="13" rx="2"/><circle cx="12" cy="12.5" r="2.5"/><path d="M6 10v5M18 10v5"/>',
+more:'<circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/>'};
+const icon=k=>`<svg class="ico" viewBox="0 0 24 24">${I[k]}</svg>`;
+const tick='<svg viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></svg>';
+
+/* ---------- shell ---------- */
+const NAV=()=>["dashboard","songs","tasks","sessions","projects","ideas","members",...(isLeader()?["money"]:[])];
+const BOTTOM=["dashboard","songs","tasks","sessions","more"];
+function myOpenCount(){return D.tasks.filter(x=>x.owners.includes(S.me)&&(isOver(x)||isToday(x))).length}
+function shell(){
+  document.documentElement.lang=S.lang;
+  document.getElementById("meName").textContent=me().name||"";
+  document.querySelectorAll("[data-lang]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.lang===S.lang));
+  const c=myOpenCount(), badge=c?`<span class="badge">${c}</span>`:"";
+  document.getElementById("sidenav").innerHTML=NAV().map(k=>`<button type="button" data-nav="${k}" ${S.view===k?'aria-current="page"':""}>${icon(k)}${t(k)}${k==="tasks"?badge:""}</button>`).join("");
+  const moreViews=["projects","ideas","members","money","more"];
+  document.getElementById("bottomnav").innerHTML=BOTTOM.map(k=>{const cur=k==="more"?moreViews.includes(S.view):S.view===k;return `<button type="button" data-nav="${k}" ${cur?'aria-current="page"':""}>${icon(k)}<span>${t(k)}</span>${k==="tasks"?badge:""}</button>`}).join("");
+  document.getElementById("title").textContent=t(S.view);
+}
+function render(){if(!D){renderGate();return}document.getElementById("gate").hidden=true;if(!T.de[S.view]||(S.view==="money"&&!isLeader()))S.view="dashboard";shell();const v=document.getElementById("view");v.innerHTML=(VIEWS[S.view]||VIEWS.dashboard)();renderSheet();persist()}
+function toast(msg){const r=document.getElementById("toastRoot");r.innerHTML=`<div class="toast" role="status">${esc(msg)}</div>`;clearTimeout(toast.h);toast.h=setTimeout(()=>r.innerHTML="",1800)}
+
+/* ---------- pieces ---------- */
+const owners=a=>a.length>3?a.slice(0,3).map(nm).join(", ")+" +"+(a.length-3):a.map(nm).join(", ");
+function stChip(s){return `<span class="chip ${s==="done"?"ok":s==="prog"?"warn":""}">${t("st."+s)}</span>`}
+function dueChip(tk){if(!tk.due)return "";if(tk.status==="done")return `<span class="chip">${fmt(tk.due)}</span>`;if(isOver(tk))return `<span class="chip bad">${t("overdue")} · ${fmt(tk.due)}</span>`;if(isToday(tk))return `<span class="chip warn">${t("today")}</span>`;return `<span class="chip">${fmt(tk.due)}</span>`}
+function prioChip(p){return p==="high"?`<span class="chip bad">${t("prio.high")}</span>`:p==="low"?`<span class="chip">${t("prio.low")}</span>`:""}
+function canTask(tk){return canAll()||tk.owners.includes(S.me)}
+function linkName(l){if(!l)return "";if(l.type==="song"){const s=D.songs.find(x=>x.id===l.id);return s?"♪ "+s.title:""}if(l.type==="project"){const p=D.projects.find(x=>x.id===l.id);return p?p.title:""}if(l.type==="session"){const s=D.sessions.find(x=>x.id===l.id);return s?t("session")+" "+fmt(s.date):""}return ""}
+function taskRow(tk){
+  const can=canTask(tk), cls=tk.status==="done"?"done":tk.status==="prog"?"prog":"";
+  const subs=tk.subs.length?`<span class="chip">${tk.subs.filter(s=>s.d).length}/${tk.subs.length}</span>`:"";
+  const com=tk.comments.length?`<span class="chip">💬 ${tk.comments.length}</span>`:"";
+  return `<div class="row"><button type="button" class="check ${cls}" data-act="cycleTask" data-id="${tk.id}" ${can?"":"disabled"} aria-label="${t("status")}: ${t("st."+tk.status)}">${tk.status==="done"?tick:""}</button>
+  <div class="grow"><button type="button" class="link title ${tk.status==="done"?"struck":""}" data-act="openTask" data-id="${tk.id}" style="color:inherit">${esc(tk.title)}</button>
+  <div class="muted" style="font-size:.8rem;display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:2px">${esc(owners(tk.owners))}${tk.link?" · "+esc(linkName(tk.link)):""} ${subs}${com}</div></div>
+  <div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end">${prioChip(tk.prio)}${dueChip(tk)}</div></div>`}
+function linksPanel(type,id,links,can){
+  return `<div class="panel"><div class="panel-head"><h3>${t("links")}</h3></div><div class="rows">${links.map((l,i)=>`<div class="row"><div class="grow"><a href="${esc(l.u)}" target="_blank" rel="noopener">${esc(l.l)} ↗</a></div>${can?`<button type="button" class="btn small" data-act="delLink" data-type="${type}" data-id="${id}" data-i="${i}" aria-label="Link entfernen">✕</button>`:""}</div>`).join("")||`<p class="empty">${t("nothing")}</p>`}</div>
+  ${can?`<form data-form="link" data-type="${type}" data-id="${id}" class="form" style="margin-top:8px"><div class="field"><input id="ll-${type}-${id}" name="l" placeholder="${t("linkLabel")}" aria-label="${t("linkLabel")}" required></div><div class="field"><input id="lu-${type}-${id}" name="u" placeholder="${t("linkUrl")}" aria-label="${t("linkUrl")}" required></div><div class="full"><button class="btn small" type="submit">${t("addLink")}</button></div></form>`:""}</div>`}
+function holderOf(type,id){return type==="song"?D.songs.find(x=>x.id===id):type==="task"?D.tasks.find(x=>x.id===id):D.sessions.find(x=>x.id===id)}
+function myParts(uid){
+  return D.songs.filter(s=>s.stage!=="tbd"&&STAGES.indexOf(s.stage)>=STAGES.indexOf("rawdemo")).map(s=>{const items=[];
+    if(s.leads.includes(uid))items.push({name:t("vocalArr"),status:s.arr.v});
+    else if((s.arr.vhelp||[]).includes(uid))items.push({name:t("vocalArr")+" ("+t("helpers")+")",status:s.arr.v});
+    if((s.arr.io||[]).includes(uid))items.push({name:t("instrArr"),status:s.arr.i});
+    s.parts.forEach(p=>{if(showPart(s,p)&&p.owner===uid&&!p.ext)items.push({name:p.name+(p.note?" · "+p.note:""),status:p.status})});
+    return {s,items}}).filter(x=>x.items.length).sort((a,b)=>STAGES.indexOf(b.s.stage)-STAGES.indexOf(a.s.stage));}
+function myPartsPanel(uid){const l=myParts(uid);
+  return `<div class="panel"><div class="panel-head"><h2>${t("myParts")}</h2><span class="chip">${l.reduce((a,x)=>a+x.items.filter(i=>i.status!=="done").length,0)} ${t("open")}</span></div><div class="rows">${l.map(({s,items})=>`<div class="row" style="align-items:flex-start"><div class="grow"><button type="button" class="link title" data-act="openSong" data-id="${s.id}" style="color:inherit">${esc(s.title)}</button> <span class="chip">${t("stages."+s.stage)}</span><div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px">${items.map(i=>`<span class="chip ${i.status==="done"?"ok":i.status==="prog"?"warn":""}">${esc(i.name)}</span>`).join("")}</div></div></div>`).join("")||`<p class="empty">${t("noParts")}</p>`}</div></div>`}
+function quickPanel(){return `<div class="panel"><h2>${t("quick")}</h2><div style="display:flex;flex-wrap:wrap;gap:6px">${QUICK.map(([l,id])=>`<a class="chip acc" href="https://drive.google.com/drive/folders/${id}" target="_blank" rel="noopener">${esc(l)} ↗</a>`).join("")}</div></div>`}
+function nextSession(){return D.sessions.filter(s=>pd(s.date)>=TODAY).sort((a,b)=>a.date.localeCompare(b.date))[0]}
+function dateBox(s){const d=pd(s.date);return `<div class="date"><b>${d.getDate()}</b><span>${d.toLocaleDateString(S.lang==="de"?"de-DE":"en-GB",{month:"short"})}</span></div>`}
+function rsvp(s){const v=s.rsvp[S.me];return `<div class="rsvp">${["yes","maybe","no"].map(k=>`<button type="button" data-act="rsvp" data-id="${s.id}" data-v="${k}" aria-pressed="${v===k}">${t(k)}</button>`).join("")}</div>`}
+function songCard(s){const p=progress(s);return `<button type="button" class="card" data-act="openSong" data-id="${s.id}"><span class="t">${esc(s.title)}</span><span class="m">${s.key?`<span class="mono">${esc(s.key)}</span>`:""}${s.tempo?`<span class="mono">${esc(s.tempo)} bpm</span>`:""}${s.rec==="live"?`<span class="chip acc">Live</span>`:""}${s.parts.length?`<span>${s.parts.filter(x=>showPart(s,x)&&x.status==="done").length}/${s.parts.filter(x=>showPart(s,x)).length} ${t("parts")}</span>`:""}</span><div class="prog"><i style="width:${p}%"></i></div></button>`}
+
+/* ---------- views ---------- */
+const VIEWS={
+dashboard(){
+  const ns=nextSession(), yes=ns?Object.values(ns.rsvp).filter(v=>v==="yes").length:0;
+  const over=D.tasks.filter(isOver).sort((a,b)=>a.due.localeCompare(b.due));
+  const mine=D.tasks.filter(x=>x.owners.includes(S.me)&&x.status!=="done").sort((a,b)=>(a.due||"9").localeCompare(b.due||"9")).slice(0,6);
+  const counts=[...STAGES,"tbd"].map(k=>[k,D.songs.filter(s=>s.stage===k).length]).filter(([k,c])=>c||k!=="liverec");
+  const max=Math.max(...counts.map(c=>c[1]),1);
+  const rel=D.songs.flatMap(s=>s.releases.map(r=>({s,r}))).filter(x=>x.r.date&&pd(x.r.date)>=TODAY).sort((a,b)=>a.r.date.localeCompare(b.r.date));
+  return `<div class="grid cols-2">
+  <div class="panel"><div class="panel-head"><h2>${t("nextSession")}</h2><button type="button" class="link" data-act="openSession" data-id="${ns?ns.id:""}">${t("agenda")} ›</button></div>
+   ${ns?`<div class="next">${dateBox(ns)}<div><b>${esc(ns.place)}</b><div class="muted">${esc(ns.time)} · ${yes} ${t("yesCount")}</div><div class="label" style="margin-top:8px">${t("coming")}</div>${rsvp(ns)}</div></div>`:`<p class="empty">${t("nothing")}</p>`}</div>
+  <div class="panel"><div class="panel-head"><h2>${t("overdue")}</h2><span class="chip ${over.length?"bad":"ok"}">${over.length}</span></div>
+   <div class="rows">${over.length?over.map(taskRow).join(""):`<p class="empty">${t("nothing")}</p>`}</div></div>
+  <div class="panel"><div class="panel-head"><h2>${t("myTasks")}</h2><button type="button" class="link" data-nav="tasks">${t("tasks")} ›</button></div>
+   <div class="rows">${mine.length?mine.map(taskRow).join(""):`<p class="empty">${t("nothing")}</p>`}</div></div>
+  ${myPartsPanel(S.me)}
+  <div class="panel"><div class="panel-head"><h2>${t("songsByStage")}</h2><button type="button" class="link" data-nav="songs">${t("songs")} ›</button></div>
+   <div class="stagebar">${counts.map(([k,c])=>`<div class="sb"><span>${t("stages."+k)}</span><div class="track"><div class="fill" style="width:${c/max*100}%"></div></div><span class="n mono">${c}</span></div>`).join("")}</div></div>
+  <div class="panel"><h2>${t("releases")}</h2><div class="rows">${rel.length?rel.map(({s,r})=>{const ch=Object.values(r.checks),d=ch.filter(v=>v==="done").length;return `<div class="row"><div class="grow"><button type="button" class="link title" data-act="openSong" data-id="${s.id}" style="color:inherit">${esc(s.title)}</button><div class="muted" style="font-size:.8rem">${t(r.kind)} · ${d}/${ch.length}</div></div><span class="chip acc">${fmt(r.date)}</span></div>`}).join(""):`<p class="empty">${t("nothing")}</p>`}</div></div>
+  ${isLeader()?`<div class="panel"><div class="panel-head"><h2>${t("budget")}</h2><button type="button" class="link" data-nav="money">${t("invoices")} ›</button></div><div class="money">${eur(balance())}</div><div class="muted" style="font-size:.85rem">${t("startBalance")} ${eur(D.money.start)} · ${t("spent")} ${eur(spent())} · ${t("onlyLeaders")}</div></div>`:""}
+  ${quickPanel()}
+  </div>`},
+songs(){
+  const groups=[...STAGES,"tbd"].filter(k=>k!=="liverec"||D.songs.some(s=>s.rec==="live"));
+  const board=groups.map(k=>{const l=D.songs.filter(s=>s.stage===k);return `<div class="col"><h3><span>${t("stages."+k)}</span><span class="mono muted">${l.length}</span></h3>${l.map(songCard).join("")}</div>`}).join("");
+  const list=groups.map(k=>{const l=D.songs.filter(s=>s.stage===k);if(!l.length)return "";return `<div><div class="label" style="margin-bottom:6px">${t("stages."+k)} · ${l.length}</div><div class="grid" style="gap:8px">${l.map(songCard).join("")}</div></div>`}).join("");
+  return `<div class="board">${board}</div><div class="glist">${list}</div>`},
+tasks(){
+  const f=S.taskFilter;let l=D.tasks.slice();
+  if(f==="mine")l=l.filter(x=>x.owners.includes(S.me));if(f==="over")l=l.filter(isOver);if(f==="done")l=l.filter(x=>x.status==="done");else if(f!=="all")l=l.filter(x=>x.status!=="done"||f==="mine");
+  if(f==="mine"||f==="all")l.sort((a,b)=>(a.status==="done")-(b.status==="done")||(a.due||"9").localeCompare(b.due||"9"));
+  const tab=(k,lab)=>`<button type="button" data-act="taskFilter" data-v="${k}" aria-pressed="${f===k}">${lab}</button>`;
+  return `<div class="tabs">${tab("mine",t("myTasks"))}${tab("all",t("allTasks"))}${tab("over",t("overdue"))}${tab("done",t("done"))}<button type="button" class="btn primary small" data-act="newTask" style="margin-left:auto">+ ${t("newTask")}</button></div>
+  <div class="grid">${f==="mine"?myPartsPanel(S.me):""}<div class="panel"><h2 style="margin-bottom:8px">${t("tasks")}</h2><div class="rows">${l.length?l.map(taskRow).join(""):`<p class="empty">${t("nothing")}</p>`}</div></div></div>`},
+sessions(){
+  const f=S.sessFilter, up=D.sessions.filter(s=>pd(s.date)>=TODAY).sort((a,b)=>a.date.localeCompare(b.date)), past=D.sessions.filter(s=>pd(s.date)<TODAY).sort((a,b)=>b.date.localeCompare(a.date));
+  const l=f==="upcoming"?up:past;
+  return `<div class="tabs"><button type="button" data-act="sessFilter" data-v="upcoming" aria-pressed="${f==="upcoming"}">${t("upcoming")}</button><button type="button" data-act="sessFilter" data-v="past" aria-pressed="${f==="past"}">${t("past")}</button></div>
+  <div class="panel"><div class="rows">${l.map(s=>{const y=Object.values(s.rsvp).filter(v=>v==="yes").length;return `<div class="row">${dateBox(s)}<div class="grow"><button type="button" class="link title" data-act="openSession" data-id="${s.id}" style="color:inherit">Creative Session</button><div class="muted" style="font-size:.85rem">${esc(s.time)} · ${esc(s.place)}</div></div>${f==="upcoming"?`<span class="chip ${s.rsvp[S.me]==="yes"?"ok":""}">${y} ${t("yesCount")}</span>`:s.pdf?`<a class="chip acc" href="${DRIVE.file(s.pdf)}" target="_blank" rel="noopener">${t("pdf")}</a>`:""}</div>`}).join("")}</div></div>`},
+projects(){
+  return `<div class="grid cols-2">${D.projects.map(p=>{const l=D.tasks.filter(x=>x.link&&x.link.type==="project"&&x.link.id===p.id);const d=l.filter(x=>x.status==="done").length;return `<div class="panel"><div class="panel-head"><h2>${esc(p.title)}</h2><span class="chip">${esc(p.when)}</span></div><p class="muted" style="margin:0 0 8px">${esc(p.note)}</p><div class="label">${t("tasks")} · ${d}/${l.length}</div><div class="rows">${l.map(taskRow).join("")||`<p class="empty">${t("nothing")}</p>`}</div></div>`}).join("")}
+  </div>`},
+money(){
+  if(!isLeader())return `<p class="note">${t("onlyLeaders")}</p>`;
+  const inv=D.money.invoices.slice().sort((a,b)=>b.date.localeCompare(a.date));
+  const songOpts=[`<option value="">${t("none")}</option>`,...D.songs.map(x=>`<option value="${x.id}">${esc(x.title)}</option>`)].join("");
+  return `<div class="grid cols-2"><div class="panel"><div class="panel-head"><h2>${t("budget")}</h2><span class="chip acc">${t("onlyLeaders")}</span></div><div class="money">${eur(balance())}</div><div class="rows" style="margin-top:8px"><div class="row"><div class="grow">${t("startBalance")}<div class="log">${esc(D.money.startNote)}</div></div><span class="mono">${eur(D.money.start)}</span></div><div class="row"><div class="grow">${t("spent")}</div><span class="mono">− ${eur(spent())}</span></div></div></div>
+  <div class="panel"><h2>${t("invoiceNew")}</h2><form class="form" data-form="invoice"><div class="field"><label class="label" for="inv-vendor">${t("vendor")}</label><input id="inv-vendor" name="vendor" required></div><div class="field"><label class="label" for="inv-nr">${t("invNr")}</label><input id="inv-nr" name="nr"></div><div class="field"><label class="label" for="inv-date">${t("date")}</label><input id="inv-date" name="date" type="date" required></div><div class="field"><label class="label" for="inv-amount">${t("amount")}</label><input id="inv-amount" name="amount" type="number" step="0.01" min="0" required></div><div class="field full"><label class="label" for="inv-items">${t("items")}</label><input id="inv-items" name="items"></div><div class="field"><label class="label" for="inv-song">${t("forSong")}</label><select id="inv-song" name="song">${songOpts}</select></div><div class="field"><label class="label" for="inv-file">${t("pdfLink")}</label><input id="inv-file" name="file" type="url" placeholder="https://drive.google.com/…"></div><div class="full"><button class="btn primary" type="submit">${t("add")}</button></div></form><p class="log" style="margin:10px 0 0">${t("invHint")}</p></div>
+  <div class="panel" style="grid-column:1/-1"><div class="panel-head"><h2>${t("invoices")}</h2><span class="chip">${inv.length}</span></div><div class="rows">${inv.map(r=>`<div class="row"><div class="grow"><div class="title">${esc(r.vendor)}</div><div class="muted" style="font-size:.82rem">${fmt(r.date)}${r.nr?" · Nr. "+esc(r.nr):""}${r.items?" · "+esc(r.items):""}${r.song?" · ♪ "+esc((D.songs.find(x=>x.id===r.song)||{}).title||""):""}${r.file?` · <a href="${esc(r.file)}" target="_blank" rel="noopener">PDF</a>`:""}</div></div><button type="button" class="chip ${r.status==="paid"?"ok":"warn"}" data-act="toggleInv" data-id="${r.id}" style="border:0">${r.status==="paid"?t("paid"):t("unpaid")}</button><span class="mono" style="min-width:70px;text-align:right">${eur(r.amount)}</span></div>`).join("")||`<p class="empty">${t("nothing")}</p>`}</div></div></div>`},
+ideas(){
+  return `<div class="grid cols-2"><div class="panel"><h2>${t("ideaNew")}</h2><form class="form" data-form="idea"><div class="field full"><label class="label" for="ideaTitle">${t("ideaTitle")}</label><input id="ideaTitle" name="title" required></div><div class="field full"><label class="label" for="ideaText">${t("lyrics")}</label><textarea id="ideaText" name="text"></textarea></div><div class="field full"><label class="label" for="ideaMemo">${t("memoLink")}</label><input id="ideaMemo" name="memo" type="url" placeholder="https://drive.google.com/…"></div><div class="full"><button class="btn primary" type="submit">${t("add")}</button></div></form></div>
+  <div class="panel"><h2>${t("ideas")}</h2><div class="rows">${D.ideas.map(i=>`<div class="row"><div class="grow"><div class="title">${esc(i.title)}</div><div class="muted" style="font-size:.85rem">${t("from")} ${esc(nm(i.by))} · ${fmt(i.date)}${i.memo?` · <a href="${esc(i.memo)}" target="_blank" rel="noopener">🎙 Memo</a>`:""}</div>${i.text?`<div style="font-size:.9rem;margin-top:4px;white-space:pre-wrap">${esc(i.text)}</div>`:""}</div>${canAll()?`<button type="button" class="btn small" data-act="ideaToSong" data-id="${i.id}">${t("toPipeline")}</button>`:""}</div>`).join("")||`<p class="empty">${t("nothing")}</p>`}</div></div></div>`},
+members(){
+  return `<div class="panel"><div class="rows">${D.members.map(m=>`<div class="row"><div class="avatar">${esc(m.name.slice(0,2))}</div><div class="grow"><button type="button" class="link title" data-act="openMember" data-id="${m.id}" style="color:inherit">${esc(m.name)}</button><div class="muted" style="font-size:.82rem">${esc(m.groups.join(", "))}</div></div>${isLeader()?`<button type="button" class="btn small" data-act="prodToggle" data-id="${m.id}" aria-pressed="${(m.perms||[]).includes("songs")}">${(m.perms||[]).includes("songs")?"✓ ":""}${t("production")}</button><button type="button" class="btn small" data-act="invite" data-id="${m.id}">${t("invite")}</button>`:((m.perms||[]).includes("songs")?`<span class="chip warn">${t("production")}</span>`:"")}<span class="chip ${m.role==="leader"?"acc":m.role==="middle"?"warn":""}">${t("roles."+m.role)}</span></div>`).join("")}</div></div>`},
+more(){
+  return `<div class="grid"><div class="panel"><div class="rows">${["projects","ideas","members",...(isLeader()?["money"]:[])].map(k=>`<div class="row"><button type="button" class="link" data-nav="${k}" style="display:flex;gap:10px;align-items:center;color:inherit">${icon(k)}${t(k)}</button></div>`).join("")}</div></div>
+  ${quickPanel()}<div class="panel"><h2>${t("settings")}</h2><p class="note">${t("installHint")}</p><button type="button" class="btn" data-act="logout">${t("logout")}</button></div></div>`}};
+
+/* ---------- sheets (detail panels) ---------- */
+function renderSheet(){
+  const r=document.getElementById("sheetRoot");if(!S.sheet){r.innerHTML="";document.body.style.overflow="";return}
+  const html=SHEETS[S.sheet.type](S.sheet.id);if(!html){S.sheet=null;r.innerHTML="";return}
+  const keep=r.querySelector(".sheet");const top=keep?keep.scrollTop:0;
+  r.innerHTML=`<div class="sheet-bg" data-act="closeBg"><div class="sheet" role="dialog" aria-modal="true">${html}</div></div>`;
+  r.querySelector(".sheet").scrollTop=top;document.body.style.overflow="hidden";
+}
+const head=(eyebrow,title)=>`<div class="sheet-head"><div><div class="label">${esc(eyebrow)}</div><h1>${esc(title)}</h1></div><button type="button" class="x" data-act="close" aria-label="Schließen">✕</button></div>`;
+const RCHK=[["dist","Distributor Upload (RecordJet)"],["date","Release Datum"],["cover","Cover"],["shoot","Shooting"],["profile","Profil"],["reel","Reel"],["posts","Posts"],["lyrics","Lyrics Check"],["rights","GEMA und CCLI"]];
+const SHEETS={
+song(id){
+  const s=D.songs.find(x=>x.id===id);if(!s)return "";const all=canSongs(), wEdit=!(s.gema||s.ccli)||isLeader();
+  const st=[...stagesFor(s),"tbd"], idx=st.indexOf(s.stage);
+  const arrBlocked=s.stage==="arrangement"&&!(s.arr.v==="done"&&s.arr.i==="done");
+  const steps=st.map((k,i)=>`<button type="button" class="${k===s.stage?"now":i<idx&&s.stage!=="tbd"?"past":""}" data-act="setStage" data-id="${s.id}" data-v="${k}" ${all?"":"disabled"}>${t("stages."+k)}</button>`).join("");
+  const parts=s.parts.map((p,i)=>{if(!showPart(s,p))return "";const can=all||p.owner===S.me;const ownerLabel=p.ext?`${esc(p.owner)} <span class="chip">${t("extern")}</span>`:p.owner?esc(nm(p.owner)):`<span class="muted">${t("none")}</span>`;
+    return `<div class="row"><button type="button" class="check ${p.status==="done"?"done":p.status==="prog"?"prog":""}" data-act="cyclePart" data-id="${s.id}" data-i="${i}" ${can?"":"disabled"} aria-label="${t("status")}">${p.status==="done"?tick:""}</button><div class="grow"><div class="title" style="font-weight:500">${esc(p.name)}${p.note?` <span class="muted" style="font-weight:400">· ${esc(p.note)}</span>`:""}</div><div class="muted" style="font-size:.8rem">${ownerLabel}</div></div>${all&&!p.ext?`<select data-act="partOwner" data-id="${s.id}" data-i="${i}" aria-label="${t("owner")}" style="max-width:120px;border:1px solid var(--line);border-radius:6px;background:var(--surface);padding:3px">${["",...D.members.map(m=>m.id)].map(o=>`<option value="${o}" ${o===p.owner?"selected":""}>${o?esc(nm(o)):"–"}</option>`).join("")}</select>`:""}${stChip(p.status)}</div>`}).join("");
+  const arrRow=(k,lab,who)=>`<div class="row"><button type="button" class="check ${s.arr[k]==="done"?"done":s.arr[k]==="prog"?"prog":""}" data-act="cycleArr" data-id="${s.id}" data-v="${k}" ${all?"":"disabled"} aria-label="${lab}">${s.arr[k]==="done"?tick:""}</button><div class="grow"><div class="title" style="font-weight:500">${lab}</div><div class="muted" style="font-size:.8rem">${who&&who.length?esc(who.map(nm).join(", ")):t("none")}</div></div>${stChip(s.arr[k])}</div>`;
+  const rels=s.releases.map((r,ri)=>`<div class="panel"><div class="panel-head"><h3>${t(r.kind)} ${t("releasesTitle")}</h3><span class="chip acc">${fmt(r.date)}</span></div><div class="rows">${RCHK.map(([k,lab])=>`<div class="row"><button type="button" class="check ${r.checks[k]==="done"?"done":r.checks[k]==="prog"?"prog":""}" data-act="cycleRel" data-id="${s.id}" data-ri="${ri}" data-v="${k}" ${all?"":"disabled"} aria-label="${lab}">${r.checks[k]==="done"?tick:""}</button><div class="grow">${lab}</div>${stChip(r.checks[k])}</div>`).join("")}</div></div>`).join("");
+  return `${head(t("song")+" · "+t("stages."+s.stage),s.title)}
+  ${s.note?`<p class="note">${esc(s.note)}</p>`:""}
+  <div class="facts"><div class="fact"><span class="label">${t("key")}</span><b>${esc(s.key||"–")}</b></div><div class="fact"><span class="label">${t("tempo")}</span><b>${esc(s.tempo?s.tempo+" bpm":"–")}</b></div><div class="fact"><span class="label">${t("meter")}</span><b>${esc(s.meter||"–")}</b></div><div class="fact"><span class="label">${t("lead")}</span><b style="font-family:var(--body)">${esc(s.leads.map(nm).join(", ")||"–")}</b></div></div>
+  <div><div class="label" style="margin-bottom:6px">${t("stage")} · ${progress(s)}%</div><div class="steps">${steps}</div>${arrBlocked?`<p class="log" style="margin:6px 0 0">${t("moveOnHint")}</p>`:""}${all?"":`<p class="log" style="margin:6px 0 0">${t("readOnly")}</p>`}</div>
+  <div class="panel"><div class="panel-head"><h3>${t("recording")}</h3><div class="seg"><button type="button" data-act="setRec" data-id="${s.id}" data-v="studio" aria-pressed="${s.rec==="studio"}" ${all?"":"disabled"}>${t("studio")}</button><button type="button" data-act="setRec" data-id="${s.id}" data-v="live" aria-pressed="${s.rec==="live"}" ${all?"":"disabled"}>${t("live")}</button></div></div>${s.rec==="live"?`<p class="note" style="margin:0">${t("liveNote")}</p>`:""}</div>
+  <div class="panel"><div class="panel-head"><h3>${t("writers")}</h3><span class="chip ${s.gema?"ok":""}">${t("gema")}: ${s.gema?t("registered"):t("notRegistered")}</span></div>
+   ${wEdit?`<form data-form="writers" data-id="${s.id}" style="display:flex;gap:8px"><div class="field" style="flex:1"><input id="w-${s.id}" name="w" value="${esc(s.writers.map(nm).join(", "))}" placeholder="z.B. Melli, Dani" aria-label="${t("writers")}"></div><button class="btn" type="submit">${t("save")}</button></form>`:`<div>${esc(s.writers.map(nm).join(", ")||"–")}</div><p class="log">${t("writersLocked")}</p>`}
+   ${s.log.length?`<div class="log" style="margin-top:6px">${s.log.slice(-3).map(l=>`${esc(l.v||"–")} · ${t("changedBy")} ${esc(nm(l.by))}, ${fmt(l.at)}`).join("<br>")}</div>`:""}
+   ${isLeader()?`<div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap"><button type="button" class="btn small" data-act="toggleReg" data-id="${s.id}" data-v="gema">${t("gema")} ${s.gema?"✓":"○"}</button><button type="button" class="btn small" data-act="toggleReg" data-id="${s.id}" data-v="ccli">${t("ccli")} ${s.ccli?"✓":"○"}</button></div>`:""}</div>
+  ${linksPanel("song",s.id,s.links,true)}
+  <div class="panel"><div class="panel-head"><h3>${t("arrangement")}</h3></div><div class="rows">${arrRow("v",t("vocal")+" · "+t("leadDoes"),s.leads.concat(s.arr.vhelp||[]))}${arrRow("i",t("instrumental"),s.arr.io)}</div></div>
+  <div class="panel"><div class="panel-head"><h3>${t("parts")}</h3><label style="display:flex;gap:6px;align-items:center;font-size:.85rem"><input type="checkbox" id="cello-${s.id}" data-act="toggleCello" data-id="${s.id}" ${s.cello?"checked":""} ${all?"":"disabled"}> ${t("celloQ")}</label></div><div class="rows">${parts||`<p class="empty">${t("nothing")}</p>`}</div></div>
+  ${rels}`},
+task(id){
+  const tk=D.tasks.find(x=>x.id===id);if(!tk)return "";const can=canTask(tk);
+  return `${head(t("tasks")+(tk.link?" · "+linkName(tk.link):""),tk.title)}
+  <div style="display:flex;gap:6px;flex-wrap:wrap">${stChip(tk.status)}${prioChip(tk.prio)}${dueChip(tk)}</div>
+  <div class="panel"><div class="label">${t("owner")}</div><div>${esc(tk.owners.map(nm).join(", "))}</div>${can?"":`<p class="log">${t("readOnly")}</p>`}
+   ${can?`<div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">${["open","prog","done"].map(k=>`<button type="button" class="btn small" data-act="setTask" data-id="${tk.id}" data-v="${k}" ${tk.status===k?'aria-pressed="true" style="background:var(--fg);color:var(--bg)"':""}>${t("st."+k)}</button>`).join("")}</div>`:""}</div>
+  <div class="panel"><h3 style="margin-bottom:6px">${t("subtasks")}</h3><div class="rows">${tk.subs.map((s,i)=>`<div class="row"><button type="button" class="check ${s.d?"done":""}" data-act="toggleSub" data-id="${tk.id}" data-i="${i}" ${can?"":"disabled"} aria-label="${esc(s.t)}">${s.d?tick:""}</button><div class="grow ${s.d?"struck":""}">${esc(s.t)}</div></div>`).join("")||`<p class="empty">${t("nothing")}</p>`}</div>
+   ${can?`<form data-form="sub" data-id="${tk.id}" style="display:flex;gap:8px;margin-top:8px"><div class="field" style="flex:1"><input id="sub-${tk.id}" name="t" placeholder="${t("addSub")}" aria-label="${t("addSub")}"></div><button class="btn" type="submit">${t("add")}</button></form>`:""}</div>
+  ${linksPanel("task",tk.id,tk.links,can)}
+  <div class="panel"><h3 style="margin-bottom:6px">${t("comments")}</h3>${tk.comments.map(c=>`<div class="row"><div class="avatar">${esc(nm(c.by).slice(0,2))}</div><div class="grow"><div class="log">${esc(nm(c.by))} · ${fmt(c.at)}</div><div>${esc(c.text)}</div></div></div>`).join("")}
+   <form data-form="comment" data-id="${tk.id}" style="display:flex;gap:8px;margin-top:8px"><div class="field" style="flex:1"><input id="com-${tk.id}" name="text" placeholder="${t("comment")}" aria-label="${t("comment")}"></div><button class="btn" type="submit">${t("add")}</button></form></div>`},
+member(id){const m=mem(id);if(!m)return "";const tk=D.tasks.filter(x=>x.owners.includes(id)&&x.status!=="done");
+  return `${head(t("roles."+m.role)+(m.groups.length?" · "+m.groups.join(", "):""),m.name)}${myPartsPanel(id)}<div class="panel"><h3 style="margin-bottom:6px">${t("tasks")}</h3><div class="rows">${tk.map(taskRow).join("")||`<p class="empty">${t("nothing")}</p>`}</div></div>`},
+newTask(){
+  const opts=[`<option value="">${t("none")}</option>`,...D.songs.map(s=>`<option value="song:${s.id}">♪ ${esc(s.title)}</option>`),...D.projects.map(p=>`<option value="project:${p.id}">${esc(p.title)}</option>`)].join("");
+  const ownerOpts=(canAll()?D.members:[me()]).map(m=>`<option value="${m.id}" ${m.id===S.me?"selected":""}>${esc(m.name)}</option>`).join("");
+  return `${head(t("tasks"),t("newTask"))}<form class="form" data-form="task"><div class="field full"><label class="label" for="nt-title">${t("title")}</label><input id="nt-title" name="title" required></div>
+  <div class="field"><label class="label" for="nt-owner">${t("owner")}</label><select id="nt-owner" name="owner">${ownerOpts}</select></div>
+  <div class="field"><label class="label" for="nt-due">${t("dueDate")}</label><input id="nt-due" name="due" type="date"></div>
+  <div class="field"><label class="label" for="nt-prio">${t("priority")}</label><select id="nt-prio" name="prio"><option value="mid">${t("prio.mid")}</option><option value="high">${t("prio.high")}</option><option value="low">${t("prio.low")}</option></select></div>
+  <div class="field"><label class="label" for="nt-link">${t("link")}</label><select id="nt-link" name="link">${opts}</select></div>
+  <div class="full"><button class="btn primary" type="submit">${t("add")}</button></div></form>`},
+session(id){
+  const s=D.sessions.find(x=>x.id===id);if(!s)return "";const up=pd(s.date)>=TODAY, can=canAll();
+  const byV=v=>D.members.filter(m=>s.rsvp[m.id]===v).map(m=>m.name);
+  return `${head("Creative Session · "+s.time,fmt(s.date)+" · "+s.place)}
+  ${up?`<div class="panel"><h3>${t("coming")}</h3>${rsvp(s)}<div class="log" style="margin-top:8px">${t("yes")}: ${esc(byV("yes").join(", ")||"–")}<br>${t("maybe")}: ${esc(byV("maybe").join(", ")||"–")}<br>${t("no")}: ${esc(byV("no").join(", ")||"–")}</div></div>`:""}
+  ${s.attendees.length?`<div class="panel"><h3>${t("attendees")} · ${s.attendees.length}</h3><div class="muted">${esc(s.attendees.map(nm).join(", "))}</div></div>`:""}
+  <form class="grid" data-form="session" data-id="${s.id}" style="gap:12px">
+   <div class="field"><label class="label" for="ag-${s.id}">${t("agenda")}</label><textarea id="ag-${s.id}" name="agenda" ${can?"":"readonly"}>${esc(s.agenda)}</textarea></div>
+   <div class="field"><label class="label" for="re-${s.id}">${t("protocol")}: ${t("results")}</label><textarea id="re-${s.id}" name="results" ${can?"":"readonly"}>${esc(s.results)}</textarea></div>
+   <div class="field"><label class="label" for="de-${s.id}">${t("decisions")}</label><textarea id="de-${s.id}" name="decisions" ${can?"":"readonly"}>${esc(s.decisions)}</textarea></div>
+   <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">${can?`<button class="btn primary" type="submit">${t("save")}</button><button class="btn" type="button" data-act="exportPdf" data-id="${s.id}">${t("exportPdf")}</button>`:`<span class="log">${t("readOnly")}</span>`}<span class="log">${t("protocolBy")}</span>${s.pdf?`<a class="link" href="${DRIVE.file(s.pdf)}" target="_blank" rel="noopener">${t("pdf")} ↗</a>`:""}</div>
+  </form>
+  ${linksPanel("session",s.id,s.links,can)}
+  <div class="panel"><h3 style="margin-bottom:6px">${t("tasks")}</h3><div class="rows">${D.tasks.filter(x=>x.link&&x.link.type==="session"&&x.link.id===s.id).map(taskRow).join("")||`<p class="empty">${t("nothing")}</p>`}</div></div>`}};
+
+/* ---------- login gate ---------- */
+const params=new URLSearchParams(location.search);
+if(params.get("m"))LS.set("rw-member",params.get("m"));
+let NAMES=null;
+async function renderGate(){
+  const g=document.getElementById("gate");g.hidden=false;
+  const token=LS.get("rw-token");
+  if(token){g.innerHTML=`<div class="gatebox"><div class="mark">R</div><p class="muted">${t("loading")}</p></div>`;return}
+  const mid=LS.get("rw-member");
+  if(!NAMES){try{NAMES=await api("names")}catch(e){NAMES=[]}}
+  const opts=NAMES.map(n=>`<option value="${esc(n.id)}" ${n.id===mid?"selected":""}>${esc(n.name)}</option>`).join("");
+  g.innerHTML=`<form class="gatebox" data-form="login"><div class="mark">R</div><h1>${t("hello")}</h1>
+  <div class="field"><label class="label" for="login-member">${t("whoAreYou")}</label><select id="login-member" name="member" required><option value="">…</option>${opts}</select></div>
+  <div class="field"><label class="label" for="login-code">${t("enterCode")}</label><input id="login-code" name="code" class="codein" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]{6}" required></div>
+  <button class="btn primary" type="submit">${t("login")}</button><p class="log" id="loginErr"></p></form>`;
+}
+async function boot(){
+  render();
+  if(!LS.get("rw-token"))return;
+  try{D=await api("bootstrap");S.me=D.me.id;render()}
+  catch(e){if(e.code==="auth"){LS.del("rw-token");D=null;render()}else{const g=document.getElementById("gate");g.innerHTML=`<div class="gatebox"><div class="mark">R</div><p>${t("offline")}</p><button class="btn" type="button" onclick="boot()">↻</button></div>`}}
+}
+async function refresh(){
+  if(!LS.get("rw-token")||document.hidden||S.busy||document.activeElement&&/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName))return;
+  try{D=await api("bootstrap");S.me=D.me.id;render()}catch(e){if(e.code==="auth"){LS.del("rw-token");D=null;render()}}
+}
+setInterval(refresh,45000);
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)refresh()});
+
+/* ---------- save helpers ---------- */
+const cyc=v=>v==="open"?"prog":v==="prog"?"done":"open";
+const song=id=>D.songs.find(x=>x.id===id), task=id=>D.tasks.find(x=>x.id===id), sess=id=>D.sessions.find(x=>x.id===id);
+const clone=o=>JSON.parse(JSON.stringify(o));
+function put(list,obj){const i=list.findIndex(x=>x.id===obj.id);if(i<0)list.push(obj);else list[i]=obj}
+async function run(fn){
+  S.busy=true;
+  try{await fn();render()}
+  catch(e){toast(t("errSave")+": "+e.message);if(e.code==="auth"){LS.del("rw-token");D=null}else{try{D=await api("bootstrap")}catch(_){}}render()}
+  finally{S.busy=false}
+}
+const saveSong=s=>run(async()=>put(D.songs,await api("saveSong",{song:s,base:song(s.id)&&song(s.id).updated_at})));
+const songOp=(id,op,extra)=>run(async()=>put(D.songs,await api("songOp",Object.assign({id,op},extra))));
+const saveTask=tk=>run(async()=>put(D.tasks,await api("saveTask",{task:tk,base:task(tk.id)&&task(tk.id).updated_at})));
+const saveSession=s=>run(async()=>put(D.sessions,await api("saveSession",{session:s,base:sess(s.id).updated_at})));
+const saveInvoice=r=>run(async()=>put(D.money.invoices,await api("saveInvoice",{invoice:r,base:(D.money.invoices.find(x=>x.id===r.id)||{}).updated_at})));
+
+function inviteSheet(inv){
+  const link=inv.link||location.origin+location.pathname+"?m="+encodeURIComponent(inv.id);
+  const msg=`Hallo ${inv.name}, hier ist dein Zugang zum Raum Worship Hub:\n${link}\nDein Code: ${inv.code}\nAuf dem iPhone: Link öffnen, Teilen › Zum Home Bildschirm, dann in der App den Code eingeben.`;
+  return `${head(t("inviteTitle"),inv.name)}<p class="note">${t("inviteHint")}</p><div class="panel"><div class="label">Code</div><div class="money mono">${esc(inv.code)}</div></div>
+  <div class="field"><textarea id="inviteText" readonly style="min-height:150px">${esc(msg)}</textarea></div><button type="button" class="btn primary" data-act="copyInvite">${t("copy")}</button>`;
+}
+SHEETS.invite=()=>S.inviteHtml||"";
+
+/* ---------- clicks ---------- */
+document.addEventListener("click",e=>{
+  const nav=e.target.closest("[data-nav]");if(nav){S.view=nav.dataset.nav;S.sheet=null;try{history.replaceState(null,"",location.pathname+location.search+"#"+S.view)}catch(_){}render();window.scrollTo(0,0);return}
+  const lang=e.target.closest("[data-lang]");if(lang){S.lang=lang.dataset.lang;persist();render();return}
+  const a=e.target.closest("[data-act]");if(!a||!D)return;const {act,id,v,i,ri}=a.dataset;
+  if(act==="closeBg"&&e.target!==a)return;
+  const s=id&&song(id);
+  switch(act){
+  case "close":case "closeBg":S.sheet=null;break;
+  case "openSong":S.sheet={type:"song",id};break;
+  case "openMember":S.sheet={type:"member",id};break;
+  case "openTask":S.sheet={type:"task",id};break;
+  case "openSession":if(!id)return;S.sheet={type:"session",id};break;
+  case "newTask":S.sheet={type:"newTask"};break;
+  case "taskFilter":S.taskFilter=v;break;
+  case "sessFilter":S.sessFilter=v;break;
+  case "cycleTask":{const k=task(id);if(!canTask(k))return;const c=clone(k);c.status=cyc(c.status);saveTask(c);return}
+  case "setTask":{const c=clone(task(id));c.status=v;saveTask(c);return}
+  case "toggleSub":{const c=clone(task(id));c.subs[i].d=!c.subs[i].d;saveTask(c);return}
+  case "rsvp":run(async()=>{put(D.sessions,await api("rsvp",{id,v}));toast(t("saved"))});return;
+  case "setStage":{if(!canSongs())return;const st=stagesFor(s);if(s.stage==="arrangement"&&!(s.arr.v==="done"&&s.arr.i==="done")&&st.indexOf(v)>st.indexOf("arrangement")){toast(t("moveOnHint"));return}const c=clone(s);c.stage=v;saveSong(c);return}
+  case "setRec":{if(!canSongs())return;const c=clone(s);c.rec=v;if(v==="studio"&&c.stage==="liverec")c.stage="production";if(v==="live"&&!c.parts.some(p=>p.key==="tracks"))c.parts.push({key:"tracks",name:"Tracks und Click vorbereitet",owner:"",status:"open",note:"",ext:false});saveSong(c);return}
+  case "toggleCello":{if(!canSongs()){e.preventDefault();return}const c=clone(s);c.cello=!c.cello;saveSong(c);return}
+  case "cyclePart":{const p=s.parts[i];if(!(canSongs()||p.owner===S.me))return;songOp(id,"partStatus",{key:p.key,status:cyc(p.status)});return}
+  case "cycleArr":{const own=v==="v"?s.leads:(s.arr.io||[]);if(!(canSongs()||own.includes(S.me)))return;songOp(id,"arr",{track:v,status:cyc(s.arr[v])});return}
+  case "cycleRel":{if(!canSongs())return;const c=clone(s);c.releases[ri].checks[v]=cyc(c.releases[ri].checks[v]);saveSong(c);return}
+  case "toggleReg":{if(!isLeader())return;const c=clone(s);c[v]=!c[v];saveSong(c);return}
+  case "delLink":{const type=a.dataset.type;
+    if(type==="song")songOp(id,"delLink",{index:Number(i)});
+    else if(type==="task"){const c=clone(task(id));c.links.splice(i,1);saveTask(c)}
+    else{const c=clone(sess(id));c.links.splice(i,1);saveSession(c)}
+    return}
+  case "ideaToSong":run(async()=>{put(D.songs,await api("promoteIdea",{id}));D.ideas=D.ideas.filter(x=>x.id!==id);toast(t("saved"))});return;
+  case "toggleInv":{const c=clone(D.money.invoices.find(x=>x.id===id));c.status=c.status==="paid"?"open":"paid";saveInvoice(c);return}
+  case "exportPdf":run(async()=>{put(D.sessions,await api("exportProtocol",{id}));toast(t("pdfDone"))});return;
+  case "invite":run(async()=>{const inv=await api("invite",{id});S.inviteHtml=inviteSheet(inv);S.sheet={type:"invite"}});return;
+  case "copyInvite":{const ta=document.getElementById("inviteText");const txt=ta.value;try{navigator.clipboard.writeText(txt).then(()=>toast(t("saved")),()=>{ta.focus();ta.select()})}catch(_){ta.focus();ta.select()}return}
+  case "prodToggle":{const m=mem(id);const perms=(m.perms||[]).includes("songs")?[]:["songs"];run(async()=>put(D.members,await api("saveMember",{member:Object.assign({},m,{perms})})));return}
+  case "logout":run(async()=>{try{await api("logout")}catch(_){}LS.del("rw-token");D=null;S.sheet=null});return;
+  default:return}
+  render();
+});
+document.addEventListener("change",e=>{
+  const a=e.target.closest("[data-act='partOwner']");if(a&&D){const c=clone(song(a.dataset.id));c.parts[a.dataset.i].owner=a.value;saveSong(c)}
+});
+document.addEventListener("submit",e=>{
+  const f=e.target.closest("form[data-form]");if(!f)return;e.preventDefault();const fd=new FormData(f),id=f.dataset.id;
+  switch(f.dataset.form){
+  case "login":{const err=document.getElementById("loginErr");err.textContent="";
+    api("login",{member:fd.get("member"),code:fd.get("code")}).then(r=>{LS.set("rw-token",r.token);LS.set("rw-member",fd.get("member"));D=r.data;S.me=D.me.id;render()}).catch(x=>{err.textContent=x.message});return}
+  case "task":{const l=fd.get("link");const tk={id:"t"+Date.now(),title:fd.get("title"),owners:[fd.get("owner")],due:fd.get("due")||"",status:"open",prio:fd.get("prio"),link:l?{type:l.split(":")[0],id:l.split(":")[1]}:null,subs:[],comments:[],links:[]};S.sheet=null;saveTask(tk);return}
+  case "sub":{const v=(fd.get("t")||"").trim();if(!v)return;const c=clone(task(id));c.subs.push({t:v,d:false});saveTask(c);return}
+  case "comment":{const v=(fd.get("text")||"").trim();if(!v)return;run(async()=>put(D.tasks,await api("commentTask",{id,text:v})));return}
+  case "writers":{const raw=(fd.get("w")||"").split(",").map(x=>x.trim()).filter(Boolean);const ids=raw.map(n=>{const m=D.members.find(x=>x.name.toLowerCase()===n.toLowerCase());return m?m.id:n});songOp(id,"writers",{writers:ids});return}
+  case "session":{const c=clone(sess(id));c.agenda=fd.get("agenda");c.results=fd.get("results");c.decisions=fd.get("decisions");saveSession(c);toast(t("saved"));return}
+  case "link":{const u=(fd.get("u")||"").trim();if(!/^https:\/\//.test(u)){toast(t("badUrl"));return}const type=f.dataset.type,lab=fd.get("l");
+    if(type==="song")songOp(id,"addLink",{label:lab,url:u});
+    else if(type==="task"){const c=clone(task(id));c.links=(c.links||[]).concat([{l:lab,u}]);saveTask(c)}
+    else{const c=clone(sess(id));c.links=(c.links||[]).concat([{l:lab,u}]);saveSession(c)}
+    return}
+  case "invoice":{saveInvoice({id:"r"+Date.now(),vendor:fd.get("vendor"),nr:fd.get("nr"),date:fd.get("date"),amount:Number(fd.get("amount")),items:fd.get("items"),song:fd.get("song"),status:"paid",file:fd.get("file")||""});return}
+  case "idea":{run(async()=>{D.ideas.unshift(await api("addIdea",{title:fd.get("title"),text:fd.get("text"),memo:fd.get("memo")||""}));toast(t("saved"))});return}
+  }
+});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&S.sheet){S.sheet=null;render()}});
+if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
+boot();
+</script>
