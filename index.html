@@ -182,6 +182,13 @@ body[data-area="sessions"] #view .date,#view .panel[data-area] .date{background:
 :root[data-theme="dark"]{--on-area:#16171a}
 @media (max-width:760px){input,select,textarea{font-size:16px}}
 html,body{margin:0}
+#view .panel{background:var(--area-soft)}
+h2.ctoggle{cursor:pointer;display:flex;align-items:center;gap:8px;user-select:none;-webkit-user-select:none}
+h2.ctoggle::after{content:"";width:7px;height:7px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg) translateY(-2px);transition:transform .15s;flex:none}
+.panel.collapsed h2.ctoggle::after{transform:rotate(-45deg)}
+.panel.collapsed>:not(.panel-head):not(h2){display:none}
+.panel.collapsed>.panel-head,.panel.collapsed>h2{margin-bottom:0}
+.panel.collapsed{align-self:start}
 
 .toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:8px 14px;border-radius:8px;z-index:40;font-size:.88rem}
 
@@ -342,7 +349,7 @@ function shell(){
   document.getElementById("bottomnav").innerHTML=BOTTOM.map(k=>{const cur=k==="more"?moreViews.includes(S.view):S.view===k;return `<button type="button" data-nav="${k}" data-area="${areaOf(k==="more"&&cur?S.view:k)}" ${cur?'aria-current="page"':""}>${icon(k)}<span>${t(k)}</span>${k==="tasks"?badge:""}</button>`}).join("");
   document.getElementById("title").textContent=t(S.view);
 }
-function render(){if(!D){renderGate();return}document.getElementById("gate").hidden=true;try{localStorage.setItem("rw-data",JSON.stringify(D))}catch(e){}if(!T.de[S.view]||(S.view==="money"&&!isLeader()))S.view="dashboard";shell();const v=document.getElementById("view");v.innerHTML=(VIEWS[S.view]||VIEWS.dashboard)();renderSheet();const sr=document.getElementById("sheetRoot");if(sr)sr.dataset.area=S.sheet?sheetArea(S.sheet.type):areaOf(S.view);persist()}
+function render(){if(!D){renderGate();return}document.getElementById("gate").hidden=true;try{localStorage.setItem("rw-data",JSON.stringify(D))}catch(e){}if(!T.de[S.view]||(S.view==="money"&&!isLeader()))S.view="dashboard";shell();const v=document.getElementById("view");v.innerHTML=(VIEWS[S.view]||VIEWS.dashboard)();renderSheet();const sr=document.getElementById("sheetRoot");if(sr)sr.dataset.area=S.sheet?sheetArea(S.sheet.type):areaOf(S.view);if(typeof applyCollapse==="function")applyCollapse();persist()}
 function toast(msg){const r=document.getElementById("toastRoot");r.innerHTML=`<div class="toast" role="status">${esc(msg)}</div>`;clearTimeout(toast.h);toast.h=setTimeout(()=>r.innerHTML="",1800)}
 
 /* ---------- pieces ---------- */
@@ -568,8 +575,23 @@ function inviteSheet(inv){
 }
 SHEETS.invite=()=>S.inviteHtml||"";
 
+/* ---------- collapsible panels (remembered per device) ---------- */
+const COLL=(()=>{try{return new Set(JSON.parse(LS.get("rw-collapsed")||"[]"))}catch(e){return new Set()}})();
+function applyCollapse(){
+  document.querySelectorAll("#view .panel").forEach(p=>{
+    const h=p.querySelector(":scope>.panel-head>h2, :scope>h2");if(!h)return;
+    const key=S.view+":"+h.textContent.trim();p.dataset.ckey=key;
+    const c=COLL.has(key);p.classList.toggle("collapsed",c);
+    h.setAttribute("role","button");h.tabIndex=0;h.setAttribute("aria-expanded",String(!c));h.classList.add("ctoggle");
+  });
+}
+function toggleCollapse(h){const p=h.closest(".panel");if(!p||!p.dataset.ckey)return;const k=p.dataset.ckey;
+  if(COLL.has(k))COLL.delete(k);else COLL.add(k);LS.set("rw-collapsed",JSON.stringify([...COLL]));applyCollapse()}
+document.addEventListener("keydown",e=>{const h=e.target.closest&&e.target.closest("h2.ctoggle");if(h&&(e.key==="Enter"||e.key===" ")){e.preventDefault();toggleCollapse(h)}});
+
 /* ---------- clicks ---------- */
 document.addEventListener("click",e=>{
+  const ct=e.target.closest("h2.ctoggle");if(ct){toggleCollapse(ct);return}
   const nav=e.target.closest("[data-nav]");if(nav){S.view=nav.dataset.nav;S.sheet=null;try{history.replaceState(null,"",location.pathname+location.search+"#"+S.view)}catch(_){}render();window.scrollTo(0,0);return}
   const lang=e.target.closest("[data-lang]");if(lang){S.lang=lang.dataset.lang;persist();render();return}
   const a=e.target.closest("[data-act]");if(!a||!D)return;const {act,id,v,i,ri}=a.dataset;
