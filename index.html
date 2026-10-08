@@ -194,6 +194,12 @@ h2.ctoggle::after{content:"";width:7px;height:7px;border-right:2px solid var(--m
 .stagehead{font-size:1.35rem;margin:22px 0 10px;display:flex;align-items:center;gap:10px}
 .stagehead::before{content:"";width:5px;height:1.05em;border-radius:3px;background:var(--area);flex:none}
 .stagehead .cnt{font:600 .8rem var(--mono);background:var(--area-soft);color:var(--area);border-radius:999px;padding:2px 9px}
+@media (max-width:760px){
+#view .row:has([data-act="invite"]),#view .row:has([data-act="openMember"]){flex-wrap:wrap;row-gap:8px}
+#view .row:has([data-act="openMember"]){padding-left:40px}
+#view .row:has([data-act="openMember"]) .avatar{margin-left:-40px}
+#view .row:has([data-act="openMember"]) .grow{flex:1 1 calc(100% - 12px)}
+}
 
 .toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:8px 14px;border-radius:8px;z-index:40;font-size:.88rem}
 
