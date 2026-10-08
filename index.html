@@ -206,6 +206,15 @@ h2.ctoggle::after{content:"";width:7px;height:7px;border-right:2px solid var(--m
 .vkey{font-weight:600;min-width:110px;flex:none}
 img.avatar{object-fit:cover;padding:0}
 .avatar.big{width:72px;height:72px;font-size:1.3rem}
+img.avatar[data-act]{cursor:zoom-in}
+.lightbox{position:fixed;inset:0;z-index:60;background:rgba(8,8,10,.86);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px;cursor:zoom-out}
+.lightbox img{width:min(86vw,460px);height:min(86vw,460px);border-radius:18px;object-fit:cover;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.lightbox .lbname{color:#fff;font:600 1.1rem var(--display)}
+.stream{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px}
+.stream .chip{text-decoration:none;font-weight:600}
+.stream .st-apple{background:#d60017;color:#fff}.stream .st-spotify{background:#1db954;color:#06210f}.stream .st-youtube{background:#cc0000;color:#fff}
+.streamedit{margin:0 0 10px;font-size:.85rem}.streamedit summary{cursor:pointer;color:var(--muted)}
+.streamedit label{display:block;margin-top:8px}.streamedit input{display:block;width:100%;margin-top:4px;padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
 
 .toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:8px 14px;border-radius:8px;z-index:40;font-size:.88rem}
 
@@ -299,7 +308,7 @@ moveOnHint:"Moves on only when Vocal and Instrumental are done.",releasesTitle:"
 const STD_PARTS=[["drums","Drums","oti"],["percs","Percs","oti"],["bass","Bass","fini"],["synth","Synth","jeremy"],["egit","E-Gitarren",""],["acoustic","Akustik",""],["piano","Piano",""],["keys","Keys",""],["cello","Cello","suli"]];
 function stdParts(o){return STD_PARTS.map(([key,name,owner])=>Object.assign({key,name,owner,status:"open",note:"",ext:false},o[key]||{}))}
 const showPart=(s,p)=>p.key!=="cello"||s.cello;
-const QUICK=[["Songs","1cjMnf43ql39k00K6u5QSU3vY5Sn-iJf1"],["Demos","1YCc5Nrde_oWyvalPC2lCaWWn1S7RUaKz"],["RAW Mix","1A8qN3DhWfc1QLb9dhgKSe-jcnFFPMGU2"],["Lyrics","1NokrX4vhHQ53Pf1RWjYr_UEun6xjMp7N"],["Veröffentlichungen","1zjWj_045tyHNxG2cLvOvo2J9x3Wq7xC8"],["Protokolle","1Pm1yKYTB4GCqF7Nc-uO4JiRVqwYXNyVx"],["Fotos","1C63FxR6OCnX2SEGfP5hMKJTfr8HzsU7y"],["Videos","1lGvqXELsy3ys8MXPXLBH7jkNzOigZlLM"],["Logo","1c9ZPtto_-eHPD_v_eoe3uYskDQKTn3Bd"],["Allgemeine Dokumente","1JoS4OVlgjf2LDaPsLzeyihNm_m9Rvq4u"]];
+const QUICK=[["Songs","1cjMnf43ql39k00K6u5QSU3vY5Sn-iJf1"],["Demos","1YCc5Nrde_oWyvalPC2lCaWWn1S7RUaKz"],["RAW Mix","1A8qN3DhWfc1QLb9dhgKSe-jcnFFPMGU2"],["Lyrics","1NokrX4vhHQ53Pf1RWjYr_UEun6xjMp7N"],["Leadsheets","1q6kGDsjTgkYez_bfAHvJiwL0OMRJ2Q5s"],["Worship Nights","1zahWgJVUdy8v6katGkIqLvARsUNimX2C"],["Veröffentlichungen","1zjWj_045tyHNxG2cLvOvo2J9x3Wq7xC8"],["Protokolle","1Pm1yKYTB4GCqF7Nc-uO4JiRVqwYXNyVx"],["Fotos","1C63FxR6OCnX2SEGfP5hMKJTfr8HzsU7y"],["Videos","1lGvqXELsy3ys8MXPXLBH7jkNzOigZlLM"],["Logo","1c9ZPtto_-eHPD_v_eoe3uYskDQKTn3Bd"],["Allgemeine Dokumente","1JoS4OVlgjf2LDaPsLzeyihNm_m9Rvq4u"]];
 const STAGES=["idea","writing","rawdemo","arrangement","production","liverec","mix","release"];
 const DRIVE={songs:"https://drive.google.com/drive/folders/1cjMnf43ql39k00K6u5QSU3vY5Sn-iJf1",lyrics:"https://drive.google.com/drive/folders/1NokrX4vhHQ53Pf1RWjYr_UEun6xjMp7N",protocols:"https://drive.google.com/drive/folders/1Pm1yKYTB4GCqF7Nc-uO4JiRVqwYXNyVx",file:id=>"https://drive.google.com/file/d/"+id+"/view"};
 /* ---------- state and API ---------- */
@@ -330,8 +339,11 @@ function visionSection(x){return `<div class="panel"><h2>${esc(x.h)}</h2>${(x.p|
 function visionPage(){const v=D.vision;if(!v||!v.sections)return `<div class="panel"><p class="empty">${S.lang==="de"?"Die Vision ist noch nicht hinterlegt.":"The vision has not been added yet."}</p></div>`;return `<div class="grid">${v.sections.map(visionSection).join("")}</div>`}
 function visionPanel(key){const v=D.vision;const x=v&&v.sections&&v.sections.find(y=>y.key===key);return x?`<div style="margin-top:16px">${visionSection(x)}</div>`:""}
 // profile pictures: small square JPEG stored with the member, shown wherever initials were
-function avatarHtml(m,size){const c="avatar"+(size?" "+size:"");return m&&m.avatar&&/^data:image\/jpeg;base64,[A-Za-z0-9+\/=]+$/.test(m.avatar)?`<img class="${c}" src="${m.avatar}" alt="">`:`<div class="${c}">${esc(((m&&m.name)||"?").slice(0,2))}</div>`}
-function shrinkImage(file){return new Promise((ok,fail)=>{const u=URL.createObjectURL(file),img=new Image();img.onload=()=>{const n=Math.min(img.naturalWidth,img.naturalHeight),S2=192,c=document.createElement("canvas");c.width=c.height=S2;const x=c.getContext("2d");x.drawImage(img,(img.naturalWidth-n)/2,(img.naturalHeight-n)/2,n,n,0,0,S2,S2);URL.revokeObjectURL(u);let q=.82,d=c.toDataURL("image/jpeg",q);while(d.length>40000&&q>.3){q-=.1;d=c.toDataURL("image/jpeg",q)}ok(d)};img.onerror=()=>{URL.revokeObjectURL(u);fail(new Error("Bild konnte nicht gelesen werden"))};img.src=u})}
+function avatarHtml(m,size){const c="avatar"+(size?" "+size:"");return m&&m.avatar&&/^data:image\/jpeg;base64,[A-Za-z0-9+\/=]+$/.test(m.avatar)?`<img class="${c}" src="${m.avatar}" alt="${esc(m.name||"")}" data-act="avatarView" data-id="${esc(m.id||"")}" role="button" tabindex="0">`:`<div class="${c}">${esc(((m&&m.name)||"?").slice(0,2))}</div>`}
+function shrinkImage(file,S2,max){S2=S2||192;max=max||40000;return new Promise((ok,fail)=>{const u=URL.createObjectURL(file),img=new Image();img.onload=()=>{const n=Math.min(img.naturalWidth,img.naturalHeight),c=document.createElement("canvas");c.width=c.height=Math.min(S2,n);const x=c.getContext("2d");x.drawImage(img,(img.naturalWidth-n)/2,(img.naturalHeight-n)/2,n,n,0,0,c.width,c.height);URL.revokeObjectURL(u);let q=.82,d=c.toDataURL("image/jpeg",q);while(d.length>max&&q>.25){q-=.07;d=c.toDataURL("image/jpeg",q)}ok(d)};img.onerror=()=>{URL.revokeObjectURL(u);fail(new Error("Bild konnte nicht gelesen werden"))};img.src=u})}
+// streaming links per release (Apple Music, Spotify, YouTube); production rights can edit them
+const STREAMS=[["apple","Apple Music"],["spotify","Spotify"],["youtube","YouTube"]];
+function relLinks(r,sid,ri){const L=r.links||{};const ok=STREAMS.filter(([k])=>L[k]&&/^https:\/\//.test(L[k]));return `${ok.length?`<div class="stream">${ok.map(([k,l])=>`<a class="chip st-${k}" href="${esc(L[k])}" target="_blank" rel="noopener">${l} ↗</a>`).join("")}</div>`:""}${canSongs()?`<details class="streamedit"><summary>${S.lang==="de"?"Streaming Links bearbeiten":"Edit streaming links"}</summary>${STREAMS.map(([k,l])=>`<label class="label">${l}<input type="url" data-act="relLink" data-id="${sid}" data-ri="${ri}" data-k="${k}" value="${esc(L[k]||"")}" placeholder="https://"></label>`).join("")}</details>`:""}`}
 const sheetArea=ty=>/song/i.test(ty)?"songs":/task/i.test(ty)?"tasks":/session/i.test(ty)?"sessions":/project/i.test(ty)?"projects":/idea/i.test(ty)?"ideas":"neutral";
 const spent=()=>D.money.invoices.filter(r=>r.status==="paid").reduce((a,r)=>a+Number(r.amount||0),0);
 const balance=()=>D.money.start-spent();
@@ -490,7 +502,7 @@ song(id){
   const parts=s.parts.map((p,i)=>{if(!showPart(s,p))return "";const can=all||partMine(p,S.me);const ownerLabel=p.ext?`${esc(p.owner)} <span class="chip">${t("extern")}</span>`:p.owner?esc([p.owner].concat(p.co||[]).map(nm).join(" & ")):`<span class="muted">${t("none")}</span>`;
     return `<div class="row"><button type="button" class="check ${p.status==="done"?"done":p.status==="prog"?"prog":""}" data-act="cyclePart" data-id="${s.id}" data-i="${i}" ${can?"":"disabled"} aria-label="${t("status")}">${p.status==="done"?tick:""}</button><div class="grow"><div class="title" style="font-weight:500">${esc(p.name)}${p.note?` <span class="muted" style="font-weight:400">· ${esc(p.note)}</span>`:""}</div><div class="muted" style="font-size:.8rem">${ownerLabel}</div></div>${all&&!p.ext?`<select data-act="partOwner" data-id="${s.id}" data-i="${i}" aria-label="${t("owner")}" style="max-width:120px;border:1px solid var(--line);border-radius:6px;background:var(--surface);padding:3px">${["",...D.members.map(m=>m.id)].map(o=>`<option value="${o}" ${o===p.owner?"selected":""}>${o?esc(nm(o)):"–"}</option>`).join("")}</select><select data-act="partCo" data-id="${s.id}" data-i="${i}" aria-label="${t("owner")} 2" style="max-width:110px;border:1px solid var(--line);border-radius:6px;background:var(--surface);padding:3px">${["",...D.members.map(m=>m.id)].map(o=>`<option value="${o}" ${o===((p.co||[])[0]||"")?"selected":""}>${o?"+ "+esc(nm(o)):"+"}</option>`).join("")}</select>`:""}${stChip(p.status)}</div>`}).join("");
   const arrRow=(k,lab,who)=>`<div class="row"><button type="button" class="check ${s.arr[k]==="done"?"done":s.arr[k]==="prog"?"prog":""}" data-act="cycleArr" data-id="${s.id}" data-v="${k}" ${all?"":"disabled"} aria-label="${lab}">${s.arr[k]==="done"?tick:""}</button><div class="grow"><div class="title" style="font-weight:500">${lab}</div><div class="muted" style="font-size:.8rem">${who&&who.length?esc(who.map(nm).join(", ")):t("none")}</div></div>${stChip(s.arr[k])}</div>`;
-  const rels=s.releases.map((r,ri)=>`<div class="panel"><div class="panel-head"><h3>${t(r.kind)} ${t("releasesTitle")}</h3>${canSongs()?`<input type="date" class="reldate" data-act="relDate" data-id="${s.id}" data-ri="${ri}" value="${esc(r.date||"")}" aria-label="${t("date")}">`:`<span class="chip acc">${r.date?fmt(r.date):"?"}</span>`}</div><div class="rows">${RCHK.map(([k,lab])=>`<div class="row"><button type="button" class="check ${r.checks[k]==="done"?"done":r.checks[k]==="prog"?"prog":""}" data-act="cycleRel" data-id="${s.id}" data-ri="${ri}" data-v="${k}" ${all?"":"disabled"} aria-label="${lab}">${r.checks[k]==="done"?tick:""}</button><div class="grow">${lab}</div>${stChip(r.checks[k])}</div>`).join("")}</div></div>`).join("");
+  const rels=s.releases.map((r,ri)=>`<div class="panel"><div class="panel-head"><h3>${t(r.kind)} ${t("releasesTitle")}</h3>${canSongs()?`<input type="date" class="reldate" data-act="relDate" data-id="${s.id}" data-ri="${ri}" value="${esc(r.date||"")}" aria-label="${t("date")}">`:`<span class="chip acc">${r.date?fmt(r.date):"?"}</span>`}</div>${relLinks(r,s.id,ri)}<div class="rows">${RCHK.map(([k,lab])=>`<div class="row"><button type="button" class="check ${r.checks[k]==="done"?"done":r.checks[k]==="prog"?"prog":""}" data-act="cycleRel" data-id="${s.id}" data-ri="${ri}" data-v="${k}" ${all?"":"disabled"} aria-label="${lab}">${r.checks[k]==="done"?tick:""}</button><div class="grow">${lab}</div>${stChip(r.checks[k])}</div>`).join("")}</div></div>`).join("");
   return `${head(t("song")+" · "+t("stages."+s.stage),s.title)}
   ${s.note?`<p class="note">${esc(s.note)}</p>`:""}
   <div class="facts"><div class="fact"><span class="label">${t("key")}</span><b>${esc(s.key||"–")}</b></div><div class="fact"><span class="label">${t("tempo")}</span><b>${esc(s.tempo?s.tempo+" bpm":"–")}</b></div><div class="fact"><span class="label">${t("meter")}</span><b>${esc(s.meter||"–")}</b></div><div class="fact"><span class="label">${t("lead")}</span><b style="font-family:var(--body)">${esc(s.leads.map(nm).join(", ")||"–")}</b></div></div>
@@ -616,7 +628,7 @@ function applyCollapse(){
 }
 function toggleCollapse(h){const p=h.closest(".panel");if(!p||!p.dataset.ckey)return;
   COLL[p.dataset.ckey]=!p.classList.contains("collapsed");LS.set("rw-collapse",JSON.stringify(COLL));applyCollapse()}
-document.addEventListener("keydown",e=>{const h=e.target.closest&&e.target.closest("h2.ctoggle");if(h&&(e.key==="Enter"||e.key===" ")){e.preventDefault();toggleCollapse(h)}});
+document.addEventListener("keydown",e=>{const av=e.target.closest&&e.target.closest("img[data-act='avatarView']");if(av&&(e.key==="Enter"||e.key===" ")){e.preventDefault();av.click();return}const h=e.target.closest&&e.target.closest("h2.ctoggle");if(h&&(e.key==="Enter"||e.key===" ")){e.preventDefault();toggleCollapse(h)}});
 
 /* ---------- clicks ---------- */
 document.addEventListener("click",e=>{
@@ -657,6 +669,7 @@ document.addEventListener("click",e=>{
   case "invite":run(async()=>{const inv=await api("invite",{id});S.inviteHtml=inviteSheet(inv);S.sheet={type:"invite"}});return;
   case "copyInvite":{const ta=document.getElementById("inviteText");const txt=ta.value;try{navigator.clipboard.writeText(txt).then(()=>toast(t("saved")),()=>{ta.focus();ta.select()})}catch(_){ta.focus();ta.select()}return}
   case "prodToggle":{const m=mem(id);const perms=(m.perms||[]).includes("songs")?[]:["songs"];run(async()=>put(D.members,await api("saveMember",{member:Object.assign({},m,{perms})})));return}
+  case "avatarView":{const m=mem(id);if(!m||!m.avatar)return;const box=document.createElement("div");box.className="lightbox";box.setAttribute("role","dialog");box.innerHTML=`<img src="${m.avatar}" alt="${esc(m.name)}"><div class="lbname">${esc(m.name)}${m.full?" ("+esc(m.full)+")":""}</div>`;box.addEventListener("click",()=>box.remove());document.addEventListener("keydown",function k(ev){if(ev.key==="Escape"){box.remove();document.removeEventListener("keydown",k)}});document.body.appendChild(box);api("getAvatar",{id}).then(r=>{if(r&&r.image){const im=box.querySelector("img");if(im)im.src=r.image}}).catch(()=>{});return}
   case "avatarRemove":run(async()=>{const r=await api("setAvatar",{image:""});put(D.members,r)});return;
   case "logout":run(async()=>{try{await api("logout")}catch(_){}forget();S.sheet=null});return;
   default:return}
@@ -664,7 +677,8 @@ document.addEventListener("click",e=>{
 });
 document.addEventListener("change",e=>{
   const a=e.target.closest("[data-act='partOwner']");if(a&&D){const c=clone(song(a.dataset.id));c.parts[a.dataset.i].owner=a.value;saveSong(c)}
-  const af=e.target.closest("[data-act='avatarFile']");if(af&&D&&af.files&&af.files[0]){const f=af.files[0];run(async()=>{const img=await shrinkImage(f);const r=await api("setAvatar",{image:img});put(D.members,r);toast(t("saved"))},()=>{});return}
+  const af=e.target.closest("[data-act='avatarFile']");if(af&&D&&af.files&&af.files[0]){const f=af.files[0];run(async()=>{const img=await shrinkImage(f);const big=await shrinkImage(f,560,47000);const r=await api("setAvatar",{image:img,large:big});put(D.members,r);toast(t("saved"))},()=>{});return}
+  const rl=e.target.closest("[data-act='relLink']");if(rl&&D){const v=rl.value.trim();if(v&&!/^https:\/\//.test(v)){toast(t("badUrl"));return}const c=clone(song(rl.dataset.id));const r=c.releases[rl.dataset.ri];r.links=Object.assign({},r.links||{},{[rl.dataset.k]:v});saveSong(c);return}
   const rd=e.target.closest("[data-act='relDate']");if(rd&&D){const c=clone(song(rd.dataset.id));c.releases[rd.dataset.ri].date=rd.value;saveSong(c)}
   const co=e.target.closest("[data-act='partCo']");if(co&&D){const c=clone(song(co.dataset.id));c.parts[co.dataset.i].co=co.value?[co.value]:[];saveSong(c)}
 });
