@@ -258,6 +258,7 @@ const role=()=>me().role;
 const canAll=()=>role()!=="member";
 const isLeader=()=>role()==="leader";
 const canSongs=()=>canAll()||(me().perms||[]).includes("songs");
+const partMine=(p,u)=>!!u&&(p.owner===u||(p.co||[]).includes(u));
 const spent=()=>D.money.invoices.filter(r=>r.status==="paid").reduce((a,r)=>a+Number(r.amount||0),0);
 const balance=()=>D.money.start-spent();
 const eur=v=>Number(v).toLocaleString("de-DE")+" €";
@@ -297,7 +298,7 @@ function shell(){
   document.getElementById("bottomnav").innerHTML=BOTTOM.map(k=>{const cur=k==="more"?moreViews.includes(S.view):S.view===k;return `<button type="button" data-nav="${k}" ${cur?'aria-current="page"':""}>${icon(k)}<span>${t(k)}</span>${k==="tasks"?badge:""}</button>`}).join("");
   document.getElementById("title").textContent=t(S.view);
 }
-function render(){if(!D){renderGate();return}document.getElementById("gate").hidden=true;if(!T.de[S.view]||(S.view==="money"&&!isLeader()))S.view="dashboard";shell();const v=document.getElementById("view");v.innerHTML=(VIEWS[S.view]||VIEWS.dashboard)();renderSheet();persist()}
+function render(){if(!D){renderGate();return}document.getElementById("gate").hidden=true;try{localStorage.setItem("rw-data",JSON.stringify(D))}catch(e){}if(!T.de[S.view]||(S.view==="money"&&!isLeader()))S.view="dashboard";shell();const v=document.getElementById("view");v.innerHTML=(VIEWS[S.view]||VIEWS.dashboard)();renderSheet();persist()}
 function toast(msg){const r=document.getElementById("toastRoot");r.innerHTML=`<div class="toast" role="status">${esc(msg)}</div>`;clearTimeout(toast.h);toast.h=setTimeout(()=>r.innerHTML="",1800)}
 
 /* ---------- pieces ---------- */
@@ -324,7 +325,7 @@ function myParts(uid){
     if(s.leads.includes(uid))items.push({name:t("vocalArr"),status:s.arr.v});
     else if((s.arr.vhelp||[]).includes(uid))items.push({name:t("vocalArr")+" ("+t("helpers")+")",status:s.arr.v});
     if((s.arr.io||[]).includes(uid))items.push({name:t("instrArr"),status:s.arr.i});
-    s.parts.forEach(p=>{if(showPart(s,p)&&p.owner===uid&&!p.ext)items.push({name:p.name+(p.note?" · "+p.note:""),status:p.status})});
+    s.parts.forEach(p=>{if(showPart(s,p)&&partMine(p,uid)&&!p.ext)items.push({name:p.name+(p.note?" · "+p.note:""),status:p.status})});
     return {s,items}}).filter(x=>x.items.length).sort((a,b)=>STAGES.indexOf(b.s.stage)-STAGES.indexOf(a.s.stage));}
 function myPartsPanel(uid){const l=myParts(uid);
   return `<div class="panel"><div class="panel-head"><h2>${t("myParts")}</h2><span class="chip">${l.reduce((a,x)=>a+x.items.filter(i=>i.status!=="done").length,0)} ${t("open")}</span></div><div class="rows">${l.map(({s,items})=>`<div class="row" style="align-items:flex-start"><div class="grow"><button type="button" class="link title" data-act="openSong" data-id="${s.id}" style="color:inherit">${esc(s.title)}</button> <span class="chip">${t("stages."+s.stage)}</span><div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px">${items.map(i=>`<span class="chip ${i.status==="done"?"ok":i.status==="prog"?"warn":""}">${esc(i.name)}</span>`).join("")}</div></div></div>`).join("")||`<p class="empty">${t("noParts")}</p>`}</div></div>`}
@@ -409,8 +410,8 @@ song(id){
   const st=[...stagesFor(s),"tbd"], idx=st.indexOf(s.stage);
   const arrBlocked=s.stage==="arrangement"&&!(s.arr.v==="done"&&s.arr.i==="done");
   const steps=st.map((k,i)=>`<button type="button" class="${k===s.stage?"now":i<idx&&s.stage!=="tbd"?"past":""}" data-act="setStage" data-id="${s.id}" data-v="${k}" ${all?"":"disabled"}>${t("stages."+k)}</button>`).join("");
-  const parts=s.parts.map((p,i)=>{if(!showPart(s,p))return "";const can=all||p.owner===S.me;const ownerLabel=p.ext?`${esc(p.owner)} <span class="chip">${t("extern")}</span>`:p.owner?esc(nm(p.owner)):`<span class="muted">${t("none")}</span>`;
-    return `<div class="row"><button type="button" class="check ${p.status==="done"?"done":p.status==="prog"?"prog":""}" data-act="cyclePart" data-id="${s.id}" data-i="${i}" ${can?"":"disabled"} aria-label="${t("status")}">${p.status==="done"?tick:""}</button><div class="grow"><div class="title" style="font-weight:500">${esc(p.name)}${p.note?` <span class="muted" style="font-weight:400">· ${esc(p.note)}</span>`:""}</div><div class="muted" style="font-size:.8rem">${ownerLabel}</div></div>${all&&!p.ext?`<select data-act="partOwner" data-id="${s.id}" data-i="${i}" aria-label="${t("owner")}" style="max-width:120px;border:1px solid var(--line);border-radius:6px;background:var(--surface);padding:3px">${["",...D.members.map(m=>m.id)].map(o=>`<option value="${o}" ${o===p.owner?"selected":""}>${o?esc(nm(o)):"–"}</option>`).join("")}</select>`:""}${stChip(p.status)}</div>`}).join("");
+  const parts=s.parts.map((p,i)=>{if(!showPart(s,p))return "";const can=all||partMine(p,S.me);const ownerLabel=p.ext?`${esc(p.owner)} <span class="chip">${t("extern")}</span>`:p.owner?esc([p.owner].concat(p.co||[]).map(nm).join(" & ")):`<span class="muted">${t("none")}</span>`;
+    return `<div class="row"><button type="button" class="check ${p.status==="done"?"done":p.status==="prog"?"prog":""}" data-act="cyclePart" data-id="${s.id}" data-i="${i}" ${can?"":"disabled"} aria-label="${t("status")}">${p.status==="done"?tick:""}</button><div class="grow"><div class="title" style="font-weight:500">${esc(p.name)}${p.note?` <span class="muted" style="font-weight:400">· ${esc(p.note)}</span>`:""}</div><div class="muted" style="font-size:.8rem">${ownerLabel}</div></div>${all&&!p.ext?`<select data-act="partOwner" data-id="${s.id}" data-i="${i}" aria-label="${t("owner")}" style="max-width:120px;border:1px solid var(--line);border-radius:6px;background:var(--surface);padding:3px">${["",...D.members.map(m=>m.id)].map(o=>`<option value="${o}" ${o===p.owner?"selected":""}>${o?esc(nm(o)):"–"}</option>`).join("")}</select><select data-act="partCo" data-id="${s.id}" data-i="${i}" aria-label="${t("owner")} 2" style="max-width:110px;border:1px solid var(--line);border-radius:6px;background:var(--surface);padding:3px">${["",...D.members.map(m=>m.id)].map(o=>`<option value="${o}" ${o===((p.co||[])[0]||"")?"selected":""}>${o?"+ "+esc(nm(o)):"+"}</option>`).join("")}</select>`:""}${stChip(p.status)}</div>`}).join("");
   const arrRow=(k,lab,who)=>`<div class="row"><button type="button" class="check ${s.arr[k]==="done"?"done":s.arr[k]==="prog"?"prog":""}" data-act="cycleArr" data-id="${s.id}" data-v="${k}" ${all?"":"disabled"} aria-label="${lab}">${s.arr[k]==="done"?tick:""}</button><div class="grow"><div class="title" style="font-weight:500">${lab}</div><div class="muted" style="font-size:.8rem">${who&&who.length?esc(who.map(nm).join(", ")):t("none")}</div></div>${stChip(s.arr[k])}</div>`;
   const rels=s.releases.map((r,ri)=>`<div class="panel"><div class="panel-head"><h3>${t(r.kind)} ${t("releasesTitle")}</h3><span class="chip acc">${fmt(r.date)}</span></div><div class="rows">${RCHK.map(([k,lab])=>`<div class="row"><button type="button" class="check ${r.checks[k]==="done"?"done":r.checks[k]==="prog"?"prog":""}" data-act="cycleRel" data-id="${s.id}" data-ri="${ri}" data-v="${k}" ${all?"":"disabled"} aria-label="${lab}">${r.checks[k]==="done"?tick:""}</button><div class="grow">${lab}</div>${stChip(r.checks[k])}</div>`).join("")}</div></div>`).join("");
   return `${head(t("song")+" · "+t("stages."+s.stage),s.title)}
@@ -479,15 +480,19 @@ async function renderGate(){
   <div class="field"><label class="label" for="login-code">${t("enterCode")}</label><input id="login-code" name="code" class="codein" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]{6}" required></div>
   <button class="btn primary" type="submit">${t("login")}</button><p class="log" id="loginErr"></p></form>`;
 }
+function cached(){try{const c=JSON.parse(LS.get("rw-data")||"null");return c&&c.me&&c.me.id===LS.get("rw-member")?c:null}catch(e){return null}}
+function forget(){LS.del("rw-token");LS.del("rw-data");D=null}
 async function boot(){
+  if(LS.get("rw-token")&&!D){const c=cached();if(c){D=c;S.me=D.me.id}}
   render();
   if(!LS.get("rw-token"))return;
+  if(D){refresh(true);return}
   try{D=await api("bootstrap");S.me=D.me.id;render()}
-  catch(e){if(e.code==="auth"){LS.del("rw-token");D=null;render()}else{const g=document.getElementById("gate");g.innerHTML=`<div class="gatebox"><div class="mark">R</div><p>${t("offline")}</p><button class="btn" type="button" onclick="boot()">↻</button></div>`}}
+  catch(e){if(e.code==="auth"){forget();render()}else{const g=document.getElementById("gate");g.innerHTML=`<div class="gatebox"><div class="mark">R</div><p>${t("offline")}</p><button class="btn" type="button" onclick="boot()">↻</button></div>`}}
 }
-async function refresh(){
-  if(!LS.get("rw-token")||document.hidden||S.busy||document.activeElement&&/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName))return;
-  try{D=await api("bootstrap");S.me=D.me.id;render()}catch(e){if(e.code==="auth"){LS.del("rw-token");D=null;render()}}
+async function refresh(force){
+  if(!LS.get("rw-token")||document.hidden||S.busy||!force&&document.activeElement&&/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName))return;
+  try{const d=await api("bootstrap");if(S.busy)return;D=d;S.me=D.me.id;render()}catch(e){if(e.code==="auth"){forget();render()}}
 }
 setInterval(refresh,45000);
 document.addEventListener("visibilitychange",()=>{if(!document.hidden)refresh()});
@@ -497,17 +502,19 @@ const cyc=v=>v==="open"?"prog":v==="prog"?"done":"open";
 const song=id=>D.songs.find(x=>x.id===id), task=id=>D.tasks.find(x=>x.id===id), sess=id=>D.sessions.find(x=>x.id===id);
 const clone=o=>JSON.parse(JSON.stringify(o));
 function put(list,obj){const i=list.findIndex(x=>x.id===obj.id);if(i<0)list.push(obj);else list[i]=obj}
-async function run(fn){
+async function run(fn,local){
   S.busy=true;
+  if(local){try{local();render()}catch(_){}}
   try{await fn();render()}
-  catch(e){toast(t("errSave")+": "+e.message);if(e.code==="auth"){LS.del("rw-token");D=null}else{try{D=await api("bootstrap")}catch(_){}}render()}
+  catch(e){toast(t("errSave")+": "+e.message);if(e.code==="auth"){forget()}else{try{D=await api("bootstrap")}catch(_){}}render()}
   finally{S.busy=false}
 }
-const saveSong=s=>run(async()=>put(D.songs,await api("saveSong",{song:s,base:song(s.id)&&song(s.id).updated_at})));
-const songOp=(id,op,extra)=>run(async()=>put(D.songs,await api("songOp",Object.assign({id,op},extra))));
-const saveTask=tk=>run(async()=>put(D.tasks,await api("saveTask",{task:tk,base:task(tk.id)&&task(tk.id).updated_at})));
-const saveSession=s=>run(async()=>put(D.sessions,await api("saveSession",{session:s,base:sess(s.id).updated_at})));
-const saveInvoice=r=>run(async()=>put(D.money.invoices,await api("saveInvoice",{invoice:r,base:(D.money.invoices.find(x=>x.id===r.id)||{}).updated_at})));
+// each save shows the change at once (local), then replaces it with the server's answer; base is read before the local change
+const saveSong=s=>{const base=song(s.id)&&song(s.id).updated_at;return run(async()=>put(D.songs,await api("saveSong",{song:s,base})),()=>put(D.songs,clone(s)))};
+const songOp=(id,op,extra,local)=>run(async()=>put(D.songs,await api("songOp",Object.assign({id,op},extra))),local);
+const saveTask=tk=>{const base=task(tk.id)&&task(tk.id).updated_at;return run(async()=>put(D.tasks,await api("saveTask",{task:tk,base})),()=>put(D.tasks,clone(tk)))};
+const saveSession=s=>{const base=sess(s.id)&&sess(s.id).updated_at;return run(async()=>put(D.sessions,await api("saveSession",{session:s,base})),()=>put(D.sessions,clone(s)))};
+const saveInvoice=r=>{const base=(D.money.invoices.find(x=>x.id===r.id)||{}).updated_at;return run(async()=>put(D.money.invoices,await api("saveInvoice",{invoice:r,base})),()=>put(D.money.invoices,clone(r)))};
 
 function inviteSheet(inv){
   const link=inv.link||location.origin+location.pathname+"?m="+encodeURIComponent(inv.id);
@@ -540,7 +547,7 @@ document.addEventListener("click",e=>{
   case "setStage":{if(!canSongs())return;const st=stagesFor(s);if(s.stage==="arrangement"&&!(s.arr.v==="done"&&s.arr.i==="done")&&st.indexOf(v)>st.indexOf("arrangement")){toast(t("moveOnHint"));return}const c=clone(s);c.stage=v;saveSong(c);return}
   case "setRec":{if(!canSongs())return;const c=clone(s);c.rec=v;if(v==="studio"&&c.stage==="liverec")c.stage="production";if(v==="live"&&!c.parts.some(p=>p.key==="tracks"))c.parts.push({key:"tracks",name:"Tracks und Click vorbereitet",owner:"",status:"open",note:"",ext:false});saveSong(c);return}
   case "toggleCello":{if(!canSongs()){e.preventDefault();return}const c=clone(s);c.cello=!c.cello;saveSong(c);return}
-  case "cyclePart":{const p=s.parts[i];if(!(canSongs()||p.owner===S.me))return;songOp(id,"partStatus",{key:p.key,status:cyc(p.status)});return}
+  case "cyclePart":{const p=s.parts[i];if(!(canSongs()||partMine(p,S.me)))return;const st=cyc(p.status);songOp(id,"partStatus",{key:p.key,status:st},()=>{p.status=st});return}
   case "cycleArr":{const own=v==="v"?s.leads:(s.arr.io||[]);if(!(canSongs()||own.includes(S.me)))return;songOp(id,"arr",{track:v,status:cyc(s.arr[v])});return}
   case "cycleRel":{if(!canSongs())return;const c=clone(s);c.releases[ri].checks[v]=cyc(c.releases[ri].checks[v]);saveSong(c);return}
   case "toggleReg":{if(!isLeader())return;const c=clone(s);c[v]=!c[v];saveSong(c);return}
@@ -555,12 +562,13 @@ document.addEventListener("click",e=>{
   case "invite":run(async()=>{const inv=await api("invite",{id});S.inviteHtml=inviteSheet(inv);S.sheet={type:"invite"}});return;
   case "copyInvite":{const ta=document.getElementById("inviteText");const txt=ta.value;try{navigator.clipboard.writeText(txt).then(()=>toast(t("saved")),()=>{ta.focus();ta.select()})}catch(_){ta.focus();ta.select()}return}
   case "prodToggle":{const m=mem(id);const perms=(m.perms||[]).includes("songs")?[]:["songs"];run(async()=>put(D.members,await api("saveMember",{member:Object.assign({},m,{perms})})));return}
-  case "logout":run(async()=>{try{await api("logout")}catch(_){}LS.del("rw-token");D=null;S.sheet=null});return;
+  case "logout":run(async()=>{try{await api("logout")}catch(_){}forget();S.sheet=null});return;
   default:return}
   render();
 });
 document.addEventListener("change",e=>{
   const a=e.target.closest("[data-act='partOwner']");if(a&&D){const c=clone(song(a.dataset.id));c.parts[a.dataset.i].owner=a.value;saveSong(c)}
+  const co=e.target.closest("[data-act='partCo']");if(co&&D){const c=clone(song(co.dataset.id));c.parts[co.dataset.i].co=co.value?[co.value]:[];saveSong(c)}
 });
 document.addEventListener("submit",e=>{
   const f=e.target.closest("form[data-form]");if(!f)return;e.preventDefault();const fd=new FormData(f),id=f.dataset.id;
