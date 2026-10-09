@@ -156,8 +156,9 @@ a{color:var(--accent)}
 [data-area="projects"]{--area:#0269a0;--area-soft:#e2f2fe;--area-line:#95c4e9;--area-glow:#7cc6fd47}
 [data-area="ideas"]{--area:#3e7232;--area-soft:#e5f5e1;--area-line:#a8c9a0;--area-glow:#9cce9147}
 [data-area="leitung"]{--area:#786101;--area-soft:#f7efd6;--area-line:#cebd88;--area-glow:#d7bc6847}
+[data-area="prayer"]{--area:#4c6585;--area-soft:#e8f0fb;--area-line:#afbfd5;--area-glow:#a7c0e147}
 [data-area="neutral"]{--area:#6e6055;--area-soft:#f3eeea;--area-line:#c5bcb4;--area-glow:#c9bbb047}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) [data-area="dashboard"], :root:not([data-theme="light"]){--area:#fe9c91;--area-soft:#2c1816;--area-line:#743a34;--area-glow:#9c1b1b6b}:root:not([data-theme="light"]) [data-area="songs"]{--area:#c8aceb;--area-soft:#211b27;--area-line:#554568;--area-glow:#65418a6b}:root:not([data-theme="light"]) [data-area="tasks"]{--area:#ebaa82;--area-soft:#271b13;--area-line:#67432d;--area-glow:#853f016b}:root:not([data-theme="light"]) [data-area="sessions"]{--area:#efa2af;--area-soft:#28191c;--area-line:#693f47;--area-glow:#8a32486b}:root:not([data-theme="light"]) [data-area="projects"]{--area:#7dc3f7;--area-soft:#13202a;--area-line:#29516e;--area-glow:#025b8a6b}:root:not([data-theme="light"]) [data-area="ideas"]{--area:#9bca90;--area-soft:#182116;--area-line:#3b5535;--area-glow:#2a651c6b}:root:not([data-theme="light"]) [data-area="leitung"]{--area:#d2b96b;--area-soft:#231e0f;--area-line:#5a4c1e;--area-glow:#6853006b}:root:not([data-theme="light"]) [data-area="neutral"]{--area:#c5b8ad;--area-soft:#201d1c;--area-line:#534b46;--area-glow:#6152466b}}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) [data-area="dashboard"], :root:not([data-theme="light"]){--area:#fe9c91;--area-soft:#2c1816;--area-line:#743a34;--area-glow:#9c1b1b6b}:root:not([data-theme="light"]) [data-area="songs"]{--area:#c8aceb;--area-soft:#211b27;--area-line:#554568;--area-glow:#65418a6b}:root:not([data-theme="light"]) [data-area="tasks"]{--area:#ebaa82;--area-soft:#271b13;--area-line:#67432d;--area-glow:#853f016b}:root:not([data-theme="light"]) [data-area="sessions"]{--area:#efa2af;--area-soft:#28191c;--area-line:#693f47;--area-glow:#8a32486b}:root:not([data-theme="light"]) [data-area="projects"]{--area:#7dc3f7;--area-soft:#13202a;--area-line:#29516e;--area-glow:#025b8a6b}:root:not([data-theme="light"]) [data-area="ideas"]{--area:#9bca90;--area-soft:#182116;--area-line:#3b5535;--area-glow:#2a651c6b}:root:not([data-theme="light"]) [data-area="leitung"]{--area:#d2b96b;--area-soft:#231e0f;--area-line:#5a4c1e;--area-glow:#6853006b}:root:not([data-theme="light"]) [data-area="prayer"]{--area:#a5bddb;--area-soft:#1a1e24;--area-line:#414e5f;--area-glow:#3c57796b}:root:not([data-theme="light"]) [data-area="neutral"]{--area:#c5b8ad;--area-soft:#201d1c;--area-line:#534b46;--area-glow:#6152466b}}
 :root[data-theme="dark"] [data-area="dashboard"], :root[data-theme="dark"]{--area:#fe9c91;--area-soft:#2c1816;--area-line:#743a34;--area-glow:#9c1b1b6b}
 :root[data-theme="dark"] [data-area="songs"]{--area:#c8aceb;--area-soft:#211b27;--area-line:#554568;--area-glow:#65418a6b}
 :root[data-theme="dark"] [data-area="tasks"]{--area:#ebaa82;--area-soft:#271b13;--area-line:#67432d;--area-glow:#853f016b}
@@ -165,6 +166,7 @@ a{color:var(--accent)}
 :root[data-theme="dark"] [data-area="projects"]{--area:#7dc3f7;--area-soft:#13202a;--area-line:#29516e;--area-glow:#025b8a6b}
 :root[data-theme="dark"] [data-area="ideas"]{--area:#9bca90;--area-soft:#182116;--area-line:#3b5535;--area-glow:#2a651c6b}
 :root[data-theme="dark"] [data-area="leitung"]{--area:#d2b96b;--area-soft:#231e0f;--area-line:#5a4c1e;--area-glow:#6853006b}
+:root[data-theme="dark"] [data-area="prayer"]{--area:#a5bddb;--area-soft:#1a1e24;--area-line:#414e5f;--area-glow:#3c57796b}
 :root[data-theme="dark"] [data-area="neutral"]{--area:#c5b8ad;--area-soft:#201d1c;--area-line:#534b46;--area-glow:#6152466b}
 main{background-image:radial-gradient(75% 340px at 18% -60px,var(--area-glow),transparent 75%);background-repeat:no-repeat}
 #title{display:flex;align-items:center;gap:10px}
@@ -260,6 +262,24 @@ img.avatar[data-act]{cursor:zoom-in}
 .quickadd{display:flex;gap:6px;margin-top:10px}
 .quickadd input{flex:1;min-width:0;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
 .stream .st-samply{background:#1b1c1e;color:#fff}
+/* Gebet & Impulse */
+.pform{display:grid;gap:10px}
+.pform textarea{width:100%;min-height:120px;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--surface);line-height:1.55}
+.pform input{padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+.pfeed{display:grid;gap:14px;max-width:760px}
+.pcard .pc-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.pcard .ptext p{margin:0 0 10px;line-height:1.6;white-space:pre-wrap}
+.pquote{margin:0 0 12px;padding:10px 14px;border-left:3px solid var(--area);background:var(--area-soft);border-radius:0 10px 10px 0;line-height:1.6;white-space:pre-wrap;font-style:italic}
+.pquote cite,.pref{display:block;font-style:normal;font-weight:600;font-size:.85rem;color:var(--area);margin-top:6px}
+.preacts{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.preacts .chip{border:1px solid var(--line);background:var(--surface);cursor:pointer;font-size:.95rem}
+.preacts .chip.on{border-color:var(--area);background:var(--area-soft)}
+.preacts .chip span{font-size:.8rem;color:var(--muted)}
+.pcomments{margin-top:10px;border-top:1px solid var(--line);padding-top:8px}
+.pcomment{font-size:.9rem;margin:4px 0}
+.pc-tools{display:flex;gap:14px;margin-top:8px;font-size:.85rem}
+.pcard.answered{opacity:.92}
+.pteaser{white-space:pre-wrap;line-height:1.5;font-size:.95rem}
 
 .toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:8px 14px;border-radius:8px;z-index:40;font-size:.88rem}
 
@@ -306,7 +326,7 @@ img.avatar[data-act]{cursor:zoom-in}
 <script>
 /* ---------- i18n ---------- */
 const T={
-de:{dashboard:"Start",songs:"Songs",tasks:"Aufgaben",sessions:"Sessions",projects:"Projekte",ideas:"Ideen",members:"Mitglieder",vision:"Vision & Werte",more:"Mehr",
+de:{dashboard:"Start",songs:"Songs",tasks:"Aufgaben",sessions:"Sessions",projects:"Projekte",ideas:"Ideen",members:"Mitglieder",vision:"Vision & Werte",prayer:"Gebet & Impulse",more:"Mehr",
 proto:"Prototyp mit Beispieldaten",viewAs:"Ansicht als",nextSession:"Nächste Session",coming:"Kommst du?",yes:"Ja",no:"Nein",maybe:"Vielleicht",
 overdue:"Überfällig",myTasks:"Meine Aufgaben",allTasks:"Alle",open:"Offen",inprog:"In Arbeit",done:"Erledigt",songsByStage:"Songs nach Phase",
 releases:"Anstehende Releases",nothing:"Nichts offen.",due:"fällig",today:"heute",prio:{high:"Hoch",mid:"Mittel",low:"Niedrig"},priority:"Priorität",
@@ -327,7 +347,7 @@ nextStepsNote:"Die echte App lädt diese Daten aus dem Google Sheet. Änderungen
 expense:"Ausgaben",balance:"Stand",addSub:"Teilaufgabe hinzufügen",attendees:"Anwesend",yesCount:"Zusagen",
 liveNote:"Live Recording: Tracks und Click aus der Studioproduktion laufen live mit.",lineup:"Live Lineup",event:"Event",
 moveOnHint:"Weiter erst, wenn Vocal und Instrumental erledigt sind.",releasesTitle:"Releases",money:"Finanzen",invoices:"Rechnungen",invoiceNew:"Rechnung erfassen",vendor:"Von",invNr:"Rechnungsnr.",items:"Leistung",amount:"Betrag (€)",paid:"bezahlt",unpaid:"offen",startBalance:"Start",spent:"Ausgegeben",invHint:"Die PDF kommt in Drive in den Ordner Rechnungen. Bankdaten aus Rechnungen werden in der App nicht angezeigt.",forSong:"Für Song",date:"Datum",hello:"Willkommen bei Raum Worship Hub",enterCode:"Gib deinen 6 stelligen Code ein. Du bekommst ihn von der Leitung per WhatsApp.",whoAreYou:"Wer bist du?",login:"Anmelden",logout:"Abmelden",loading:"Lädt…",noLink:"Öffne bitte deinen persönlichen Link aus WhatsApp.",invite:"Einladen",inviteTitle:"Einladung",inviteHint:"Schick das per WhatsApp. Der Code gilt 14 Tage und funktioniert im Browser und in der installierten App.",copy:"Kopieren",production:"Produktion",errSave:"Nicht gespeichert",offline:"Keine Verbindung. Bitte später nochmal.",pdfDone:"PDF liegt in Protokolle › Creative Sessions",memoLink:"Sprachmemo Link (Drive)",pdfLink:"PDF Link (Drive)",installHint:"Auf dem iPhone: Teilen › Zum Home Bildschirm. Danach in der App einmal den Code eingeben.",leadDoes:"Lead Vocal baut es",celloQ:"Cello in diesem Song",links:"Drive Links",addLink:"Link hinzufügen",linkLabel:"Bezeichnung",linkUrl:"Drive Link (https://…)",myParts:"Meine Songs und Parts",quick:"Drive Ordner",noParts:"Dir ist noch kein Part zugeteilt.",exportOld:"Meine Klicks aus älteren Versionen kopieren",exportHint:"Kopiert deine Änderungen aus den vorherigen Prototyp Versionen. Füge den Text danach im Chat mit Claude ein.",copied:"Kopiert. Jetzt im Chat einfügen.",selectCopy:"Text markieren und kopieren:",badUrl:"Bitte einen Link mit https:// eingeben.",helpers:"Hilfe",vocalArr:"Vocal Arrangement",instrArr:"Instrumental Arrangement"},
-en:{dashboard:"Home",songs:"Songs",tasks:"Tasks",sessions:"Sessions",projects:"Projects",ideas:"Ideas",members:"Members",vision:"Vision & values",more:"More",
+en:{dashboard:"Home",songs:"Songs",tasks:"Tasks",sessions:"Sessions",projects:"Projects",ideas:"Ideas",members:"Members",vision:"Vision & values",prayer:"Prayer & thoughts",more:"More",
 proto:"Prototype with sample data",viewAs:"View as",nextSession:"Next session",coming:"Are you coming?",yes:"Yes",no:"No",maybe:"Maybe",
 overdue:"Overdue",myTasks:"My tasks",allTasks:"All",open:"Open",inprog:"In progress",done:"Done",songsByStage:"Songs by stage",
 releases:"Upcoming releases",nothing:"Nothing open.",due:"due",today:"today",prio:{high:"High",mid:"Medium",low:"Low"},priority:"Priority",
@@ -378,10 +398,33 @@ const canAll=()=>role()!=="member";
 const isLeader=()=>role()==="leader";
 const canSongs=()=>canAll()||(me().perms||[]).includes("songs");
 const partMine=(p,u)=>!!u&&(p.owner===u||(p.co||[]).includes(u));
-const AREA={dashboard:"dashboard",songs:"songs",tasks:"tasks",sessions:"sessions",projects:"projects",ideas:"ideas"};const areaOf=v=>AREA[v]||"neutral";
+const AREA={dashboard:"dashboard",songs:"songs",tasks:"tasks",sessions:"sessions",projects:"projects",ideas:"ideas",prayer:"prayer"};const areaOf=v=>AREA[v]||"neutral";
 // vision: kept by the leadership in the Sheet, rendered as plain sections (h heading, p paragraphs, list bullets, rows two column table)
 function visionSection(x){return `<div class="panel"><h2>${esc(x.h)}</h2>${(x.p||[]).map(t=>`<p class="vtext">${esc(t)}</p>`).join("")}${(x.list||[]).length?`<ul class="vlist">${x.list.map(i=>`<li>${esc(i)}</li>`).join("")}</ul>`:""}${(x.rows||[]).length?`<div class="rows">${x.rows.map(r=>`<div class="row" style="align-items:flex-start"><div class="vkey">${esc(r[0])}</div><div class="grow">${esc(r[1]||"")}</div></div>`).join("")}</div>`:""}</div>`}
 function visionPage(){const v=D.vision;if(!v||!v.sections)return `<div class="panel"><p class="empty">${S.lang==="de"?"Die Vision ist noch nicht hinterlegt.":"The vision has not been added yet."}</p></div>`;return `<div class="grid">${v.sections.map(visionSection).join("")}</div>`}
+// Gebet & Impulse: everyone shares impulses, Bible verses, prayer requests and thanks; others react with emoji, "Ich bete mit" and comments
+const PKINDS=[["impuls","Impuls","Thought"],["vers","Bibelvers","Bible verse"],["anliegen","Gebetsanliegen","Prayer request"],["dank","Lobpreis & Dank","Praise & thanks"]];
+const PEMOJI=["🙏","🙌","❤️","🔥","🫶","✨"];
+const pkind=k=>{const x=PKINDS.find(y=>y[0]===k)||PKINDS[0];return S.lang==="de"?x[1]:x[2]};
+const pwhen=iso=>{const d=new Date(iso);if(isNaN(d))return "";const today=new Date().toDateString()===d.toDateString();return today?(S.lang==="de"?"heute ":"today ")+d.toLocaleTimeString(S.lang==="de"?"de-DE":"en-GB",{hour:"2-digit",minute:"2-digit"}):d.toLocaleDateString(S.lang==="de"?"de-DE":"en-GB",{day:"2-digit",month:"2-digit",year:"numeric"})};
+// text keeps its line breaks; a paragraph in „quotes“ becomes a quote block, a line like "2. Samuel 5:22-25 SCH2000" becomes a verse reference
+function ptext(s){return String(s||"").split(/\n\s*\n/).map(par=>{const t2=par.trim();const lines=t2.split("\n");const last=lines[lines.length-1].trim();const isRef=x=>/^(\d\.?\s?)?[A-ZÄÖÜ][A-Za-zÄÖÜäöüß.]+\s\d+([:,]\d+([-–]\d+)?)?(\s[A-Z0-9]{2,8})?$/.test(x.trim());
+  if(/^[„"“»]/.test(t2)){const body=isRef(last)?lines.slice(0,-1).join("\n"):t2;return `<blockquote class="pquote">${esc(body)}${isRef(last)?`<cite>${esc(last)}</cite>`:""}</blockquote>`}
+  if(lines.length===1&&isRef(t2))return `<p class="pref">${esc(t2)}</p>`;return `<p>${esc(t2)}</p>`}).join("")}
+function prayerCard(p){const mineP=(p.pray||[]).includes(S.me),can=p.by===S.me||isLeader();const r=p.reacts||{};
+  return `<article class="panel pcard${p.answered?" answered":""}" id="pc-${esc(p.id)}"><div class="pc-head">${avatarHtml(mem(p.by)||{name:nm(p.by)})}<div class="grow"><b>${esc(nm(p.by))}</b><div class="muted" style="font-size:.8rem">${pwhen(p.date)}</div></div><span class="chip pk-${esc(p.kind)}">${pkind(p.kind)}${p.answered?" · "+(S.lang==="de"?"erhört ✓":"answered ✓"):""}</span></div>
+  ${p.ref?`<div class="pref">${esc(p.ref)}</div>`:""}<div class="ptext">${ptext(p.text)}</div>
+  <div class="preacts">${p.kind==="anliegen"?`<button type="button" class="chip pray ${mineP?"on":""}" data-act="prayFor" data-id="${esc(p.id)}" aria-pressed="${mineP}" title="${esc((p.pray||[]).map(nm).join(", "))}">🙏 ${S.lang==="de"?"Ich bete mit":"I'm praying"}${(p.pray||[]).length?" · "+(p.pray||[]).length:""}</button>`:""}${PEMOJI.map(e=>{const l=r[e]||[];return `<button type="button" class="chip emo ${l.includes(S.me)?"on":""}" data-act="reactP" data-id="${esc(p.id)}" data-v="${e}" aria-pressed="${l.includes(S.me)}" title="${esc(l.map(nm).join(", "))}">${e}${l.length?` <span>${l.length}</span>`:""}</button>`}).join("")}</div>
+  ${(p.pray||[]).length&&p.kind==="anliegen"?`<div class="muted" style="font-size:.8rem;margin-top:6px">${S.lang==="de"?"Beten mit":"Praying"}: ${esc(p.pray.map(nm).join(", "))}</div>`:""}
+  <div class="pcomments">${(p.comments||[]).map(c=>`<div class="pcomment"><b>${esc(nm(c.by))}</b> ${esc(c.text)}</div>`).join("")}<form class="quickadd" data-form="commentP" data-id="${esc(p.id)}"><input name="text" placeholder="${S.lang==="de"?"Antworten…":"Reply…"}" aria-label="Kommentar" required><button class="btn small" type="submit">↵</button></form></div>
+  ${can?`<div class="pc-tools">${p.kind==="anliegen"&&p.by===S.me?`<button type="button" class="link" data-act="answeredP" data-id="${esc(p.id)}">${p.answered?(S.lang==="de"?"Doch nicht erhört":"Mark as open"):(S.lang==="de"?"Als erhört markieren":"Mark as answered")}</button>`:""}<button type="button" class="link" data-act="deleteP" data-id="${esc(p.id)}">${S.lang==="de"?"Löschen":"Delete"}</button></div>`:""}</article>`}
+function prayerPage(){const f=S.prayFilter||"all";const l=(D.prayer||[]).filter(p=>f==="all"||p.kind===f);const k=S.prayKind||"impuls";
+  const ph={impuls:"Was hat Gott dir aufs Herz gelegt?",vers:"Bibelvers oder Abschnitt einfügen, gern mit ein paar Worten dazu",anliegen:"Wofür dürfen wir beten?",dank:"Wofür bist du dankbar? Was hat Gott getan?"};
+  return `<div class="panel" data-area="prayer"><h2 style="margin-bottom:10px">${S.lang==="de"?"Teilen":"Share"}</h2><form data-form="prayer" class="pform"><div class="tabs" role="group">${PKINDS.map(([v])=>`<button type="button" data-act="prayKind" data-v="${v}" aria-pressed="${k===v}">${pkind(v)}</button>`).join("")}</div>
+   <textarea name="text" required placeholder="${S.lang==="de"?ph[k]:"Share something…"}"></textarea>${k==="vers"?`<input name="ref" placeholder="${S.lang==="de"?"Stelle, z. B. Psalm 27,4 (optional)":"Reference, e.g. Psalm 27:4 (optional)"}">`:""}<input type="hidden" name="kind" value="${k}"><button class="btn primary" type="submit">${S.lang==="de"?"Teilen":"Share"}</button></form></div>
+  <div class="tabs" style="margin:14px 0">${[["all",S.lang==="de"?"Alle":"All"],...PKINDS.map(([v])=>[v,pkind(v)])].map(([v,lab])=>`<button type="button" data-act="prayFilter" data-v="${v}" aria-pressed="${f===v}">${lab}</button>`).join("")}</div>
+  <div class="pfeed" data-area="prayer">${l.map(prayerCard).join("")||`<div class="panel"><p class="empty">${S.lang==="de"?"Noch nichts geteilt. Mach den Anfang.":"Nothing shared yet."}</p></div>`}</div>`}
+function prayerTeaser(){const p=(D.prayer||[])[0];return `<div class="panel" data-area="prayer"><div class="panel-head"><h2>${t("prayer")}</h2><button type="button" class="link" data-nav="prayer">${S.lang==="de"?"Alle":"All"} ›</button></div>${p?`<div class="muted" style="font-size:.85rem;margin-bottom:6px">${esc(nm(p.by))} · ${pkind(p.kind)} · ${pwhen(p.date)}</div><div class="pteaser">${esc(String(p.text).slice(0,220))}${String(p.text).length>220?"…":""}</div>`:`<p class="empty">${S.lang==="de"?"Teile einen Impuls, einen Vers oder ein Gebetsanliegen.":"Share a thought, verse or prayer request."}</p>`}</div>`}
 function visionPanel(key){const v=D.vision;const x=v&&v.sections&&v.sections.find(y=>y.key===key);return x?`<div style="margin-top:16px">${visionSection(x)}</div>`:""}
 // profile pictures: small square JPEG stored with the member, shown wherever initials were
 // invoice files: uploads live in the private Rechnungen folder of the band account and are opened through the backend ("drive:<id>"), older entries keep their plain link
@@ -444,12 +487,13 @@ ideas:'<path d="M9 18h6M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 
 members:'<circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0"/><path d="M17 4a4 4 0 0 1 0 8M22 21a7 7 0 0 0-4-6.3"/>',
 money:'<rect x="2" y="6" width="20" height="13" rx="2"/><circle cx="12" cy="12.5" r="2.5"/><path d="M6 10v5M18 10v5"/>',
 vision:'<path d="M12 21s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.6-7 10-7 10z"/>',
+prayer:'<path d="M2 5.5A1.5 1.5 0 0 1 3.5 4H9a3 3 0 0 1 3 3v13a2.5 2.5 0 0 0-2.5-2.5H2z"/><path d="M22 5.5A1.5 1.5 0 0 0 20.5 4H15a3 3 0 0 0-3 3v13a2.5 2.5 0 0 1 2.5-2.5H22z"/>',
 more:'<circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/>'};
 const icon=k=>`<svg class="ico" viewBox="0 0 24 24">${I[k]}</svg>`;
 const tick='<svg viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></svg>';
 
 /* ---------- shell ---------- */
-const NAV=()=>["dashboard","songs","tasks","sessions","projects","ideas","members","vision",...(isLeader()?["money"]:[])];
+const NAV=()=>["dashboard","songs","tasks","sessions","projects","ideas","prayer","members","vision",...(isLeader()?["money"]:[])];
 const BOTTOM=["dashboard","songs","tasks","sessions","more"];
 function myOpenCount(){return D.tasks.filter(x=>x.owners.includes(S.me)&&(isOver(x)||isToday(x))).length}
 function shell(){
@@ -460,7 +504,7 @@ function shell(){
   const c=myOpenCount(), badge=c?`<span class="badge">${c}</span>`:"";
   document.body.dataset.area=areaOf(S.view);
   document.getElementById("sidenav").innerHTML=NAV().map(k=>`<button type="button" data-nav="${k}" data-area="${areaOf(k)}" ${S.view===k?'aria-current="page"':""}>${icon(k)}${t(k)}${k==="tasks"?badge:""}</button>`).join("");
-  const moreViews=["projects","ideas","members","vision","money","more"];
+  const moreViews=["projects","ideas","prayer","members","vision","money","more"];
   document.getElementById("bottomnav").innerHTML=BOTTOM.map(k=>{const cur=k==="more"?moreViews.includes(S.view):S.view===k;return `<button type="button" data-nav="${k}" data-area="${areaOf(k==="more"&&cur?S.view:k)}" ${cur?'aria-current="page"':""}>${icon(k)}<span>${t(k)}</span>${k==="tasks"?badge:""}</button>`}).join("");
   document.getElementById("title").textContent=t(S.view);
 }
@@ -513,6 +557,7 @@ dashboard(){
   return `<div class="grid cols-2">
   <div class="panel" data-area="sessions"><div class="panel-head"><h2>${t("nextSession")}</h2><button type="button" class="link" data-act="openSession" data-id="${ns?ns.id:""}">${t("agenda")} ›</button></div>
    ${ns?`<div class="next">${dateBox(ns)}<div><b>${esc(ns.place)}</b><div class="muted">${esc(ns.time)} · ${yes} ${t("yesCount")}</div><div class="label" style="margin-top:8px">${t("coming")}</div>${rsvp(ns)}</div></div>`:`<p class="empty">${t("nothing")}</p>`}</div>
+  ${prayerTeaser()}
   <div class="panel" data-area="tasks"><div class="panel-head"><h2>${t("overdue")}</h2><span class="chip ${over.length?"bad":"ok"}">${over.length}</span></div>
    <div class="rows">${over.length?over.map(taskRow).join(""):`<p class="empty">${t("nothing")}</p>`}</div></div>
   <div class="panel" data-area="tasks"><div class="panel-head"><h2>${t("myTasks")}</h2><button type="button" class="link" data-nav="tasks">${t("tasks")} ›</button></div>
@@ -557,8 +602,9 @@ ideas(){
 members(){
   return `<div class="panel"><div class="rows">${D.members.map(m=>`<div class="row">${avatarHtml(m)}<div class="grow"><button type="button" class="link title" data-act="openMember" data-id="${m.id}" style="color:inherit">${esc(m.name)}</button>${m.full?` <span class="muted" style="font-size:.85rem">(${esc(m.full)})</span>`:""}<div class="muted" style="font-size:.82rem">${esc(m.groups.join(", "))}</div>${(m.skills||[]).length?`<div class="skills">${esc(m.skills.join(" · "))}</div>`:""}</div>${isLeader()?`<button type="button" class="btn small" data-act="prodToggle" data-id="${m.id}" aria-pressed="${(m.perms||[]).includes("songs")}">${(m.perms||[]).includes("songs")?"✓ ":""}${t("production")}</button><button type="button" class="btn small" data-act="invite" data-id="${m.id}">${t("invite")}</button>`:((m.perms||[]).includes("songs")?`<span class="chip warn">${t("production")}</span>`:"")}<span class="chip ${m.role==="leader"?"acc":m.role==="middle"?"warn":""}">${t("roles."+m.role)}</span></div>`).join("")}</div></div>`},
 vision(){return visionPage()},
+prayer(){return prayerPage()},
 more(){
-  return `<div class="grid"><div class="panel"><div class="rows">${["projects","ideas","members","vision",...(isLeader()?["money"]:[])].map(k=>`<div class="row"><button type="button" class="link" data-nav="${k}" style="display:flex;gap:10px;align-items:center;color:inherit">${icon(k)}${t(k)}</button></div>`).join("")}</div></div>
+  return `<div class="grid"><div class="panel"><div class="rows">${["projects","ideas","prayer","members","vision",...(isLeader()?["money"]:[])].map(k=>`<div class="row"><button type="button" class="link" data-nav="${k}" style="display:flex;gap:10px;align-items:center;color:inherit">${icon(k)}${t(k)}</button></div>`).join("")}</div></div>
   ${quickPanel()}<div class="panel"><h2>${S.lang==="de"?"Profilbild":"Profile picture"}</h2><div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">${avatarHtml(me(),"big")}<label class="btn">${S.lang==="de"?"Bild auswählen":"Choose picture"}<input type="file" accept="image/*" data-act="avatarFile" hidden></label>${me().avatar?`<button type="button" class="btn" data-act="avatarRemove">${S.lang==="de"?"Entfernen":"Remove"}</button>`:""}</div><p class="note" style="margin-top:8px">${S.lang==="de"?"Wird automatisch quadratisch zugeschnitten und verkleinert.":"Cropped to a square and resized automatically."}</p></div><div class="panel"><h2>${t("settings")}</h2><p class="note">${t("installHint")}</p><button type="button" class="btn" data-act="logout">${t("logout")}</button></div></div>`}};
 
 /* ---------- sheets (detail panels) ---------- */
@@ -686,6 +732,8 @@ function fileBox(action,id){document.querySelectorAll(".filebox").forEach(x=>x.r
     box.querySelector(".fb-body").innerHTML=/^image\//.test(r.mime)?`<img src="${u}" alt="">`:`<iframe src="${u}" title="${esc(r.name)}"></iframe>`;
     box.querySelector(".fb-actions").innerHTML=`<a class="btn primary" href="${u}" download="${esc(r.name)}">${S.lang==="de"?"Herunterladen":"Download"}</a><a class="btn" href="${u}" target="_blank" rel="noopener">${S.lang==="de"?"In neuem Tab öffnen":"Open in new tab"}</a>`;
   }).catch(err=>{box.querySelector(".fb-name").textContent=err.message||t("errSave")})}
+// deleting a post asks once, inside the app (no browser dialog)
+function confirmDel(id){const k="rw-del-"+id;if(S._del===k){S._del=null;return true}S._del=k;toast(S.lang==="de"?"Zum Löschen nochmal tippen":"Tap again to delete");setTimeout(()=>{if(S._del===k)S._del=null},4000);return false}
 // big profile pictures are kept in memory once loaded, so a second tap is instant
 const AVBIG={};
 const saveInvoice=(r,file)=>{const base=(D.money.invoices.find(x=>x.id===r.id)||{}).updated_at;return run(async()=>{const upload=file?await readUpload(file):undefined;if(upload)toast(S.lang==="de"?"Lädt hoch…":"Uploading…");put(D.money.invoices,await api("saveInvoice",{invoice:r,base,upload}));if(upload)toast(t("saved"))},()=>put(D.money.invoices,clone(r)))};
@@ -753,6 +801,12 @@ document.addEventListener("click",e=>{
     else{const c=clone(sess(id));c.links.splice(i,1);saveSession(c)}
     return}
   case "ideaToSong":run(async()=>{put(D.songs,await api("promoteIdea",{id}));D.ideas=D.ideas.filter(x=>x.id!==id);toast(t("saved"))});return;
+  case "prayKind":S.prayKind=v;render();return
+  case "prayFilter":S.prayFilter=v;render();return
+  case "reactP":run(async()=>put(D.prayer,await api("reactPrayer",{id,emoji:v})));return
+  case "prayFor":run(async()=>put(D.prayer,await api("reactPrayer",{id,pray:true})));return
+  case "answeredP":run(async()=>put(D.prayer,await api("answeredPrayer",{id})));return
+  case "deleteP":if(!confirmDel(id))return;run(async()=>{await api("deletePrayer",{id});D.prayer=D.prayer.filter(x=>x.id!==id)});return
   case "newTaskFor":S.sheet={type:"newTask",link:"project:"+id};render();return
   case "invOpen":fileBox("getInvoiceFile",id);return
   case "toggleInv":{const c=clone(D.money.invoices.find(x=>x.id===id));c.status=c.status==="paid"?"open":"paid";saveInvoice(c);return}
@@ -787,6 +841,8 @@ document.addEventListener("submit",e=>{
   case "sub":{const v=(fd.get("t")||"").trim();if(!v)return;const c=clone(task(id));c.subs.push({t:v,d:false});saveTask(c);return}
   case "comment":{const v=(fd.get("text")||"").trim();if(!v)return;run(async()=>put(D.tasks,await api("commentTask",{id,text:v})));return}
   case "writers":{const raw=(fd.get("w")||"").split(",").map(x=>x.trim()).filter(Boolean);const ids=raw.map(n=>{const m=D.members.find(x=>x.name.toLowerCase()===n.toLowerCase());return m?m.id:n});songOp(id,"writers",{writers:ids});return}
+  case "prayer":{const tx=String(fd.get("text")||"").trim();if(!tx)return;run(async()=>{const r=await api("addPrayer",{kind:fd.get("kind"),text:tx,ref:fd.get("ref")||""});D.prayer=[r].concat(D.prayer||[]);toast(S.lang==="de"?"Geteilt 🙏":"Shared 🙏")});return}
+  case "commentP":{const tx=String(fd.get("text")||"").trim();if(!tx)return;run(async()=>put(D.prayer,await api("commentPrayer",{id,text:tx})));return}
   case "quickTodo":{const ti=String(fd.get("title")||"").trim();if(!ti)return;saveTask({id:"t"+Date.now(),title:ti,owners:[S.me],due:"",status:"open",prio:"mid",link:{type:"project",id},subs:[],comments:[],links:[]});return}
   case "protocol":{const s=sess(id);const f2=e.target.closest("form");
     const groups=[...f2.querySelectorAll(".pg-row")].map(r=>({t:r.querySelector(".pg-t").value.trim(),who:r.querySelector(".pg-who").value.trim(),status:r.querySelector(".pg-st").value,note:r.querySelector(".pg-note").value.trim()})).filter(g=>g.t);
