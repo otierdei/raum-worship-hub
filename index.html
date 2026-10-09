@@ -234,6 +234,12 @@ img.avatar[data-act]{cursor:zoom-in}
 .lightbox img{width:min(86vw,78vh,760px);height:min(86vw,78vh,760px)}
 .lightbox img.loading{filter:blur(6px) saturate(.9)}
 .lightbox .lbhint{color:rgba(255,255,255,.7);font-size:.85rem;min-height:1.2em}
+/* own name in the top bar opens the profile */
+.mebtn{display:inline-flex;align-items:center;gap:6px;border:0;background:none;padding:0;cursor:pointer;color:inherit}
+.mebtn .avatar{width:28px;height:28px;font-size:.7rem}
+.mebtn:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:999px}
+.profile-top{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.avatar.xl{width:112px;height:112px;font-size:2rem}
 
 .toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:8px 14px;border-radius:8px;z-index:40;font-size:.88rem}
 
@@ -265,7 +271,7 @@ img.avatar[data-act]{cursor:zoom-in}
     <div class="top">
       <h1 id="title"></h1>
       <div class="who">
-        <span class="chip acc" id="meName"></span>
+        <button type="button" class="mebtn" id="meBtn" data-act="openMember" aria-label="Mein Profil"><span id="meAv"></span><span class="chip acc" id="meName"></span></button>
         <div class="seg" role="group" aria-label="Sprache"><button type="button" data-lang="de">DE</button><button type="button" data-lang="en">EN</button></div>
       </div>
     </div>
@@ -429,6 +435,7 @@ function myOpenCount(){return D.tasks.filter(x=>x.owners.includes(S.me)&&(isOver
 function shell(){
   document.documentElement.lang=S.lang;
   document.getElementById("meName").textContent=me().name||"";
+  {const mb=document.getElementById("meBtn");if(mb)mb.dataset.id=S.me||"";const ma=document.getElementById("meAv");const mm=me();if(ma)ma.innerHTML=mm&&mm.avatar&&/^data:image\/jpeg;base64,[A-Za-z0-9+\/=]+$/.test(mm.avatar)?`<img class="avatar" src="${mm.avatar}" alt="">`:`<span class="avatar">${esc(((mm&&mm.name)||"?").slice(0,2))}</span>`}
   document.querySelectorAll("[data-lang]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.lang===S.lang));
   const c=myOpenCount(), badge=c?`<span class="badge">${c}</span>`:"";
   document.body.dataset.area=areaOf(S.view);
@@ -513,7 +520,7 @@ sessions(){
   const f=S.sessFilter, up=D.sessions.filter(s=>pd(s.date)>=TODAY).sort((a,b)=>a.date.localeCompare(b.date)), past=D.sessions.filter(s=>pd(s.date)<TODAY).sort((a,b)=>b.date.localeCompare(a.date));
   const l=f==="upcoming"?up:past;
   return `<div class="tabs"><button type="button" data-act="sessFilter" data-v="upcoming" aria-pressed="${f==="upcoming"}">${t("upcoming")}</button><button type="button" data-act="sessFilter" data-v="past" aria-pressed="${f==="past"}">${t("past")}</button></div>
-  <div class="panel"><div class="rows">${l.map(s=>{const y=Object.values(s.rsvp).filter(v=>v==="yes").length;return `<div class="row">${dateBox(s)}<div class="grow"><button type="button" class="link title" data-act="openSession" data-id="${s.id}" style="color:inherit">${isLeitung(s)?(S.lang==="de"?"Leitungstreffen":"Leadership meeting"):"Creative Session"}</button>${isLeitung(s)?` <span class="chip warn">${S.lang==="de"?"nur Leitung":"leaders only"}</span>`:""}<div class="muted" style="font-size:.85rem">${esc(s.time)} · ${esc(s.place)}</div></div>${f==="upcoming"?`<span class="chip ${s.rsvp[S.me]==="yes"?"ok":""}">${y} ${t("yesCount")}${Object.values(s.rsvp).filter(v=>v==="maybe").length?` · ${Object.values(s.rsvp).filter(v=>v==="maybe").length} ${t("maybe")}`:""}</span>`:s.pdf?(isLeitung(s)?`<button type="button" class="chip acc" data-act="protoOpen" data-id="${s.id}" style="border:0">${t("pdf")}</button>`:`<a class="chip acc" href="${DRIVE.file(s.pdf)}" target="_blank" rel="noopener">${t("pdf")}</a>`):""}</div>`}).join("")}</div></div>${isLeader()?`<button type="button" class="btn" data-act="addLeitung" style="margin-top:12px">+ ${S.lang==="de"?"Nächstes Leitungstreffen (in 2 Wochen)":"Next leadership meeting (in 2 weeks)"}</button>`:""}${visionPanel("sessions")}`},
+  <div class="panel"><div class="rows">${l.map(s=>{const y=Object.values(s.rsvp).filter(v=>v==="yes").length;return `<div class="row">${dateBox(s)}<div class="grow"><button type="button" class="link title" data-act="openSession" data-id="${s.id}" style="color:inherit">${isLeitung(s)?(S.lang==="de"?"Leiter Treffen":"Leadership meeting"):"Creative Session"}</button>${isLeitung(s)?` <span class="chip warn">${S.lang==="de"?"nur Leitung":"leaders only"}</span>`:""}<div class="muted" style="font-size:.85rem">${esc(s.time)} · ${esc(s.place)}</div></div>${f==="upcoming"?`<span class="chip ${s.rsvp[S.me]==="yes"?"ok":""}">${y} ${t("yesCount")}${Object.values(s.rsvp).filter(v=>v==="maybe").length?` · ${Object.values(s.rsvp).filter(v=>v==="maybe").length} ${t("maybe")}`:""}</span>`:s.pdf?(isLeitung(s)?`<button type="button" class="chip acc" data-act="protoOpen" data-id="${s.id}" style="border:0">${t("pdf")}</button>`:`<a class="chip acc" href="${DRIVE.file(s.pdf)}" target="_blank" rel="noopener">${t("pdf")}</a>`):""}</div>`}).join("")}</div></div>${isLeader()?`<button type="button" class="btn" data-act="addLeitung" style="margin-top:12px">+ ${S.lang==="de"?"Nächstes Leiter Treffen (in 2 Wochen)":"Next leadership meeting (in 2 weeks)"}</button>`:""}${visionPanel("sessions")}`},
 projects(){
   return `<div class="grid cols-2">${D.projects.map(p=>{const l=D.tasks.filter(x=>x.link&&x.link.type==="project"&&x.link.id===p.id);const d=l.filter(x=>x.status==="done").length;return `<div class="panel"><div class="panel-head"><h2>${esc(p.title)}</h2><span class="chip">${esc(p.when)}</span></div><p class="muted" style="margin:0 0 8px">${esc(p.note)}</p><div class="label">${t("tasks")} · ${d}/${l.length}</div><div class="rows">${l.map(taskRow).join("")||`<p class="empty">${t("nothing")}</p>`}</div></div>`}).join("")}
   </div>`},
@@ -579,7 +586,8 @@ task(id){
   <div class="panel"><h3 style="margin-bottom:6px">${t("comments")}</h3>${tk.comments.map(c=>`<div class="row">${avatarHtml(mem(c.by)||{name:nm(c.by)})}<div class="grow"><div class="log">${esc(nm(c.by))} · ${fmt(c.at)}</div><div>${esc(c.text)}</div></div></div>`).join("")}
    <form data-form="comment" data-id="${tk.id}" style="display:flex;gap:8px;margin-top:8px"><div class="field" style="flex:1"><input id="com-${tk.id}" name="text" placeholder="${t("comment")}" aria-label="${t("comment")}"></div><button class="btn" type="submit">${t("add")}</button></form></div>`},
 member(id){const m=mem(id);if(!m)return "";const tk=D.tasks.filter(x=>x.owners.includes(id)&&x.status!=="done");
-  return `${head(t("roles."+m.role)+(m.groups.length?" · "+m.groups.join(", "):""),m.name)}${myPartsPanel(id)}<div class="panel"><h3 style="margin-bottom:6px">${t("tasks")}</h3><div class="rows">${tk.map(taskRow).join("")||`<p class="empty">${t("nothing")}</p>`}</div></div>`},
+  const mine=id===S.me;
+  return `${head(t("roles."+m.role)+(m.groups.length?" · "+m.groups.join(", "):""),m.name)}<div class="panel profile"><div class="profile-top">${avatarHtml(m,"xl")}<div class="grow"><div class="title" style="font-size:1.15rem">${esc(m.name)}</div>${m.full?`<div class="muted">${esc(m.full)}</div>`:""}${(m.skills||[]).length?`<div class="skills" style="margin-top:6px">${esc(m.skills.join(" · "))}</div>`:""}</div></div>${mine?`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px"><label class="btn primary">${m.avatar?(S.lang==="de"?"Neues Bild hochladen":"Upload new picture"):(S.lang==="de"?"Bild hinzufügen":"Add picture")}<input type="file" accept="image/*" data-act="avatarFile" hidden></label>${m.avatar?`<button type="button" class="btn" data-act="avatarRemove">${S.lang==="de"?"Bild entfernen":"Remove picture"}</button>`:""}</div><p class="note" style="margin-top:8px">${S.lang==="de"?"Wird quadratisch zugeschnitten. Antippen vergrößert das Bild.":"Cropped to a square. Tap to enlarge."}</p>`:""}</div>${myPartsPanel(id)}<div class="panel"><h3 style="margin-bottom:6px">${t("tasks")}</h3><div class="rows">${tk.map(taskRow).join("")||`<p class="empty">${t("nothing")}</p>`}</div></div>`},
 newTask(){
   const opts=[`<option value="">${t("none")}</option>`,...D.songs.map(s=>`<option value="song:${s.id}">♪ ${esc(s.title)}</option>`),...D.projects.map(p=>`<option value="project:${p.id}">${esc(p.title)}</option>`)].join("");
   const ownerOpts=(canAll()?D.members:[me()]).map(m=>`<option value="${m.id}" ${m.id===S.me?"selected":""}>${esc(m.name)}</option>`).join("");
@@ -592,7 +600,7 @@ newTask(){
 session(id){
   const s=D.sessions.find(x=>x.id===id);if(!s)return "";const up=pd(s.date)>=TODAY, can=isLeitung(s)?isLeader():canAll();
   const byV=v=>D.members.filter(m=>s.rsvp[m.id]===v).map(m=>m.name);
-  return `${head((isLeitung(s)?(S.lang==="de"?"Leitungstreffen · nur Leitung":"Leadership meeting · leaders only"):"Creative Session")+(s.time?" · "+s.time:""),fmt(s.date)+(s.place?" · "+s.place:""))}
+  return `${head((isLeitung(s)?(S.lang==="de"?"Leiter Treffen · nur Leitung":"Leadership meeting · leaders only"):"Creative Session")+(s.time?" · "+s.time:""),fmt(s.date)+(s.place?" · "+s.place:""))}
   ${up?`<div class="panel"><h3>${t("coming")}</h3>${rsvp(s)}<div class="log" style="margin-top:8px">${t("yes")}: ${esc(byV("yes").join(", ")||"–")}<br>${t("maybe")}: ${esc(byV("maybe").join(", ")||"–")}<br>${t("no")}: ${esc(byV("no").join(", ")||"–")}<br>${S.lang==="de"?"Noch keine Antwort":"No answer yet"}: ${esc(D.members.filter(m=>m.active!==false&&!s.rsvp[m.id]&&(!isLeitung(s)||m.role==="leader")).map(m=>m.name).join(", ")||"–")}</div></div>`:""}
   ${s.attendees.length?`<div class="panel"><h3>${t("attendees")} · ${s.attendees.length}</h3><div class="muted">${esc(s.attendees.map(nm).join(", "))}</div></div>`:""}
   ${protoForm(s,can)}
