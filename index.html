@@ -283,7 +283,8 @@ img.avatar[data-act]{cursor:zoom-in}
 /* start page: two stacks instead of a grid with gaps; left "for me", right "band" */
 .dash{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start}
 .dash>.dcol{display:grid;gap:16px;align-content:start;min-width:0}
-@media (max-width:900px){.dash{grid-template-columns:minmax(0,1fr)}}
+.dend{display:grid;gap:16px;min-width:0}
+@media (max-width:900px){.dash{display:flex;flex-direction:column}.dash>.dcol{display:contents}.dend{order:1}}
 
 .toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:8px 14px;border-radius:8px;z-index:40;font-size:.88rem}
 
@@ -566,8 +567,8 @@ dashboard(){
   ${over.length&&canAll()?`<div class="panel" data-area="tasks"><div class="panel-head"><h2>${t("overdue")}</h2><span class="chip ${over.length?"bad":"ok"}">${over.length}</span></div>
    <div class="rows">${over.length?over.map(taskRow).join(""):`<p class="empty">${t("nothing")}</p>`}</div></div>`:""}
   ${myPartsPanel(S.me)}
-  ${D.money?`<div class="panel" data-area="neutral"><div class="panel-head"><h2>${t("budget")}</h2><button type="button" class="link" data-nav="money">${t("invoices")} ›</button></div><div class="money">${eur(balance())}</div><div class="muted" style="font-size:.85rem">${t("startBalance")} ${eur(D.money.start)} · ${t("spent")} ${eur(spent())}</div></div>`:""}
-  ${quickPanel()}
+  <div class="dend">${D.money?`<div class="panel" data-area="neutral"><div class="panel-head"><h2>${t("budget")}</h2><button type="button" class="link" data-nav="money">${t("invoices")} ›</button></div><div class="money">${eur(balance())}</div><div class="muted" style="font-size:.85rem">${t("startBalance")} ${eur(D.money.start)} · ${t("spent")} ${eur(spent())}</div></div>`:""}
+  ${quickPanel()}</div>
   </div><div class="dcol">
   ${prayerTeaser()}
   ${rel.length?`<div class="panel" data-area="songs"><h2>${t("releases")}</h2><div class="rows">${rel.length?rel.map(({s,r})=>{const ch=Object.values(r.checks),d=ch.filter(v=>v==="done").length;return `<div class="row"><div class="grow"><button type="button" class="link title" data-act="openSong" data-id="${s.id}" style="color:inherit">${esc(s.title)}</button><div class="muted" style="font-size:.8rem">${t(r.kind)} · ${d}/${ch.length}</div></div><span class="chip acc">${fmt(r.date)}</span></div>`}).join(""):`<p class="empty">${t("nothing")}</p>`}</div></div>`:""}
