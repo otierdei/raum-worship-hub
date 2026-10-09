@@ -215,8 +215,8 @@ img.avatar[data-act]{cursor:zoom-in}
 .stream .st-apple{background:#d60017;color:#fff}.stream .st-spotify{background:#1db954;color:#06210f}.stream .st-youtube{background:#cc0000;color:#fff}
 .streamedit{margin:0 0 10px;font-size:.85rem}.streamedit summary{cursor:pointer;color:var(--muted)}
 .streamedit label{display:block;margin-top:8px}.streamedit input{display:block;width:100%;margin-top:4px;padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
-.proto textarea{width:100%;min-height:110px;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--surface);line-height:1.5}
-.proto h3{margin-bottom:8px}
+.protokoll textarea{width:100%;min-height:110px;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--surface);line-height:1.5}
+.protokoll h3{margin-bottom:8px}
 .attgrid{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
 .attchip{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border:1px solid var(--line);border-radius:999px;background:var(--surface);font-size:.85rem;cursor:pointer}
 .attchip:has(input:checked){background:var(--area-soft);border-color:var(--area);color:var(--fg)}
@@ -224,6 +224,16 @@ img.avatar[data-act]{cursor:zoom-in}
 .pt-row{grid-template-columns:1fr 2fr 1fr}
 .pg-row input,.pg-row select,.pt-row input,.pt-row select{width:100%;min-width:0;padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
 @media (max-width:760px){.pg-row{grid-template-columns:1fr 1fr;padding-bottom:8px;border-bottom:1px solid var(--line)}.pt-row{grid-template-columns:1fr 1fr}.pt-row .pt-title{grid-column:1/-1;order:-1}}
+/* session sheet on laptops: centered and large instead of a side panel */
+@media (min-width:900px){
+  .sheet-bg:has(.sheet.wide){justify-content:center;align-items:center;padding:3vh 3vw}
+  .sheet.wide{width:min(1120px,100%);height:min(94vh,100%);border-radius:18px;padding:28px 36px 44px;box-shadow:inset 0 4px 0 var(--area),0 30px 80px rgba(0,0,0,.35)}
+  .sheet.wide .protokoll textarea{min-height:130px}
+}
+@media (min-width:900px) and (prefers-reduced-motion:no-preference){.sheet.wide{animation:pop .18s ease-out}@keyframes pop{from{transform:scale(.97);opacity:.6}}}
+.lightbox img{width:min(86vw,78vh,760px);height:min(86vw,78vh,760px)}
+.lightbox img.loading{filter:blur(6px) saturate(.9)}
+.lightbox .lbhint{color:rgba(255,255,255,.7);font-size:.85rem;min-height:1.2em}
 
 .toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:8px 14px;border-radius:8px;z-index:40;font-size:.88rem}
 
@@ -348,6 +358,9 @@ function visionSection(x){return `<div class="panel"><h2>${esc(x.h)}</h2>${(x.p|
 function visionPage(){const v=D.vision;if(!v||!v.sections)return `<div class="panel"><p class="empty">${S.lang==="de"?"Die Vision ist noch nicht hinterlegt.":"The vision has not been added yet."}</p></div>`;return `<div class="grid">${v.sections.map(visionSection).join("")}</div>`}
 function visionPanel(key){const v=D.vision;const x=v&&v.sections&&v.sections.find(y=>y.key===key);return x?`<div style="margin-top:16px">${visionSection(x)}</div>`:""}
 // profile pictures: small square JPEG stored with the member, shown wherever initials were
+// invoice files: uploads live in the private Rechnungen folder of the band account and are opened through the backend ("drive:<id>"), older entries keep their plain link
+function invFileHtml(r){const f=r.file||"";if(/^drive:/.test(f))return ` · <button type="button" class="link" data-act="invOpen" data-id="${esc(r.id)}">${S.lang==="de"?"Datei öffnen":"Open file"}</button>`;if(/^https:\/\//.test(f))return ` · <a href="${esc(f)}" target="_blank" rel="noopener">PDF</a>`;return ` · <label class="link" style="cursor:pointer">${S.lang==="de"?"Datei hochladen":"Upload file"}<input type="file" accept="application/pdf,image/jpeg,image/png" data-act="invFile" data-id="${esc(r.id)}" hidden></label>`}
+function readUpload(file){return new Promise((ok,fail)=>{if(!/^(application\/pdf|image\/jpeg|image\/png)$/.test(file.type))return fail(new Error(S.lang==="de"?"Bitte PDF, JPG oder PNG.":"Please use PDF, JPG or PNG."));if(file.size>9e6)return fail(new Error(S.lang==="de"?"Datei ist größer als 9 MB.":"File is larger than 9 MB."));const fr=new FileReader();fr.onload=()=>ok({name:file.name,mime:file.type,data:String(fr.result).split(",")[1]});fr.onerror=()=>fail(new Error("Datei konnte nicht gelesen werden"));fr.readAsDataURL(file)})}
 function avatarHtml(m,size){const c="avatar"+(size?" "+size:"");return m&&m.avatar&&/^data:image\/jpeg;base64,[A-Za-z0-9+\/=]+$/.test(m.avatar)?`<img class="${c}" src="${m.avatar}" alt="${esc(m.name||"")}" data-act="avatarView" data-id="${esc(m.id||"")}" role="button" tabindex="0">`:`<div class="${c}">${esc(((m&&m.name)||"?").slice(0,2))}</div>`}
 function shrinkImage(file,S2,max){S2=S2||192;max=max||40000;return new Promise((ok,fail)=>{const u=URL.createObjectURL(file),img=new Image();img.onload=()=>{const n=Math.min(img.naturalWidth,img.naturalHeight),c=document.createElement("canvas");c.width=c.height=Math.min(S2,n);const x=c.getContext("2d");x.drawImage(img,(img.naturalWidth-n)/2,(img.naturalHeight-n)/2,n,n,0,0,c.width,c.height);URL.revokeObjectURL(u);let q=S2>500?.9:.82,d=c.toDataURL("image/jpeg",q);while(d.length>max&&q>.25){q-=.07;d=c.toDataURL("image/jpeg",q)}ok(d)};img.onerror=()=>{URL.revokeObjectURL(u);fail(new Error("Bild konnte nicht gelesen werden"))};img.src=u})}
 // streaming links per release (Apple Music, Spotify, YouTube); production rights can edit them
@@ -367,7 +380,7 @@ function protoForm(s,can){const dr=can?protoDraft(s.id):null;const p=dr?{writer:
   const open=D.tasks.filter(t=>t.status!=="done").sort((a,b)=>(a.due||"9999").localeCompare(b.due||"9999"));
   const next=D.sessions.filter(x=>x.date>s.date).sort((a,b)=>a.date.localeCompare(b.date))[0];
   const ro=can?"":"readonly disabled";
-  return `<form class="grid proto" data-form="protocol" data-id="${s.id}" style="gap:12px">
+  return `<form class="grid protokoll" data-form="protocol" data-id="${s.id}" style="gap:12px">
   <div class="panel"><h3>Agenda (vorab)</h3><textarea name="agenda" ${ro} placeholder="Was steht heute an?">${esc(dr?dr.agenda:(s.agenda||""))}</textarea></div>
   <div class="panel"><h3>Kopf</h3><div class="field"><label class="label" for="pw-${s.id}">Protokoll geführt von</label><select id="pw-${s.id}" name="writer" ${ro}>${D.members.map(m=>`<option value="${m.id}" ${m.id===p.writer?"selected":""}>${esc(m.name)}</option>`).join("")}</select></div>
    <div class="label" style="margin-top:10px">Anwesende · aus den Zusagen vorausgefüllt</div><div class="attgrid">${D.members.filter(m=>m.active!==false).map(m=>`<label class="attchip"><input type="checkbox" name="att" value="${m.id}" ${att.includes(m.id)?"checked":""} ${ro}>${esc(m.name)}</label>`).join("")}</div></div>
@@ -506,8 +519,8 @@ money(){
   const inv=D.money.invoices.slice().sort((a,b)=>b.date.localeCompare(a.date));
   const songOpts=[`<option value="">${t("none")}</option>`,...D.songs.map(x=>`<option value="${x.id}">${esc(x.title)}</option>`)].join("");
   return `<div class="grid cols-2"><div class="panel"><div class="panel-head"><h2>${t("budget")}</h2><span class="chip acc">${t("onlyLeaders")}</span></div><div class="money">${eur(balance())}</div><div class="rows" style="margin-top:8px"><div class="row"><div class="grow">${t("startBalance")}<div class="log">${esc(D.money.startNote)}</div></div><span class="mono">${eur(D.money.start)}</span></div><div class="row"><div class="grow">${t("spent")}</div><span class="mono">− ${eur(spent())}</span></div></div></div>
-  <div class="panel"><h2>${t("invoiceNew")}</h2><form class="form" data-form="invoice"><div class="field"><label class="label" for="inv-vendor">${t("vendor")}</label><input id="inv-vendor" name="vendor" required></div><div class="field"><label class="label" for="inv-nr">${t("invNr")}</label><input id="inv-nr" name="nr"></div><div class="field"><label class="label" for="inv-date">${t("date")}</label><input id="inv-date" name="date" type="date" required></div><div class="field"><label class="label" for="inv-amount">${t("amount")}</label><input id="inv-amount" name="amount" type="number" step="0.01" min="0" required></div><div class="field full"><label class="label" for="inv-items">${t("items")}</label><input id="inv-items" name="items"></div><div class="field"><label class="label" for="inv-song">${t("forSong")}</label><select id="inv-song" name="song">${songOpts}</select></div><div class="field"><label class="label" for="inv-file">${t("pdfLink")}</label><input id="inv-file" name="file" type="url" placeholder="https://drive.google.com/…"></div><div class="full"><button class="btn primary" type="submit">${t("add")}</button></div></form><p class="log" style="margin:10px 0 0">${t("invHint")}</p></div>
-  <div class="panel" style="grid-column:1/-1"><div class="panel-head"><h2>${t("invoices")}</h2><span class="chip">${inv.length}</span></div><div class="rows">${inv.map(r=>`<div class="row"><div class="grow"><div class="title">${esc(r.vendor)}</div><div class="muted" style="font-size:.82rem">${fmt(r.date)}${r.nr?" · Nr. "+esc(r.nr):""}${r.items?" · "+esc(r.items):""}${r.song?" · ♪ "+esc((D.songs.find(x=>x.id===r.song)||{}).title||""):""}${r.file?` · <a href="${esc(r.file)}" target="_blank" rel="noopener">PDF</a>`:""}</div></div><button type="button" class="chip ${r.status==="paid"?"ok":"warn"}" data-act="toggleInv" data-id="${r.id}" style="border:0">${r.status==="paid"?t("paid"):t("unpaid")}</button><span class="mono" style="min-width:70px;text-align:right">${eur(r.amount)}</span></div>`).join("")||`<p class="empty">${t("nothing")}</p>`}</div></div></div>`},
+  <div class="panel"><h2>${t("invoiceNew")}</h2><form class="form" data-form="invoice"><div class="field"><label class="label" for="inv-vendor">${t("vendor")}</label><input id="inv-vendor" name="vendor" required></div><div class="field"><label class="label" for="inv-nr">${t("invNr")}</label><input id="inv-nr" name="nr"></div><div class="field"><label class="label" for="inv-date">${t("date")}</label><input id="inv-date" name="date" type="date" required></div><div class="field"><label class="label" for="inv-amount">${t("amount")}</label><input id="inv-amount" name="amount" type="number" step="0.01" min="0" required></div><div class="field full"><label class="label" for="inv-items">${t("items")}</label><input id="inv-items" name="items"></div><div class="field"><label class="label" for="inv-song">${t("forSong")}</label><select id="inv-song" name="song">${songOpts}</select></div><div class="field"><label class="label" for="inv-up">${S.lang==="de"?"PDF oder Foto hochladen":"Upload PDF or photo"}</label><input id="inv-up" name="upload" type="file" accept="application/pdf,image/jpeg,image/png"></div><div class="field"><label class="label" for="inv-file">${S.lang==="de"?"oder Drive Link":"or Drive link"}</label><input id="inv-file" name="file" type="url" placeholder="https://drive.google.com/…"></div><div class="full"><button class="btn primary" type="submit">${t("add")}</button></div></form><p class="log" style="margin:10px 0 0">${t("invHint")}</p></div>
+  <div class="panel" style="grid-column:1/-1"><div class="panel-head"><h2>${t("invoices")}</h2><span class="chip">${inv.length}</span></div><div class="rows">${inv.map(r=>`<div class="row"><div class="grow"><div class="title">${esc(r.vendor)}</div><div class="muted" style="font-size:.82rem">${fmt(r.date)}${r.nr?" · Nr. "+esc(r.nr):""}${r.items?" · "+esc(r.items):""}${r.song?" · ♪ "+esc((D.songs.find(x=>x.id===r.song)||{}).title||""):""}${invFileHtml(r)}</div></div><button type="button" class="chip ${r.status==="paid"?"ok":"warn"}" data-act="toggleInv" data-id="${r.id}" style="border:0">${r.status==="paid"?t("paid"):t("unpaid")}</button><span class="mono" style="min-width:70px;text-align:right">${eur(r.amount)}</span></div>`).join("")||`<p class="empty">${t("nothing")}</p>`}</div></div></div>`},
 ideas(){
   return `<div class="grid cols-2"><div class="panel"><h2>${t("ideaNew")}</h2><form class="form" data-form="idea"><div class="field full"><label class="label" for="ideaTitle">${t("ideaTitle")}</label><input id="ideaTitle" name="title" required></div><div class="field full"><label class="label" for="ideaText">${t("lyrics")}</label><textarea id="ideaText" name="text"></textarea></div><div class="field full"><label class="label" for="ideaMemo">${t("memoLink")}</label><input id="ideaMemo" name="memo" type="url" placeholder="https://drive.google.com/…"></div><div class="full"><button class="btn primary" type="submit">${t("add")}</button></div></form></div>
   <div class="panel"><h2>${t("ideas")}</h2><div class="rows">${D.ideas.map(i=>`<div class="row"><div class="grow"><div class="title">${esc(i.title)}</div><div class="muted" style="font-size:.85rem">${t("from")} ${esc(nm(i.by))} · ${fmt(i.date)}${i.memo?` · <a href="${esc(i.memo)}" target="_blank" rel="noopener">🎙 Memo</a>`:""}</div>${i.text?`<div style="font-size:.9rem;margin-top:4px;white-space:pre-wrap">${esc(i.text)}</div>`:""}</div>${canAll()?`<button type="button" class="btn small" data-act="ideaToSong" data-id="${i.id}">${t("toPipeline")}</button>`:""}</div>`).join("")||`<p class="empty">${t("nothing")}</p>`}</div></div></div>`},
@@ -523,7 +536,7 @@ function renderSheet(){
   const r=document.getElementById("sheetRoot");if(!S.sheet){r.innerHTML="";document.body.style.overflow="";return}
   const html=SHEETS[S.sheet.type](S.sheet.id);if(!html){S.sheet=null;r.innerHTML="";return}
   const keep=r.querySelector(".sheet");const top=keep?keep.scrollTop:0;
-  r.innerHTML=`<div class="sheet-bg" data-act="closeBg"><div class="sheet" role="dialog" aria-modal="true">${html}</div></div>`;
+  r.innerHTML=`<div class="sheet-bg" data-act="closeBg"><div class="sheet${S.sheet.type==="session"?" wide":""}" role="dialog" aria-modal="true">${html}</div></div>`;
   r.querySelector(".sheet").scrollTop=top;document.body.style.overflow="hidden";
 }
 const head=(eyebrow,title)=>`<div class="sheet-head"><div><div class="label">${esc(eyebrow)}</div><h1>${esc(title)}</h1></div><button type="button" class="x" data-act="close" aria-label="Schließen">✕</button></div>`;
@@ -633,7 +646,9 @@ const saveSong=s=>{const base=song(s.id)&&song(s.id).updated_at;return run(async
 const songOp=(id,op,extra,local)=>run(async()=>put(D.songs,await api("songOp",Object.assign({id,op},extra))),local);
 const saveTask=tk=>{const base=task(tk.id)&&task(tk.id).updated_at;return run(async()=>put(D.tasks,await api("saveTask",{task:tk,base})),()=>put(D.tasks,clone(tk)))};
 const saveSession=s=>{const base=sess(s.id)&&sess(s.id).updated_at;return run(async()=>put(D.sessions,await api("saveSession",{session:s,base})),()=>put(D.sessions,clone(s)))};
-const saveInvoice=r=>{const base=(D.money.invoices.find(x=>x.id===r.id)||{}).updated_at;return run(async()=>put(D.money.invoices,await api("saveInvoice",{invoice:r,base})),()=>put(D.money.invoices,clone(r)))};
+// big profile pictures are kept in memory once loaded, so a second tap is instant
+const AVBIG={};
+const saveInvoice=(r,file)=>{const base=(D.money.invoices.find(x=>x.id===r.id)||{}).updated_at;return run(async()=>{const upload=file?await readUpload(file):undefined;if(upload)toast(S.lang==="de"?"Lädt hoch…":"Uploading…");put(D.money.invoices,await api("saveInvoice",{invoice:r,base,upload}));if(upload)toast(t("saved"))},()=>put(D.money.invoices,clone(r)))};
 
 function inviteSheet(inv){
   const link=inv.link||location.origin+location.pathname+"?m="+encodeURIComponent(inv.id);
@@ -698,12 +713,13 @@ document.addEventListener("click",e=>{
     else{const c=clone(sess(id));c.links.splice(i,1);saveSession(c)}
     return}
   case "ideaToSong":run(async()=>{put(D.songs,await api("promoteIdea",{id}));D.ideas=D.ideas.filter(x=>x.id!==id);toast(t("saved"))});return;
+  case "invOpen":{const w=window.open("","_blank");api("getInvoiceFile",{id}).then(r=>{const b=Uint8Array.from(atob(r.data),c=>c.charCodeAt(0));const u=URL.createObjectURL(new Blob([b],{type:r.mime}));if(w)w.location.href=u;else{const a=document.createElement("a");a.href=u;a.download=r.name;a.click()}}).catch(err=>{if(w)w.close();toast(err.message||t("errSave"))});return}
   case "toggleInv":{const c=clone(D.money.invoices.find(x=>x.id===id));c.status=c.status==="paid"?"open":"paid";saveInvoice(c);return}
   case "exportPdf":run(async()=>{put(D.sessions,await api("exportProtocol",{id}));toast(t("pdfDone"))});return;
   case "invite":run(async()=>{const inv=await api("invite",{id});S.inviteHtml=inviteSheet(inv);S.sheet={type:"invite"}});return;
   case "copyInvite":{const ta=document.getElementById("inviteText");const txt=ta.value;try{navigator.clipboard.writeText(txt).then(()=>toast(t("saved")),()=>{ta.focus();ta.select()})}catch(_){ta.focus();ta.select()}return}
   case "prodToggle":{const m=mem(id);const perms=(m.perms||[]).includes("songs")?[]:["songs"];run(async()=>put(D.members,await api("saveMember",{member:Object.assign({},m,{perms})})));return}
-  case "avatarView":{const m=mem(id);if(!m||!m.avatar)return;const box=document.createElement("div");box.className="lightbox";box.setAttribute("role","dialog");box.innerHTML=`<img src="${m.avatar}" alt="${esc(m.name)}"><div class="lbname">${esc(m.name)}${m.full?" ("+esc(m.full)+")":""}</div>`;box.addEventListener("click",()=>box.remove());document.addEventListener("keydown",function k(ev){if(ev.key==="Escape"){box.remove();document.removeEventListener("keydown",k)}});document.body.appendChild(box);api("getAvatar",{id}).then(r=>{if(r&&r.image){const im=box.querySelector("img");if(im)im.src=r.image}}).catch(()=>{});return}
+  case "avatarView":{const m=mem(id);if(!m||!m.avatar)return;const big=AVBIG[id];const box=document.createElement("div");box.className="lightbox";box.setAttribute("role","dialog");box.innerHTML=`<img src="${big||m.avatar}" alt="${esc(m.name)}" class="${big?"":"loading"}"><div class="lbname">${esc(m.name)}${m.full?" ("+esc(m.full)+")":""}</div><div class="lbhint">${big?"":(S.lang==="de"?"Lädt in voller Qualität…":"Loading full quality…")}</div>`;box.addEventListener("click",()=>box.remove());document.addEventListener("keydown",function k(ev){if(ev.key==="Escape"){box.remove();document.removeEventListener("keydown",k)}});document.body.appendChild(box);if(big)return;api("getAvatar",{id}).then(r=>{if(r&&r.image){AVBIG[id]=r.image;const im=box.querySelector("img");if(im){im.onload=()=>{im.classList.remove("loading");const h=box.querySelector(".lbhint");if(h)h.textContent=""};im.src=r.image}}}).catch(()=>{const h=box.querySelector(".lbhint");if(h)h.textContent=""});return}
   case "addPg":{const l=document.querySelector(".pg-list");if(l)l.insertAdjacentHTML("beforeend",pgRow({status:"open"}));return}
   case "addPt":{const l=document.querySelector(".pt-list");if(l)l.insertAdjacentHTML("beforeend",ptRow());return}
   case "avatarRemove":run(async()=>{const r=await api("setAvatar",{image:""});put(D.members,r)});return;
@@ -714,6 +730,7 @@ document.addEventListener("click",e=>{
 document.addEventListener("change",e=>{
   const a=e.target.closest("[data-act='partOwner']");if(a&&D){const c=clone(song(a.dataset.id));c.parts[a.dataset.i].owner=a.value;saveSong(c)}
   const af=e.target.closest("[data-act='avatarFile']");if(af&&D&&af.files&&af.files[0]){const f=af.files[0];run(async()=>{const img=await shrinkImage(f);const big=await shrinkImage(f,1080,400000);const r=await api("setAvatar",{image:img,large:big});put(D.members,r);toast(t("saved"))},()=>{});return}
+  const ivf=e.target.closest("[data-act='invFile']");if(ivf&&D&&ivf.files&&ivf.files[0]){const c=clone(D.money.invoices.find(x=>x.id===ivf.dataset.id));saveInvoice(c,ivf.files[0]);return}
   const rl=e.target.closest("[data-act='relLink']");if(rl&&D){const v=rl.value.trim();if(v&&!/^https:\/\//.test(v)){toast(t("badUrl"));return}const c=clone(song(rl.dataset.id));const r=c.releases[rl.dataset.ri];r.links=Object.assign({},r.links||{},{[rl.dataset.k]:v});saveSong(c);return}
   const rd=e.target.closest("[data-act='relDate']");if(rd&&D){const c=clone(song(rd.dataset.id));c.releases[rd.dataset.ri].date=rd.value;saveSong(c)}
   const co=e.target.closest("[data-act='partCo']");if(co&&D){const c=clone(song(co.dataset.id));c.parts[co.dataset.i].co=co.value?[co.value]:[];saveSong(c)}
@@ -737,7 +754,7 @@ document.addEventListener("submit",e=>{
     else if(type==="task"){const c=clone(task(id));c.links=(c.links||[]).concat([{l:lab,u}]);saveTask(c)}
     else{const c=clone(sess(id));c.links=(c.links||[]).concat([{l:lab,u}]);saveSession(c)}
     return}
-  case "invoice":{saveInvoice({id:"r"+Date.now(),vendor:fd.get("vendor"),nr:fd.get("nr"),date:fd.get("date"),amount:Number(fd.get("amount")),items:fd.get("items"),song:fd.get("song"),status:"paid",file:fd.get("file")||""});return}
+  case "invoice":{const up=fd.get("upload");saveInvoice({id:"r"+Date.now(),vendor:fd.get("vendor"),nr:fd.get("nr"),date:fd.get("date"),amount:Number(fd.get("amount")),items:fd.get("items"),song:fd.get("song"),status:"paid",file:fd.get("file")||""},up&&up.size?up:null);return}
   case "idea":{run(async()=>{D.ideas.unshift(await api("addIdea",{title:fd.get("title"),text:fd.get("text"),memo:fd.get("memo")||""}));toast(t("saved"))});return}
   }
 });
