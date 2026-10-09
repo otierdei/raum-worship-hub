@@ -286,6 +286,10 @@ img.avatar[data-act]{cursor:zoom-in}
 .dend{display:grid;gap:16px;min-width:0}
 @media (max-width:900px){.dash{display:flex;flex-direction:column}.dash>.dcol{display:contents}.dend{order:1}.dash>.dcol>*{align-self:stretch;width:auto}}
 
+/* own name in task rows */
+.mine-name{font-weight:700;color:var(--bg);background:var(--area);border-radius:6px;padding:1px 7px}
+.owners{line-height:1.7}
+
 .toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:8px 14px;border-radius:8px;z-index:40;font-size:.88rem}
 
 @media (max-width:899px){
@@ -518,6 +522,8 @@ function toast(msg){const r=document.getElementById("toastRoot");r.innerHTML=`<d
 
 /* ---------- pieces ---------- */
 const owners=a=>a.length>3?a.slice(0,3).map(nm).join(", ")+" +"+(a.length-3):a.map(nm).join(", ");
+// own name first and highlighted, so everyone sees at a glance what is theirs
+function ownersHtml(a){const me=a.includes(S.me),rest=a.filter(x=>x!==S.me),shown=rest.slice(0,me?2:3);const parts=[...(me?[`<b class="mine-name">${esc(nm(S.me))}</b>`]:[]),...shown.map(x=>esc(nm(x)))];const more=rest.length-shown.length;return `<span class="owners">${parts.join(", ")}${more>0?" +"+more:""}</span>`}
 function stChip(s){return `<span class="chip ${s==="done"?"ok":s==="prog"?"warn":""}">${t("st."+s)}</span>`}
 function dueChip(tk){if(!tk.due)return "";if(tk.status==="done")return `<span class="chip">${fmt(tk.due)}</span>`;if(isOver(tk))return `<span class="chip bad">${t("overdue")} · ${fmt(tk.due)}</span>`;if(isToday(tk))return `<span class="chip warn">${t("today")}</span>`;return `<span class="chip">${fmt(tk.due)}</span>`}
 function prioChip(p){return p==="high"?`<span class="chip bad">${t("prio.high")}</span>`:p==="low"?`<span class="chip">${t("prio.low")}</span>`:""}
@@ -529,7 +535,7 @@ function taskRow(tk){
   const com=tk.comments.length?`<span class="chip">💬 ${tk.comments.length}</span>`:"";
   return `<div class="row"><button type="button" class="check ${cls}" data-act="cycleTask" data-id="${tk.id}" ${can?"":"disabled"} aria-label="${t("status")}: ${t("st."+tk.status)}">${tk.status==="done"?tick:""}</button>
   <div class="grow"><button type="button" class="link title ${tk.status==="done"?"struck":""}" data-act="openTask" data-id="${tk.id}" style="color:inherit">${esc(tk.title)}</button>
-  <div class="muted" style="font-size:.8rem;display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:2px">${esc(owners(tk.owners))}${tk.link?" · "+esc(linkName(tk.link)):""} ${subs}${com}</div></div>
+  <div class="muted" style="font-size:.8rem;display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:2px">${ownersHtml(tk.owners)}${tk.link?" · "+esc(linkName(tk.link)):""} ${subs}${com}</div></div>
   <div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end">${prioChip(tk.prio)}${dueChip(tk)}</div></div>`}
 function linksPanel(type,id,links,can){
   return `<div class="panel"><div class="panel-head"><h3>${t("links")}</h3></div><div class="rows">${links.map((l,i)=>`<div class="row"><div class="grow"><a href="${esc(l.u)}" target="_blank" rel="noopener">${esc(l.l)} ↗</a></div>${can?`<button type="button" class="btn small" data-act="delLink" data-type="${type}" data-id="${id}" data-i="${i}" aria-label="Link entfernen">✕</button>`:""}</div>`).join("")||`<p class="empty">${t("nothing")}</p>`}</div>
