@@ -307,6 +307,14 @@ img.avatar[data-act]{cursor:zoom-in}
 .chip.gchip{background:var(--area-soft);color:var(--fg)}
 .titleedit{margin:-4px 0 12px}
 .titleedit input{font-weight:600}
+/* login feedback and band logo */
+.loadbar{height:4px;border-radius:99px;background:var(--line);overflow:hidden;margin-top:10px}
+.loadbar>div{height:100%;width:40%;background:var(--brand);border-radius:99px;animation:loadslide 1.1s ease-in-out infinite}
+@keyframes loadslide{0%{transform:translateX(-100%)}100%{transform:translateX(250%)}}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:spin .7s linear infinite;vertical-align:-2px;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.loadbar>div,.spin{animation-duration:3s}}
+.mark{background:#c22626 url("icon-192.png") center/cover no-repeat;color:transparent!important;overflow:hidden}
 
 .toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:8px 14px;border-radius:8px;z-index:40;font-size:.88rem}
 
@@ -764,7 +772,7 @@ async function renderGate(){
   g.innerHTML=`<form class="gatebox" data-form="login"><div class="mark">R</div><h1>${t("hello")}</h1>
   <div class="field"><label class="label" for="login-member">${t("whoAreYou")}</label><select id="login-member" name="member" required><option value="">…</option>${opts}</select></div>
   <div class="field"><label class="label" for="login-code">${t("enterCode")}</label><input id="login-code" name="code" class="codein" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]{6}" required></div>
-  <button class="btn primary" type="submit">${t("login")}</button><p class="log" id="loginErr"></p></form>`;
+  <button class="btn primary" type="submit" id="loginBtn">${t("login")}</button><div class="loadbar" id="loginBar" hidden><div></div></div><p class="log" id="loginErr"></p></form>`;
 }
 function cached(){try{const c=JSON.parse(LS.get("rw-data")||"null");return c&&c.me&&c.me.id===LS.get("rw-member")?c:null}catch(e){return null}}
 function forget(){LS.del("rw-token");LS.del("rw-data");try{Object.keys(localStorage).filter(k=>k.startsWith("rw-proto-")).forEach(k=>localStorage.removeItem(k))}catch(e){}D=null}
@@ -918,8 +926,11 @@ document.addEventListener("change",e=>{
 document.addEventListener("submit",e=>{
   const f=e.target.closest("form[data-form]");if(!f)return;e.preventDefault();const fd=new FormData(f),id=f.dataset.id;
   switch(f.dataset.form){
-  case "login":{const err=document.getElementById("loginErr");err.textContent="";
-    api("login",{member:fd.get("member"),code:fd.get("code")}).then(r=>{LS.set("rw-token",r.token);LS.set("rw-member",fd.get("member"));D=r.data;S.me=D.me.id;render()}).catch(x=>{err.textContent=x.message});return}
+  case "login":{const err=document.getElementById("loginErr"),btn=document.getElementById("loginBtn"),bar=document.getElementById("loginBar");err.textContent="";
+    // visible feedback while the backend checks the code and loads the data (takes a few seconds)
+    if(btn){if(btn.disabled)return;btn.disabled=true;btn.innerHTML=`<span class="spin" aria-hidden="true"></span> ${S.lang==="de"?"Wird angemeldet…":"Signing in…"}`}if(bar)bar.hidden=false;
+    const reset=()=>{if(btn){btn.disabled=false;btn.textContent=t("login")}if(bar)bar.hidden=true};
+    api("login",{member:fd.get("member"),code:fd.get("code")}).then(r=>{LS.set("rw-token",r.token);LS.set("rw-member",fd.get("member"));D=r.data;S.me=D.me.id;render()}).catch(x=>{reset();err.textContent=x.message});return}
   case "taskTitle":{const ti=String(fd.get("title")||"").trim();const c=clone(task(id));if(!ti||c.title===ti)return;c.title=ti;saveTask(c);toast(t("saved"));return}
   case "meeting":{const ex=id?clone(sess(id)):null,kind=ex?(ex.kind||""):String(fd.get("kind")||""),date=String(fd.get("date")||""),title=String(fd.get("title")||"").trim(),inv=fd.getAll("inv");if(!date)return;
     if(kind==="gruppe"&&!title){toast(S.lang==="de"?"Gib dem Treffen einen Namen.":"Give the meeting a name.");return}
