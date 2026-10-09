@@ -289,6 +289,20 @@ img.avatar[data-act]{cursor:zoom-in}
 /* own name in task rows */
 .mine-name{font-weight:700;color:var(--bg);background:var(--area);border-radius:6px;padding:1px 7px}
 .owners{line-height:1.7}
+/* project manager overview */
+.ov-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:16px}
+.ov-stat{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:2px}
+.ov-stat b{font-size:1.6rem;line-height:1.1}
+.ov-stat span{font-size:.8rem;color:var(--muted)}
+.ov-stat.bad b{color:var(--bad,#b3261e)}
+.ov-stat.warn b{color:var(--warn,#8a5a00)}
+.ov-people{display:flex;flex-wrap:wrap;gap:6px}
+.ov-person{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--fg);font:inherit;font-size:.85rem;cursor:pointer}
+.ov-person[aria-pressed="true"]{background:var(--area);color:var(--bg);border-color:var(--area)}
+.ov-grid{margin-top:16px;align-items:start}
+.ov-bar{height:6px;border-radius:99px;background:var(--sunk,var(--line));overflow:hidden}
+.ov-bar>div{height:100%;background:var(--area);border-radius:99px}
+@media (max-width:600px){.ov-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
 
 .toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:8px 14px;border-radius:8px;z-index:40;font-size:.88rem}
 
@@ -537,6 +551,27 @@ function taskRow(tk){
   <div class="grow"><button type="button" class="link title ${tk.status==="done"?"struck":""}" data-act="openTask" data-id="${tk.id}" style="color:inherit">${esc(tk.title)}</button>
   <div class="muted" style="font-size:.8rem;display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:2px">${ownersHtml(tk.owners)}${tk.link?" · "+esc(linkName(tk.link)):""} ${subs}${com}</div></div>
   <div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end">${prioChip(tk.prio)}${dueChip(tk)}</div></div>`}
+// project manager overview: every open task, grouped by project, plus who is carrying what
+function overviewPage(){
+  const de=S.lang==="de",open=D.tasks.filter(x=>x.status!=="done"),over=open.filter(isOver);
+  const wk=new Date(TODAY);wk.setDate(wk.getDate()+7);
+  const soon=open.filter(x=>x.due&&!isOver(x)&&pd(x.due)<=wk),nodate=open.filter(x=>!x.due);
+  const byDue=(a,b)=>(isOver(b)-isOver(a))||(a.due||"9").localeCompare(b.due||"9");
+  const stat=(n,l,c)=>`<div class="ov-stat ${c||""}"><b>${n}</b><span>${l}</span></div>`;
+  const pf=S.ovPerson&&D.members.some(m=>m.id===S.ovPerson)?S.ovPerson:"";
+  const people=D.members.map(m=>{const o=open.filter(x=>x.owners.includes(m.id));return {m,o:o.length,v:o.filter(isOver).length}}).filter(x=>x.o).sort((a,b)=>b.v-a.v||b.o-a.o);
+  const pchips=people.map(p=>`<button type="button" class="ov-person" data-act="ovPerson" data-v="${p.m.id}" aria-pressed="${pf===p.m.id}">${esc(p.m.name)} <span class="mono">${p.o}</span>${p.v?`<span class="chip bad">${p.v}</span>`:""}</button>`).join("");
+  const scope=pf?open.filter(x=>x.owners.includes(pf)):open;
+  const key=x=>x.link&&x.link.type&&linkName(x.link)?x.link.type+":"+x.link.id:"none";
+  const groups={};scope.forEach(x=>{(groups[key(x)]=groups[key(x)]||[]).push(x)});
+  const order=Object.keys(groups).sort((a,b)=>groups[b].filter(isOver).length-groups[a].filter(isOver).length||(a==="none")-(b==="none")||groups[b].length-groups[a].length);
+  const panels=order.map(k=>{const l=groups[k].sort(byDue),lk=k==="none"?null:groups[k][0].link;
+    const all=lk?D.tasks.filter(x=>x.link&&x.link.type===lk.type&&x.link.id===lk.id):l,d=all.filter(x=>x.status==="done").length,ov=l.filter(isOver).length;
+    const title=lk?linkName(lk):(de?"Ohne Projekt":"No project"),pct=all.length?Math.round(d/all.length*100):0;
+    return `<div class="panel ov-group"><div class="panel-head"><h2>${esc(title)}</h2><span style="display:flex;gap:4px">${ov?`<span class="chip bad">${ov} ${de?"überfällig":"overdue"}</span>`:""}<span class="chip">${l.length} ${de?"offen":"open"}</span></span></div>${lk?`<div class="ov-bar" title="${d}/${all.length}"><div style="width:${pct}%"></div></div><div class="muted" style="font-size:.78rem;margin:4px 0 6px">${d} ${de?"von":"of"} ${all.length} ${de?"erledigt":"done"}</div>`:""}<div class="rows">${l.map(taskRow).join("")}</div></div>`}).join("");
+  return `<div class="ov-stats">${stat(open.length,de?"Offen":"Open")}${stat(over.length,de?"Überfällig":"Overdue",over.length?"bad":"")}${stat(soon.length,de?"Fällig in 7 Tagen":"Due in 7 days",soon.length?"warn":"")}${stat(nodate.length,de?"Ohne Datum":"No date")}</div>
+  <div class="panel"><div class="panel-head"><h2>${de?"Wer hat wie viel offen":"Open per person"}</h2>${pf?`<button type="button" class="link" data-act="ovPerson" data-v="">${de?"Alle zeigen":"Show all"} ›</button>`:""}</div><div class="ov-people">${pchips||`<p class="empty">${t("nothing")}</p>`}</div></div>
+  <div class="grid cols-2 ov-grid">${panels||`<div class="panel"><p class="empty">${t("nothing")}</p></div>`}</div>`}
 function linksPanel(type,id,links,can){
   return `<div class="panel"><div class="panel-head"><h3>${t("links")}</h3></div><div class="rows">${links.map((l,i)=>`<div class="row"><div class="grow"><a href="${esc(l.u)}" target="_blank" rel="noopener">${esc(l.l)} ↗</a></div>${can?`<button type="button" class="btn small" data-act="delLink" data-type="${type}" data-id="${id}" data-i="${i}" aria-label="Link entfernen">✕</button>`:""}</div>`).join("")||`<p class="empty">${t("nothing")}</p>`}</div>
   ${can?`<form data-form="link" data-type="${type}" data-id="${id}" class="form" style="margin-top:8px"><div class="field"><input id="ll-${type}-${id}" name="l" placeholder="${t("linkLabel")}" aria-label="${t("linkLabel")}" required></div><div class="field"><input id="lu-${type}-${id}" name="u" placeholder="${t("linkUrl")}" aria-label="${t("linkUrl")}" required></div><div class="full"><button class="btn small" type="submit">${t("addLink")}</button></div></form>`:""}</div>`}
@@ -591,8 +626,8 @@ tasks(){
   if(f==="mine")l=l.filter(x=>x.owners.includes(S.me));if(f==="over")l=l.filter(isOver);if(f==="done")l=l.filter(x=>x.status==="done");else if(f!=="all")l=l.filter(x=>x.status!=="done"||f==="mine");
   if(f==="mine"||f==="all")l.sort((a,b)=>(a.status==="done")-(b.status==="done")||(a.due||"9").localeCompare(b.due||"9"));
   const tab=(k,lab)=>`<button type="button" data-act="taskFilter" data-v="${k}" aria-pressed="${f===k}">${lab}</button>`;
-  return `<div class="tabs">${tab("mine",t("myTasks"))}${tab("all",t("allTasks"))}${tab("over",t("overdue"))}${tab("done",t("done"))}<button type="button" class="btn primary small" data-act="newTask" style="margin-left:auto">+ ${t("newTask")}</button></div>
-  <div class="grid">${f==="mine"?myPartsPanel(S.me):""}<div class="panel"><h2 style="margin-bottom:8px">${t("tasks")}</h2><div class="rows">${l.length?l.map(taskRow).join(""):`<p class="empty">${t("nothing")}</p>`}</div></div></div>`},
+  return `<div class="tabs">${tab("mine",t("myTasks"))}${tab("all",t("allTasks"))}${tab("over",t("overdue"))}${tab("done",t("done"))}${isLeader()?tab("ov",S.lang==="de"?"Übersicht":"Overview"):""}<button type="button" class="btn primary small" data-act="newTask" style="margin-left:auto">+ ${t("newTask")}</button></div>
+  ${f==="ov"&&isLeader()?overviewPage():`<div class="grid">${f==="mine"?myPartsPanel(S.me):""}<div class="panel"><h2 style="margin-bottom:8px">${t("tasks")}</h2><div class="rows">${l.length?l.map(taskRow).join(""):`<p class="empty">${t("nothing")}</p>`}</div></div></div>`}`},
 sessions(){
   const f=S.sessFilter, up=D.sessions.filter(s=>pd(s.date)>=TODAY).sort((a,b)=>a.date.localeCompare(b.date)), past=D.sessions.filter(s=>pd(s.date)<TODAY).sort((a,b)=>b.date.localeCompare(a.date));
   const l=f==="upcoming"?up:past;
@@ -795,6 +830,7 @@ document.addEventListener("click",e=>{
   case "openSession":if(!id)return;S.sheet={type:"session",id};break;
   case "newTask":S.sheet={type:"newTask"};break;
   case "taskFilter":S.taskFilter=v;break;
+  case "ovPerson":S.ovPerson=S.ovPerson===v?"":v;break;
   case "sessFilter":S.sessFilter=v;break;
   case "cycleTask":{const k=task(id);if(!canTask(k))return;const c=clone(k);c.status=cyc(c.status);saveTask(c);return}
   case "setTask":{const c=clone(task(id));c.status=v;saveTask(c);return}
