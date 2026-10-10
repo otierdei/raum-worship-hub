@@ -10,6 +10,8 @@ function setupStarten() { return setup(); }
 
 const P = PropertiesService.getScriptProperties();
 const DRIVE_PROTOKOLLE = "REDACTED_ID";
+// Drive folder shortcuts for the start page. They live here (not in the public frontend) and reach the app only after login.
+const DRIVE_QUICK = []; // REDACTED for the public repo: the 12 Drive folder shortcuts live only in the deployed Apps Script
 const INVITE_DAYS = 14;
 const MAX_FAILS = 5;
 const ROLES = ["leader", "middle", "member"];
@@ -229,6 +231,7 @@ function bootstrap_(me) {
     prayer: readAll_("prayer").sort((a, c) => String(c.date).localeCompare(String(a.date))).slice(0, 200),
     money: null,
     vision: null,
+    drive: { quick: DRIVE_QUICK },
     server_time: now_()
   };
   const st = {}; readAll_("settings").forEach(x => { st[x.key] = x.value; });
