@@ -465,7 +465,7 @@ const ACTIONS = {
     const lt = isLeitung_(s);
     const gr = s.kind === "gruppe";
     const sameKind = x => (x.kind || "") === (s.kind || "") && (!gr || x.title === s.title);
-    const fileBase = lt ? "REDACTED_ID" : gr ? "Protokoll_" + String(s.title || "Treffen").replace(/[^\wäöüÄÖÜß ]+/g, "").trim().replace(/\s+/g, "_") + "_" : "Protokoll_";
+    const fileBase = lt ? "Protokoll_Leiter_Treffen_" : gr ? "Protokoll_" + String(s.title || "Treffen").replace(/[^\wäöüÄÖÜß ]+/g, "").trim().replace(/\s+/g, "_") + "_" : "Protokoll_";
     const members = readAll_("members");
     const nm = id => (members.find(m => m.id === id) || { name: id }).name;
     const de = x => x ? String(x).split("-").reverse().join(".") : "";
