@@ -315,6 +315,9 @@ img.avatar[data-act]{cursor:zoom-in}
 @keyframes spin{to{transform:rotate(360deg)}}
 @media (prefers-reduced-motion:reduce){.loadbar>div,.spin{animation-duration:3s}}
 .mark{background:#c22626 url("icon-192.png") center/cover no-repeat;color:transparent!important;overflow:hidden}
+/* editing own prayer posts */
+.pedit{display:grid;gap:8px;margin:6px 0 10px}
+.pedit input,.pedit textarea{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--fg);font:inherit}
 
 .toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:8px 14px;border-radius:8px;z-index:40;font-size:.88rem}
 
@@ -447,12 +450,12 @@ function ptext(s){return String(s||"").split(/\n\s*\n/).map(par=>{const t2=par.t
   if(/^[„"“»]/.test(t2)){const body=isRef(last)?lines.slice(0,-1).join("\n"):t2;return `<blockquote class="pquote">${esc(body)}${isRef(last)?`<cite>${esc(last)}</cite>`:""}</blockquote>`}
   if(lines.length===1&&isRef(t2))return `<p class="pref">${esc(t2)}</p>`;return `<p>${esc(t2)}</p>`}).join("")}
 function prayerCard(p){const mineP=(p.pray||[]).includes(S.me),can=p.by===S.me||isLeader();const r=p.reacts||{};
-  return `<article class="panel pcard${p.answered?" answered":""}" id="pc-${esc(p.id)}"><div class="pc-head">${avatarHtml(mem(p.by)||{name:nm(p.by)})}<div class="grow"><b>${esc(nm(p.by))}</b><div class="muted" style="font-size:.8rem">${pwhen(p.date)}</div></div><span class="chip pk-${esc(p.kind)}">${pkind(p.kind)}${p.answered?" · "+(S.lang==="de"?"erhört ✓":"answered ✓"):""}</span></div>
-  ${p.ref?`<div class="pref">${esc(p.ref)}</div>`:""}<div class="ptext">${ptext(p.text)}</div>
+  return `<article class="panel pcard${p.answered?" answered":""}" id="pc-${esc(p.id)}"><div class="pc-head">${avatarHtml(mem(p.by)||{name:nm(p.by)})}<div class="grow"><b>${esc(nm(p.by))}</b><div class="muted" style="font-size:.8rem">${pwhen(p.date)}${p.edited?(S.lang==="de"?" · bearbeitet":" · edited"):""}</div></div><span class="chip pk-${esc(p.kind)}">${pkind(p.kind)}${p.answered?" · "+(S.lang==="de"?"erhört ✓":"answered ✓"):""}</span></div>
+  ${S.editP===p.id&&p.by===S.me?`<form class="pedit" data-form="editP" data-id="${esc(p.id)}"><input name="ref" value="${esc(p.ref||"")}" placeholder="${S.lang==="de"?"Bibelstelle (optional)":"Reference (optional)"}" aria-label="Bibelstelle"><textarea name="text" rows="6" required aria-label="Text">${esc(p.text)}</textarea><div style="display:flex;gap:8px"><button class="btn primary small" type="submit">${t("save")}</button><button type="button" class="btn small" data-act="editPCancel">${S.lang==="de"?"Abbrechen":"Cancel"}</button></div></form>`:`${p.ref?`<div class="pref">${esc(p.ref)}</div>`:""}<div class="ptext">${ptext(p.text)}</div>`}
   <div class="preacts">${p.kind==="anliegen"?`<button type="button" class="chip pray ${mineP?"on":""}" data-act="prayFor" data-id="${esc(p.id)}" aria-pressed="${mineP}" title="${esc((p.pray||[]).map(nm).join(", "))}">🙏 ${S.lang==="de"?"Ich bete mit":"I'm praying"}${(p.pray||[]).length?" · "+(p.pray||[]).length:""}</button>`:""}${PEMOJI.map(e=>{const l=r[e]||[];return `<button type="button" class="chip emo ${l.includes(S.me)?"on":""}" data-act="reactP" data-id="${esc(p.id)}" data-v="${e}" aria-pressed="${l.includes(S.me)}" title="${esc(l.map(nm).join(", "))}">${e}${l.length?` <span>${l.length}</span>`:""}</button>`}).join("")}</div>
   ${(p.pray||[]).length&&p.kind==="anliegen"?`<div class="muted" style="font-size:.8rem;margin-top:6px">${S.lang==="de"?"Beten mit":"Praying"}: ${esc(p.pray.map(nm).join(", "))}</div>`:""}
   <div class="pcomments">${(p.comments||[]).map(c=>`<div class="pcomment"><b>${esc(nm(c.by))}</b> ${esc(c.text)}</div>`).join("")}<form class="quickadd" data-form="commentP" data-id="${esc(p.id)}"><input name="text" placeholder="${S.lang==="de"?"Antworten…":"Reply…"}" aria-label="Kommentar" required><button class="btn small" type="submit">↵</button></form></div>
-  ${can?`<div class="pc-tools">${p.kind==="anliegen"&&p.by===S.me?`<button type="button" class="link" data-act="answeredP" data-id="${esc(p.id)}">${p.answered?(S.lang==="de"?"Doch nicht erhört":"Mark as open"):(S.lang==="de"?"Als erhört markieren":"Mark as answered")}</button>`:""}<button type="button" class="link" data-act="deleteP" data-id="${esc(p.id)}">${S.lang==="de"?"Löschen":"Delete"}</button></div>`:""}</article>`}
+  ${can?`<div class="pc-tools">${p.kind==="anliegen"&&p.by===S.me?`<button type="button" class="link" data-act="answeredP" data-id="${esc(p.id)}">${p.answered?(S.lang==="de"?"Doch nicht erhört":"Mark as open"):(S.lang==="de"?"Als erhört markieren":"Mark as answered")}</button>`:""}${p.by===S.me?`<button type="button" class="link" data-act="editP" data-id="${esc(p.id)}">${S.lang==="de"?"Bearbeiten":"Edit"}</button>`:""}<button type="button" class="link" data-act="deleteP" data-id="${esc(p.id)}">${S.lang==="de"?"Löschen":"Delete"}</button></div>`:""}</article>`}
 function prayerPage(){const f=S.prayFilter||"all";const l=(D.prayer||[]).filter(p=>f==="all"||p.kind===f);const k=S.prayKind||"impuls";
   const ph={impuls:"Was hat Gott dir aufs Herz gelegt?",vers:"Bibelvers oder Abschnitt einfügen, gern mit ein paar Worten dazu",anliegen:"Wofür dürfen wir beten?",dank:"Wofür bist du dankbar? Was hat Gott getan?"};
   return `<div class="panel" data-area="prayer"><h2 style="margin-bottom:10px">${S.lang==="de"?"Teilen":"Share"}</h2><form data-form="prayer" class="pform"><div class="tabs" role="group">${PKINDS.map(([v])=>`<button type="button" data-act="prayKind" data-v="${v}" aria-pressed="${k===v}">${pkind(v)}</button>`).join("")}</div>
@@ -867,6 +870,8 @@ document.addEventListener("click",e=>{
   case "openTask":S.sheet={type:"task",id};break;
   case "openSession":if(!id)return;S.sheet={type:"session",id};break;
   case "newMeeting":S.sheet={type:"newMeeting"};break;
+  case "editP":S.editP=id;break;
+  case "editPCancel":S.editP=null;break;
   case "editMeeting":S.sheet={type:"editMeeting",id};break;
   case "delMeeting":if(!confirmDel(id))return;run(async()=>{await api("deleteSession",{id});D.sessions=D.sessions.filter(x=>x.id!==id);S.sheet=null;toast(S.lang==="de"?"Treffen gelöscht":"Meeting deleted")});return;
   case "newTask":S.sheet={type:"newTask"};break;
@@ -931,6 +936,7 @@ document.addEventListener("submit",e=>{
     if(btn){if(btn.disabled)return;btn.disabled=true;btn.innerHTML=`<span class="spin" aria-hidden="true"></span> ${S.lang==="de"?"Wird angemeldet…":"Signing in…"}`}if(bar)bar.hidden=false;
     const reset=()=>{if(btn){btn.disabled=false;btn.textContent=t("login")}if(bar)bar.hidden=true};
     api("login",{member:fd.get("member"),code:fd.get("code")}).then(r=>{LS.set("rw-token",r.token);LS.set("rw-member",fd.get("member"));D=r.data;S.me=D.me.id;render()}).catch(x=>{reset();err.textContent=x.message});return}
+  case "editP":{const tx=String(fd.get("text")||"").trim();if(!tx)return;run(async()=>{const np=await api("editPrayer",{id,text:tx,ref:String(fd.get("ref")||"")});D.prayer=D.prayer.map(x=>x.id===id?np:x);S.editP=null;toast(t("saved"))});return}
   case "taskTitle":{const ti=String(fd.get("title")||"").trim();const c=clone(task(id));if(!ti||c.title===ti)return;c.title=ti;saveTask(c);toast(t("saved"));return}
   case "meeting":{const ex=id?clone(sess(id)):null,kind=ex?(ex.kind||""):String(fd.get("kind")||""),date=String(fd.get("date")||""),title=String(fd.get("title")||"").trim(),inv=fd.getAll("inv");if(!date)return;
     if(kind==="gruppe"&&!title){toast(S.lang==="de"?"Gib dem Treffen einen Namen.":"Give the meeting a name.");return}
