@@ -510,6 +510,17 @@ body[data-area="sessions"] #view .date,#view .panel[data-area] .date{background:
 .sheet .panel>h2,.sheet .panel>h3,.sheet .panel .panel-head h2,.sheet .panel .panel-head h3,.sheet .panel>.panel-head>*:first-child{font:400 1.4rem/1 var(--head);letter-spacing:.14em;text-transform:uppercase}
 .sheet-head h1{font:400 3rem/.9 var(--poster);text-transform:uppercase;letter-spacing:.005em;margin-top:4px;overflow-wrap:anywhere}
 @media (max-width:899px){.sheet-head h1{font-size:2.6rem}}
+/* iPhone: Inhalt beginnt unter der Statusleiste, damit die Unschärfe oben keinen Text verdeckt */
+@media (max-width:899px){main{padding-top:calc(14px + env(safe-area-inset-top,0px))} body[data-area="dashboard"] main{padding-top:0}}
+/* Meine Songs und Parts: Plakat Tabelle (Oti, 12.10.) */
+.ptab .psong{padding:12px 0 4px}
+.ptab .psong-h{display:flex;justify-content:space-between;align-items:baseline;gap:12px;border-bottom:2px solid var(--fg);padding-bottom:4px;margin-bottom:2px}
+.ptab .ptitle{all:unset;cursor:pointer;font:400 1.35rem/1.05 var(--head);letter-spacing:.1em;text-transform:uppercase;overflow-wrap:anywhere}
+.ptab .ptitle:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.ptab .pstage{font:400 1rem var(--head);letter-spacing:.14em;color:var(--accent);white-space:nowrap;text-transform:uppercase}
+.ptab .ppart{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px solid var(--line);font:500 .9rem/1.35 var(--body)}
+.ptab .ppart em{font:400 .95rem var(--head);letter-spacing:.12em;font-style:normal;color:var(--muted);white-space:nowrap;text-transform:uppercase}
+.ptab .ppart.s-prog em{color:var(--accent)} .ptab .ppart.s-done em{color:var(--fg)} .ptab .ppart.s-done span{color:var(--muted)}
 
 </style>
 
@@ -792,7 +803,7 @@ function myParts(uid){
     s.parts.forEach(p=>{if(showPart(s,p)&&partMine(p,uid)&&!p.ext)items.push({name:p.name+(p.note?" · "+p.note:""),status:p.status})});
     return {s,items}}).filter(x=>x.items.length).sort((a,b)=>STAGES.indexOf(b.s.stage)-STAGES.indexOf(a.s.stage));}
 function myPartsPanel(uid){const l=myParts(uid);
-  return `<div class="panel" data-area="songs"><div class="panel-head"><h2>${t("myParts")}</h2><span class="chip">${l.reduce((a,x)=>a+x.items.filter(i=>i.status!=="done").length,0)} ${t("open")}</span></div><div class="rows">${l.map(({s,items})=>`<div class="row" style="align-items:flex-start"><div class="grow"><button type="button" class="link title" data-act="openSong" data-id="${s.id}" style="color:inherit">${esc(s.title)}</button> <span class="chip">${t("stages."+s.stage)}</span><div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px">${items.map(i=>`<span class="chip ${i.status==="done"?"ok":i.status==="prog"?"warn":""}">${esc(i.name)}</span>`).join("")}</div></div></div>`).join("")||`<p class="empty">${t("noParts")}</p>`}</div></div>`}
+  return `<div class="panel" data-area="songs"><div class="panel-head"><h2>${t("myParts")}</h2><span class="chip">${l.reduce((a,x)=>a+x.items.filter(i=>i.status!=="done").length,0)} ${t("open")}</span></div><div class="rows ptab">${l.map(({s,items})=>`<div class="psong"><div class="psong-h"><button type="button" class="ptitle" data-act="openSong" data-id="${s.id}">${esc(s.title)}</button><span class="pstage">${t("stages."+s.stage)}</span></div>${items.map(i=>`<div class="ppart s-${i.status}"><span>${esc(i.name)}</span><em>${t("st."+i.status)}</em></div>`).join("")}</div>`).join("")||`<p class="empty">${t("noParts")}</p>`}</div></div>`}
 function quickPanel(){if(!quickList().length)return "";return `<div class="panel"><h2>${t("quick")}</h2><div style="display:flex;flex-wrap:wrap;gap:6px">${quickList().map(([l,id])=>`<a class="chip acc" href="https://drive.google.com/drive/folders/${id}" target="_blank" rel="noopener">${esc(l)} ↗</a>`).join("")}</div></div>`}
 // start page: the invite only meetings I am part of
 function myMeetingsPanel(){const l=D.sessions.filter(s=>invitedTo(s)&&pd(s.date)>=TODAY).sort((a,b)=>a.date.localeCompare(b.date));if(!l.length)return "";
