@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Raum Hub</title>
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#c4262b">
+<meta name="theme-color" content="#FAF7F2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0B0B0C" media="(prefers-color-scheme: dark)">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Raum Hub">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -338,6 +339,173 @@ img.avatar[data-act]{cursor:zoom-in}
   .sb{grid-template-columns:96px 1fr 22px}
 }
 @media (prefers-reduced-motion:no-preference){.sheet{animation:slide .18s ease-out}@keyframes slide{from{transform:translateX(24px);opacity:.6}}}
+/* ===== Redesign Oktober 2026: Raum Corporate Design (Visionsdokument)
+   Schrift: Anton (große Zahlen, Titel), Bebas Neue (Überschriften, Labels), DM Sans (Text).
+   Farben: Raum Rot, Raum Blau, Papier. Hell = Plakat, dunkel = Worship Night.
+   Kanten eckig wie im Visionsdokument; nur die schwebende Leiste unten ist rund (Apple Stil). ===== */
+@font-face{font-family:"Anton";src:url("fonts/anton-400.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Bebas Neue";src:url("fonts/bebas-400.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"DM Sans";font-weight:400;src:url("fonts/dmsans-400.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"DM Sans";font-weight:500;src:url("fonts/dmsans-500.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"DM Sans";font-weight:600 700;src:url("fonts/dmsans-700.woff2") format("woff2");font-display:swap}
+:root{
+  --bg:#FAF7F2; --surface:#FFFFFF; --sunk:#EFEAE2; --line:#DDD6CB;
+  --fg:#141414; --muted:#615C55; --accent:#D9232A; --accent-soft:#FBE4E2; --on-accent:#FFFFFF; --brand:#E5262B;
+  --rule:#1E4F9C; --blue:#1E4F9C;
+  --poster:"Anton", "Impact", "Arial Narrow", sans-serif;
+  --head:"Bebas Neue", "Anton", "Arial Narrow", sans-serif;
+  --display:"DM Sans", "Helvetica Neue", "Segoe UI", sans-serif;
+  --body:"DM Sans", "Helvetica Neue", "Segoe UI", sans-serif;
+  --mono:"DM Sans", ui-monospace, monospace;
+  --r:0px; --glass:rgba(255,255,255,.58); --glass-line:rgba(0,0,0,.08); --glass-on:rgba(0,0,0,.075);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0B0B0C; --surface:#151517; --sunk:#1E1E21; --line:#2C2C30;
+  --fg:#F2EFEA; --muted:#9A958F; --accent:#F0484C; --accent-soft:#2A1314; --on-accent:#FFFFFF; --brand:#E5262B;
+  --rule:#F2EFEA; --glass:rgba(30,30,32,.55); --glass-line:rgba(255,255,255,.13); --glass-on:rgba(255,255,255,.15)}}
+:root[data-theme="dark"]{
+  --bg:#0B0B0C; --surface:#151517; --sunk:#1E1E21; --line:#2C2C30;
+  --fg:#F2EFEA; --muted:#9A958F; --accent:#F0484C; --accent-soft:#2A1314; --on-accent:#FFFFFF; --brand:#E5262B;
+  --rule:#F2EFEA; --glass:rgba(30,30,32,.55); --glass-line:rgba(255,255,255,.13); --glass-on:rgba(255,255,255,.15)}
+:root{--on-area:#FFFFFF}
+
+body{font:15px/1.5 var(--body);-webkit-font-smoothing:antialiased}
+/* Papierstruktur (hell) und Filmkorn (dunkel), wie im Visionsdokument und auf dem Visionboard */
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;background:url("img/paper.jpg") center/cover;opacity:.10;mix-blend-mode:multiply}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) body::before{background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .5 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");opacity:.07;mix-blend-mode:normal}}
+:root[data-theme="dark"] body::before{background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .5 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");opacity:.07;mix-blend-mode:normal}
+.app{position:relative;z-index:1}
+
+/* Überschriften */
+h1,h2,h3{font-family:var(--body);font-weight:700;letter-spacing:0}
+#title{font:400 2.5rem/.95 var(--poster);text-transform:uppercase;letter-spacing:.005em}
+#title::before{display:none}
+.panel>h2,.panel-head h2,.panel h2{font:400 1.45rem/1 var(--head);letter-spacing:.14em;text-transform:uppercase}
+h3{font-weight:700}
+.label{font:400 .95rem/1.1 var(--head);letter-spacing:.16em;color:var(--muted)}
+.stagehead{font:400 1.7rem/1 var(--head);letter-spacing:.12em;text-transform:uppercase}
+.stagehead::before{width:12px;height:12px;border-radius:0;background:var(--brand)}
+.stagehead .cnt{font:400 1.5rem var(--poster);background:none;color:var(--accent);padding:0}
+.money{font:400 2.6rem/1 var(--poster);letter-spacing:.01em}
+
+/* Flächen: keine Karten mit runden Ecken, sondern Abschnitte mit Linie oben wie im Visionsdokument */
+#view .panel,#view .panel[data-area]{background:transparent;border:0;border-top:3px solid var(--rule);border-radius:0;padding:14px 0 6px}
+#view .panel-head{margin-bottom:8px}
+#view .panel[data-area] .panel-head .link,.link{color:var(--accent);font:400 1.05rem var(--head);letter-spacing:.12em}
+main{background-image:none}
+.dash,.dash>.dcol,.dend{gap:26px}
+/* Abschnitte auf der Startseite nummerieren: 01, 02, 03 */
+.dash .panel h2[data-n]::before{content:attr(data-n);font:400 2.1rem/1 var(--poster);color:var(--accent);letter-spacing:0;margin-right:10px;vertical-align:-3px}
+.row{border-top:1px solid var(--line)}
+.row .title{font-weight:600}
+
+/* Chips, Buttons, Felder: eckig */
+.chip{border-radius:0;font-weight:600;letter-spacing:.02em}
+.chip.bad{background:var(--brand);color:#fff}
+.chip.acc{background:var(--accent-soft);color:var(--accent)}
+.badge{border-radius:0;background:var(--brand)}
+.btn{border-radius:0;border:1.5px solid var(--fg);background:transparent;font-weight:600}
+.btn:hover{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.btn.primary{background:var(--brand);border-color:var(--brand);color:#fff}
+.btn.primary:hover{background:var(--fg);border-color:var(--fg)}
+.field input,.field select,.field textarea,.quickadd input,.pform textarea,.pform input,.pedit input,.pedit textarea,.protokoll textarea,.reldate,.streamedit input,.pg-row input,.pg-row select,.pt-row input,.pt-row select,.who select{border-radius:0;border:1.5px solid var(--line);background:var(--surface)}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--fg);outline:0}
+.note{border-radius:0;border-left:3px solid var(--rule);background:var(--sunk)}
+.check{border-radius:0;border-color:var(--fg)}
+.check.done{background:var(--fg);border-color:var(--fg);color:var(--bg)}
+.x{border-radius:0;background:transparent;border:1.5px solid var(--fg)}
+
+/* Zu oder Absage: drei Felder nebeneinander wie auf dem Plakat */
+.rsvp{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;border:1.5px solid var(--fg);max-width:420px}
+.rsvp button{border:0;border-left:1.5px solid var(--fg);border-radius:0;background:transparent;font:400 1.05rem/2.2 var(--head);letter-spacing:.16em;padding:0}
+.rsvp button:first-child{border-left:0}
+.rsvp button[aria-pressed="true"]{background:var(--brand);color:#fff}
+.tabs button,.seg,.seg button,.steps button{border-radius:0}
+.tabs button{border:1.5px solid var(--fg);background:transparent;font-weight:600}
+.tabs button[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
+.steps button.now{background:var(--brand);border-color:var(--brand);color:#fff}
+
+/* Datum als große Zahl */
+.date{border-radius:0;background:var(--brand);color:#fff;width:70px}
+.date b{font:400 2.1rem/1 var(--poster)}
+.date span{font:400 .95rem var(--head);letter-spacing:.14em}
+body[data-area="sessions"] #view .date,#view .panel[data-area] .date{background:var(--brand);color:#fff}
+.row.lrow .date{background:var(--area);color:var(--bg)}
+
+/* Songs: Phasen als Balken, Karten eckig */
+.sb .track{border-radius:0;height:12px;background:var(--sunk)}
+.sb .fill{border-radius:0;background:var(--rule)}
+.sb:first-child .fill{background:var(--brand)}
+.sb .n{font:400 1.15rem var(--poster)}
+.col{border-radius:0;background:var(--sunk)}
+.col h3{font:400 1.2rem var(--head);letter-spacing:.12em;text-transform:uppercase}
+.card{border-radius:0;border:1px solid var(--line);background:var(--surface)}
+.card:hover{border-color:var(--fg)}
+.prog,.prog i,.ov-bar,.ov-bar>div{border-radius:0}
+.prog i{background:var(--brand)}
+.ov-stat{border-radius:0;background:transparent;border:0;border-top:3px solid var(--rule);padding:10px 0}
+.ov-stat b{font:400 2.2rem/1 var(--poster)}
+.ov-person,.attchip{border-radius:0}
+.mine-name{border-radius:0;background:var(--brand);color:#fff}
+
+/* Gebet & Impulse */
+.pquote{border-radius:0;border-left:3px solid var(--brand);background:var(--sunk)}
+.pquote cite,.pref{color:var(--accent)}
+.preacts .chip{border-radius:0}
+.preacts .chip.on{border-color:var(--brand);background:var(--accent-soft)}
+
+/* Seitenleiste am Laptop */
+.side{background:var(--bg);border-right:2px solid var(--fg);gap:26px}
+.brand b{font:400 1.5rem/1 var(--poster);text-transform:uppercase;letter-spacing:.01em}
+.mark{border-radius:0}
+.nav button{border-radius:0;font:400 1.2rem/1 var(--head);letter-spacing:.12em;color:var(--fg);padding:10px 10px}
+.nav button .ico{color:var(--fg)}
+.nav button:hover{background:var(--sunk)}
+.nav button[aria-current="page"],.nav button[aria-current="page"][data-area]{background:transparent;color:var(--accent);box-shadow:inset 4px 0 0 var(--brand)}
+.nav button[aria-current="page"] .ico{color:var(--accent)}
+
+/* Blätter (Song, Aufgabe, Treffen) */
+.sheet{background:var(--bg);box-shadow:inset 0 4px 0 var(--brand);background-image:none}
+.sheet-head h2{font:400 2rem/1 var(--poster);letter-spacing:.005em;text-transform:uppercase}
+.fact{border-radius:0;background:transparent;border:0;border-top:2px solid var(--rule);padding:8px 0}
+.fact b{font-family:var(--body);font-weight:700}
+@media (min-width:900px){.sheet.wide{border-radius:0;box-shadow:inset 0 4px 0 var(--brand),0 30px 80px rgba(0,0,0,.35)}}
+.fb-card{border-radius:0}
+.lightbox img{border-radius:0}
+.toast{border-radius:0;font-weight:600;bottom:calc(96px + env(safe-area-inset-bottom,0px))}
+
+/* Startseite: Bandfoto mit nächster Session */
+.hero{position:relative;margin:0 0 6px;min-height:360px;display:flex;flex-direction:column;justify-content:space-between;color:#fff;background:#141414 url("img/band.jpg") 50% 28%/cover no-repeat;padding:18px 20px 18px;overflow:hidden}
+.hero::before{content:"";position:absolute;inset:0;background:linear-gradient(rgba(0,0,0,.38),transparent 32%,transparent 42%,rgba(0,0,0,.72))}
+.hero>*{position:relative}
+.hero-top{display:flex;justify-content:space-between;align-items:center;font:400 1.05rem var(--head);letter-spacing:.24em}
+.hero-top button{all:unset;cursor:pointer;font:inherit;letter-spacing:inherit}
+.hero-k{font:400 1rem var(--head);letter-spacing:.24em}
+.hero h2{font:400 clamp(3rem,13vw,4.6rem)/.86 var(--poster);text-transform:uppercase;letter-spacing:.005em;margin-top:4px;max-width:12ch;text-wrap:balance}
+.hero-m{font:500 .85rem var(--body);margin-top:8px;opacity:.95}
+.hero-m button{all:unset;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.hero-rsvp{margin:12px 0 22px}
+.hero-rsvp .rsvp{max-width:none}
+@media (min-width:900px){.hero{min-height:380px;padding:24px 28px}.hero-rsvp .rsvp{max-width:520px}}
+
+/* Handy: Foto bis an den Rand, schwebende Glasleiste unten wie bei Apple */
+@media (max-width:899px){
+  main{padding-inline:16px;padding-block:12px 120px}
+  #title{font-size:2.1rem}
+  body[data-area="dashboard"] main{padding-top:0}
+  body[data-area="dashboard"] .top{display:none}
+  .hero{margin:0 -16px 6px;min-height:calc(372px + env(safe-area-inset-top,0px));padding-top:calc(16px + env(safe-area-inset-top,0px))}
+  .hero-rsvp{margin:14px 0 22px}
+  .bottom{left:12px;right:12px;bottom:calc(10px + env(safe-area-inset-bottom,0px));padding:6px;border-radius:34px;border:.5px solid var(--glass-line);border-top:.5px solid var(--glass-line);
+    background:var(--glass);-webkit-backdrop-filter:blur(22px) saturate(180%);backdrop-filter:blur(22px) saturate(180%);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 8px 30px rgba(0,0,0,.2)}
+  .bottom button{border-radius:28px;padding:8px 0 7px;font:600 .7rem var(--body);color:var(--fg);opacity:.85}
+  .bottom button[aria-current="page"],.bottom button[aria-current="page"][data-area]{background:var(--glass-on);color:var(--fg);opacity:1}
+  .bottom button[aria-current="page"]::before{display:none}
+  .bottom .badge{top:3px}
+}
+.link.title{font:600 .98rem/1.35 var(--body);letter-spacing:0;text-transform:none}
+
 </style>
 
 <div class="app">
@@ -552,7 +720,9 @@ function shell(){
   document.getElementById("bottomnav").innerHTML=BOTTOM.map(k=>{const cur=k==="more"?moreViews.includes(S.view):S.view===k;return `<button type="button" data-nav="${k}" data-area="${areaOf(k==="more"&&cur?S.view:k)}" ${cur?'aria-current="page"':""}>${icon(k)}<span>${t(k)}</span>${k==="tasks"?badge:""}</button>`}).join("");
   document.getElementById("title").textContent=t(S.view);
 }
-function render(){if(!D){renderGate();return}document.getElementById("gate").hidden=true;try{localStorage.setItem("rw-data",JSON.stringify(D))}catch(e){}if(!T.de[S.view]||(false))S.view="dashboard";shell();const v=document.getElementById("view");v.innerHTML=(VIEWS[S.view]||VIEWS.dashboard)();renderSheet();const sr=document.getElementById("sheetRoot");if(sr)sr.dataset.area=S.sheet?((S.sheet.type==="session"&&typeof isLeitung==="function"&&isLeitung(sess(S.sheet.id)))?"leitung":sheetArea(S.sheet.type)):areaOf(S.view);if(typeof applyCollapse==="function")applyCollapse();persist()}
+function render(){if(!D){renderGate();return}document.getElementById("gate").hidden=true;try{localStorage.setItem("rw-data",JSON.stringify(D))}catch(e){}if(!T.de[S.view]||(false))S.view="dashboard";shell();const v=document.getElementById("view");v.innerHTML=(VIEWS[S.view]||VIEWS.dashboard)();renderSheet();const sr=document.getElementById("sheetRoot");if(sr)sr.dataset.area=S.sheet?((S.sheet.type==="session"&&typeof isLeitung==="function"&&isLeitung(sess(S.sheet.id)))?"leitung":sheetArea(S.sheet.type)):areaOf(S.view);if(typeof applyCollapse==="function")applyCollapse();numberPanels();persist()}
+function numberPanels(){const l=[...document.querySelectorAll("#view .dash .panel")].map(p=>{const r=p.getBoundingClientRect();return {p,x:Math.round(r.left),y:r.top}});l.sort((a,b)=>a.x-b.x||a.y-b.y).forEach((o,i)=>{const h=o.p.querySelector("h2");if(h)h.dataset.n=String(i+1).padStart(2,"0")})}
+addEventListener("resize",()=>{clearTimeout(window._np);window._np=setTimeout(numberPanels,150)});
 function toast(msg){const r=document.getElementById("toastRoot");r.innerHTML=`<div class="toast" role="status">${esc(msg)}</div>`;clearTimeout(toast.h);toast.h=setTimeout(()=>r.innerHTML="",1800)}
 
 /* ---------- pieces ---------- */
@@ -622,6 +792,12 @@ function quickPanel(){if(!quickList().length)return "";return `<div class="panel
 // start page: the invite only meetings I am part of
 function myMeetingsPanel(){const l=D.sessions.filter(s=>invitedTo(s)&&pd(s.date)>=TODAY).sort((a,b)=>a.date.localeCompare(b.date));if(!l.length)return "";
   return `<div class="panel" data-area="sessions"><div class="panel-head"><h2>${S.lang==="de"?"Meine Treffen":"My meetings"}</h2></div><div class="rows">${l.map(s=>`<div class="next" style="margin-bottom:10px">${dateBox(s)}<div><button type="button" class="link title" data-act="openSession" data-id="${s.id}" style="color:inherit;font-weight:700">${esc(s.title)}</button><div class="muted">${esc([s.time,s.place].filter(Boolean).join(" · "))}</div>${rsvp(s)}</div></div>`).join("")}</div></div>`}
+function heroBlock(ns,yes){const de=S.lang==="de";const hi=(de?"Hallo ":"Hi ")+esc((me().name||"").split(" ")[0]);
+  const top=`<div class="hero-top"><span>Raum Hub</span><button type="button" data-act="openMember" data-id="${esc(S.me||"")}">${hi}</button></div>`;
+  if(!ns)return `<section class="hero">${top}<div><div class="hero-k">${t("nextSession")}</div><h2>${de?"Gerade nichts geplant":"Nothing planned"}</h2></div></section>`;
+  const d=pd(ns.date),wd=d.toLocaleDateString(de?"de-DE":"en-GB",{weekday:"short"}).replace(".","");
+  const dd=String(d.getDate()).padStart(2,"0")+"."+String(d.getMonth()+1).padStart(2,"0")+".";
+  return `<section class="hero" aria-label="${t("nextSession")}">${top}<div><div class="hero-k">${t("nextSession")} · ${esc(wd)} ${dd}</div><h2>${esc(ns.title||"Creative Session")}</h2><div class="hero-m">${esc([ns.time,ns.place].filter(Boolean).join(" · "))} · ${yes} ${t("yesCount")} · <button type="button" data-act="openSession" data-id="${ns.id}">${t("agenda")} ›</button></div></div></section><div class="hero-rsvp">${rsvp(ns)}</div>`}
 function nextSession(){return D.sessions.filter(s=>pd(s.date)>=TODAY&&!isLeitung(s)&&!isGruppe(s)).sort((a,b)=>a.date.localeCompare(b.date))[0]}
 function dateBox(s){const d=pd(s.date);return `<div class="date"><b>${d.getDate()}</b><span>${d.toLocaleDateString(S.lang==="de"?"de-DE":"en-GB",{month:"short"})}</span></div>`}
 function rsvp(s){const v=s.rsvp[S.me];return `<div class="rsvp">${["yes","maybe","no"].map(k=>`<button type="button" data-act="rsvp" data-id="${s.id}" data-v="${k}" aria-pressed="${v===k}">${t(k)}</button>`).join("")}</div>`}
@@ -636,9 +812,7 @@ dashboard(){
   const counts=[...STAGES,"tbd"].map(k=>[k,D.songs.filter(s=>s.stage===k).length]).filter(([k,c])=>c||k!=="liverec");
   const max=Math.max(...counts.map(c=>c[1]),1);
   const rel=D.songs.flatMap(s=>s.releases.map(r=>({s,r}))).filter(x=>x.r.date&&pd(x.r.date)>=TODAY).sort((a,b)=>a.r.date.localeCompare(b.r.date));
-  return `<div class="dash"><div class="dcol">
-  <div class="panel" data-area="sessions"><div class="panel-head"><h2>${t("nextSession")}</h2><button type="button" class="link" data-act="openSession" data-id="${ns?ns.id:""}">${t("agenda")} ›</button></div>
-   ${ns?`<div class="next">${dateBox(ns)}<div><b>${esc(ns.place)}</b><div class="muted">${esc(ns.time)} · ${yes} ${t("yesCount")}</div><div class="label" style="margin-top:8px">${t("coming")}</div>${rsvp(ns)}</div></div>`:`<p class="empty">${t("nothing")}</p>`}</div>
+  return `${heroBlock(ns,yes)}<div class="dash"><div class="dcol">
   ${myMeetingsPanel()}
   <div class="panel" data-area="tasks"><div class="panel-head"><h2>${t("myTasks")}</h2><button type="button" class="link" data-nav="tasks">${t("tasks")} ›</button></div>
    <div class="rows">${mine.length?mine.map(taskRow).join(""):`<p class="empty">${t("nothing")}</p>`}</div></div>
