@@ -521,6 +521,19 @@ body[data-area="sessions"] #view .date,#view .panel[data-area] .date{background:
 .ptab .ppart{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px solid var(--line);font:500 .9rem/1.35 var(--body)}
 .ptab .ppart em{font:400 .95rem var(--head);letter-spacing:.12em;font-style:normal;color:var(--muted);white-space:nowrap;text-transform:uppercase}
 .ptab .ppart.s-prog em{color:var(--accent)} .ptab .ppart.s-done em{color:var(--fg)} .ptab .ppart.s-done span{color:var(--muted)}
+/* Leiter Treffen: Raum Blau statt Gold, überall (Oti, 12.10.) */
+[data-area="leitung"]{--area:#1E4F9C;--area-soft:#E6ECF6;--area-line:#9DB3D9;--area-glow:#1E4F9C33}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) [data-area="leitung"]{--area:#86A9EA;--area-soft:#111A2A;--area-line:#2E4A7A;--area-glow:#1E4F9C66}}
+:root[data-theme="dark"] [data-area="leitung"]{--area:#86A9EA;--area-soft:#111A2A;--area-line:#2E4A7A;--area-glow:#1E4F9C66}
+#view .row.lrow{background:transparent;border-left:0;border-radius:0;padding-left:0;margin:0}
+#view .row.lrow .date,.row.lrow .date{background:#1E4F9C;color:#fff}
+#view .row.lrow .title{color:inherit!important}
+#view .row.lrow .chip.warn{background:transparent;color:var(--area);font:400 .95rem var(--head);letter-spacing:.14em;text-transform:uppercase;padding:0 0 0 4px}
+#sheetRoot[data-area="leitung"] .sheet{box-shadow:inset 0 4px 0 #1E4F9C}
+@media (min-width:900px){#sheetRoot[data-area="leitung"] .sheet.wide{box-shadow:inset 0 4px 0 #1E4F9C,0 30px 80px rgba(0,0,0,.35)}}
+#sheetRoot[data-area="leitung"] .sheet .panel{border-top-color:#1E4F9C}
+:root:not([data-theme="light"]) #sheetRoot[data-area="leitung"] .sheet .panel{border-top-color:var(--area)}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]) #sheetRoot[data-area="leitung"] .sheet .panel{border-top-color:#1E4F9C}}
 
 </style>
 
