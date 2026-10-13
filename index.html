@@ -534,6 +534,25 @@ body[data-area="sessions"] #view .date,#view .panel[data-area] .date{background:
 #sheetRoot[data-area="leitung"] .sheet .panel{border-top-color:#1E4F9C}
 :root:not([data-theme="light"]) #sheetRoot[data-area="leitung"] .sheet .panel{border-top-color:var(--area)}
 @media (prefers-color-scheme: light){:root:not([data-theme="dark"]) #sheetRoot[data-area="leitung"] .sheet .panel{border-top-color:#1E4F9C}}
+/* Startseite: Songs als Treppe durch die Phasen (Oti, 13.10., Feedback Markus) */
+.stairs .st-legend{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;font:400 .72rem var(--head);letter-spacing:.06em;color:var(--muted);text-align:center;margin:2px 0 4px}
+.stairs .st-row{padding:9px 0;border-bottom:1px solid var(--line)}
+.stairs .st-h{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.stairs .st-name{all:unset;cursor:pointer;font:600 .95rem/1.3 var(--body)}
+.stairs .st-name:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.stairs .st-stage{font:400 .95rem var(--head);letter-spacing:.12em;color:var(--muted);text-transform:uppercase;white-space:nowrap}
+.stairs .st-steps{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-top:6px}
+.stairs .st-steps i{height:10px;background:var(--sunk)}
+.stairs .st-steps i.on{background:var(--fg)} .stairs .st-steps i.now{background:var(--brand)}
+.stairs .st-rel{font:400 1rem var(--head);letter-spacing:.12em;color:var(--muted);padding-top:10px}
+.dash-end{display:block;margin-top:26px}
+/* Aufgabenseite: Songs rot, Aufgaben blau getrennt (Oti, 13.10.) */
+:root{--taskrule:#1E4F9C}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--taskrule:#5C86D6}}
+:root[data-theme="dark"]{--taskrule:#5C86D6}
+body[data-area="tasks"] #view .panel:has(.ptab){border-top:6px solid var(--brand)}
+body[data-area="tasks"] #view .panel:has(.ptab) .panel-head h2{color:var(--accent)}
+body[data-area="tasks"] #view .panel:not(:has(.ptab)){border-top:6px solid var(--taskrule);margin-top:30px}
 
 </style>
 
@@ -750,7 +769,7 @@ function shell(){
   document.getElementById("title").textContent=t(S.view);
 }
 function render(){if(!D){renderGate();return}document.getElementById("gate").hidden=true;try{localStorage.setItem("rw-data",JSON.stringify(D))}catch(e){}if(!T.de[S.view]||(false))S.view="dashboard";shell();const v=document.getElementById("view");v.innerHTML=(VIEWS[S.view]||VIEWS.dashboard)();renderSheet();const sr=document.getElementById("sheetRoot");if(sr)sr.dataset.area=S.sheet?((S.sheet.type==="session"&&typeof isLeitung==="function"&&isLeitung(sess(S.sheet.id)))?"leitung":sheetArea(S.sheet.type)):areaOf(S.view);if(typeof applyCollapse==="function")applyCollapse();numberPanels();persist()}
-function numberPanels(){const l=[...document.querySelectorAll("#view .dash .panel")].map(p=>{const r=p.getBoundingClientRect();return {p,x:Math.round(r.left),y:r.top}});l.sort((a,b)=>a.x-b.x||a.y-b.y).forEach((o,i)=>{const h=o.p.querySelector("h2");if(h)h.dataset.n=String(i+1).padStart(2,"0")})}
+function numberPanels(){const l=[...document.querySelectorAll("#view .dash:not(.dash-end) .panel")].map(p=>{const r=p.getBoundingClientRect();return {p,x:Math.round(r.left),y:r.top}});l.sort((a,b)=>a.x-b.x||a.y-b.y);l.push(...[...document.querySelectorAll("#view .dash-end .panel")].map(p=>({p})));l.forEach((o,i)=>{const h=o.p.querySelector("h2");if(h)h.dataset.n=String(i+1).padStart(2,"0")})}
 addEventListener("resize",()=>{clearTimeout(window._np);window._np=setTimeout(numberPanels,150)});
 function toast(msg){const r=document.getElementById("toastRoot");r.innerHTML=`<div class="toast" role="status">${esc(msg)}</div>`;clearTimeout(toast.h);toast.h=setTimeout(()=>r.innerHTML="",1800)}
 
@@ -827,6 +846,11 @@ function heroBlock(ns,yes){const de=S.lang==="de";const hi=(de?"Hallo ":"Hi ")+e
   const d=pd(ns.date),wd=d.toLocaleDateString(de?"de-DE":"en-GB",{weekday:"short"}).replace(".","");
   const dd=String(d.getDate()).padStart(2,"0")+"."+String(d.getMonth()+1).padStart(2,"0")+".";
   return `<section class="hero" aria-label="${t("nextSession")}">${top}<div><div class="hero-k">${t("nextSession")} · ${esc(wd)} ${dd}</div><h2>${esc(ns.title||"Creative Session")}</h2><div class="hero-m">${esc([ns.time,ns.place].filter(Boolean).join(" · "))} · ${yes} ${t("yesCount")} · <button type="button" data-act="openSession" data-id="${ns.id}">${t("agenda")} ›</button></div></div></section><div class="hero-rsvp">${rsvp(ns)}</div>`}
+function songStairs(){const ST=STAGES.filter(k=>k!=="liverec");const de=S.lang==="de";
+  const SH=de?{idea:"Idee",writing:"Writing",rawdemo:"Demo",arrangement:"Arr.",production:"Prod.",mix:"Mix",release:"Release"}:{idea:"Idea",writing:"Writing",rawdemo:"Demo",arrangement:"Arr.",production:"Prod.",mix:"Mix",release:"Release"};
+  const ix=s=>s.stage==="liverec"?ST.indexOf("production"):ST.indexOf(s.stage);
+  const act=D.songs.filter(s=>s.stage!=="release").sort((a,b)=>ix(b)-ix(a)||a.title.localeCompare(b.title));const rel=D.songs.length-act.length;
+  return `<div class="stairs"><div class="st-legend" aria-hidden="true">${ST.map(k=>`<span>${SH[k]}</span>`).join("")}</div>${act.map(s=>{const n=ix(s);return `<div class="st-row"><div class="st-h"><button type="button" class="st-name" data-act="openSong" data-id="${s.id}">${esc(s.title)}</button><span class="st-stage">${t("stages."+s.stage)}</span></div><div class="st-steps" role="img" aria-label="${esc(t("stages."+s.stage))}">${ST.map((k,i)=>`<i class="${i<n?"on":i===n?"now":""}"></i>`).join("")}</div></div>`}).join("")||`<p class="empty">${t("nothing")}</p>`}${rel?`<div class="st-rel">+ ${rel} ${de?"veröffentlicht":"released"}</div>`:""}</div>`}
 function nextSession(){return D.sessions.filter(s=>pd(s.date)>=TODAY&&!isLeitung(s)&&!isGruppe(s)).sort((a,b)=>a.date.localeCompare(b.date))[0]}
 function dateBox(s){const d=pd(s.date);return `<div class="date"><b>${d.getDate()}</b><span>${d.toLocaleDateString(S.lang==="de"?"de-DE":"en-GB",{month:"short"})}</span></div>`}
 function rsvp(s){const v=s.rsvp[S.me];return `<div class="rsvp">${["yes","maybe","no"].map(k=>`<button type="button" data-act="rsvp" data-id="${s.id}" data-v="${k}" aria-pressed="${v===k}">${t(k)}</button>`).join("")}</div>`}
@@ -849,13 +873,13 @@ dashboard(){
    <div class="rows">${over.length?over.map(taskRow).join(""):`<p class="empty">${t("nothing")}</p>`}</div></div>`:""}
   ${myPartsPanel(S.me)}
   <div class="dend">${D.money?`<div class="panel" data-area="neutral"><div class="panel-head"><h2>${t("budget")}</h2><button type="button" class="link" data-nav="money">${t("invoices")} ›</button></div><div class="money">${eur(balance())}</div><div class="muted" style="font-size:.85rem">${t("startBalance")} ${eur(D.money.start)} · ${t("spent")} ${eur(spent())}</div></div>`:""}
-  ${quickPanel()}</div>
+  </div>
   </div><div class="dcol">
   ${prayerTeaser()}
   ${rel.length?`<div class="panel" data-area="songs"><h2>${t("releases")}</h2><div class="rows">${rel.length?rel.map(({s,r})=>{const ch=Object.values(r.checks),d=ch.filter(v=>v==="done").length;return `<div class="row"><div class="grow"><button type="button" class="link title" data-act="openSong" data-id="${s.id}" style="color:inherit">${esc(s.title)}</button><div class="muted" style="font-size:.8rem">${t(r.kind)} · ${d}/${ch.length}</div></div><span class="chip acc">${fmt(r.date)}</span></div>`}).join(""):`<p class="empty">${t("nothing")}</p>`}</div></div>`:""}
   <div class="panel" data-area="songs"><div class="panel-head"><h2>${t("songsByStage")}</h2><button type="button" class="link" data-nav="songs">${t("songs")} ›</button></div>
-   <div class="stagebar">${counts.map(([k,c])=>`<div class="sb"><span>${t("stages."+k)}</span><div class="track"><div class="fill" style="width:${c/max*100}%"></div></div><span class="n mono">${c}</span></div>`).join("")}</div></div>
-  </div></div>`},
+   ${songStairs()}</div>
+  </div></div><div class="dash dash-end">${quickPanel()}</div>`},
 songs(){
   const groups=[...STAGES,"tbd"].filter(k=>k!=="liverec"||D.songs.some(s=>s.rec==="live"));
   const board=groups.map(k=>{const l=D.songs.filter(s=>s.stage===k);return `<div class="col"><h3><span>${t("stages."+k)}</span><span class="mono muted">${l.length}</span></h3>${l.map(songCard).join("")}</div>`}).join("");
@@ -880,7 +904,7 @@ money(){
   if(!D.money)return `<p class="empty">${t("nothing")}</p>`;
   const inv=D.money.invoices.slice().sort((a,b)=>b.date.localeCompare(a.date));
   const songOpts=[`<option value="">${t("none")}</option>`,...D.songs.map(x=>`<option value="${x.id}">${esc(x.title)}</option>`)].join("");
-  return `<div class="grid cols-2"><div class="panel"><div class="panel-head"><h2>${t("budget")}</h2><span class="chip acc">${t("onlyLeaders")}</span></div><div class="money">${eur(balance())}</div><div class="rows" style="margin-top:8px"><div class="row"><div class="grow">${t("startBalance")}<div class="log">${esc(D.money.startNote)}</div></div><span class="mono">${eur(D.money.start)}</span></div><div class="row"><div class="grow">${t("spent")}</div><span class="mono">− ${eur(spent())}</span></div></div></div>
+  return `<div class="grid cols-2"><div class="panel"><div class="panel-head"><h2>${t("budget")}</h2></div><div class="money">${eur(balance())}</div><div class="rows" style="margin-top:8px"><div class="row"><div class="grow">${t("startBalance")}<div class="log">${esc(D.money.startNote)}</div></div><span class="mono">${eur(D.money.start)}</span></div><div class="row"><div class="grow">${t("spent")}</div><span class="mono">− ${eur(spent())}</span></div></div></div>
   ${isLeader()?`<div class="panel"><h2>${t("invoiceNew")}</h2><form class="form" data-form="invoice"><div class="field"><label class="label" for="inv-vendor">${t("vendor")}</label><input id="inv-vendor" name="vendor" required></div><div class="field"><label class="label" for="inv-nr">${t("invNr")}</label><input id="inv-nr" name="nr"></div><div class="field"><label class="label" for="inv-date">${t("date")}</label><input id="inv-date" name="date" type="date" required></div><div class="field"><label class="label" for="inv-amount">${t("amount")}</label><input id="inv-amount" name="amount" type="number" step="0.01" min="0" required></div><div class="field full"><label class="label" for="inv-items">${t("items")}</label><input id="inv-items" name="items"></div><div class="field"><label class="label" for="inv-song">${t("forSong")}</label><select id="inv-song" name="song">${songOpts}</select></div><div class="field"><label class="label" for="inv-up">${S.lang==="de"?"PDF oder Foto hochladen":"Upload PDF or photo"}</label><input id="inv-up" name="upload" type="file" accept="application/pdf,image/jpeg,image/png"></div><div class="field"><label class="label" for="inv-file">${S.lang==="de"?"oder Drive Link":"or Drive link"}</label><input id="inv-file" name="file" type="url" placeholder="https://drive.google.com/…"></div><div class="full"><button class="btn primary" type="submit">${t("add")}</button></div></form><p class="log" style="margin:10px 0 0">${t("invHint")}</p></div>`:`<div class="panel"><p class="note">${S.lang==="de"?"Alle sehen die Finanzen, damit alles transparent ist. Rechnungen erfassen und ändern kann die Leitung.":"Everyone can see the finances for transparency. Leaders add and change invoices."}</p></div>`}
   <div class="panel" style="grid-column:1/-1"><div class="panel-head"><h2>${t("invoices")}</h2><span class="chip">${inv.length}</span></div><div class="rows">${inv.map(r=>`<div class="row"><div class="grow"><div class="title">${esc(r.vendor)}</div><div class="muted" style="font-size:.82rem">${fmt(r.date)}${r.nr?" · Nr. "+esc(r.nr):""}${r.items?" · "+esc(r.items):""}${r.song?" · ♪ "+esc((D.songs.find(x=>x.id===r.song)||{}).title||""):""}${invFileHtml(r)}</div></div><button type="button" class="chip ${r.status==="paid"?"ok":"warn"}" ${isLeader()?'data-act="toggleInv"':"disabled"} data-id="${r.id}" style="border:0">${r.status==="paid"?t("paid"):t("unpaid")}</button><span class="mono" style="min-width:70px;text-align:right">${eur(r.amount)}</span></div>`).join("")||`<p class="empty">${t("nothing")}</p>`}</div></div></div>`},
 ideas(){
@@ -1085,7 +1109,7 @@ document.addEventListener("click",e=>{
   case "cycleTask":{const k=task(id);if(!canTask(k))return;const c=clone(k);c.status=cyc(c.status);saveTask(c);return}
   case "setTask":{const c=clone(task(id));c.status=v;saveTask(c);return}
   case "toggleSub":{const c=clone(task(id));c.subs[i].d=!c.subs[i].d;saveTask(c);return}
-  case "rsvp":run(async()=>{put(D.sessions,await api("rsvp",{id,v}));toast(t("saved"))});return;
+  case "rsvp":run(async()=>{put(D.sessions,await api("rsvp",{id,v}));toast(t("saved"))},()=>{const x=sess(id);if(x){x.rsvp=x.rsvp||{};x.rsvp[S.me]=v}});return;
   case "setStage":{if(!canSongs())return;const st=stagesFor(s);if(s.stage==="arrangement"&&!(s.arr.v==="done"&&s.arr.i==="done")&&st.indexOf(v)>st.indexOf("arrangement")){toast(t("moveOnHint"));return}const c=clone(s);c.stage=v;saveSong(c);return}
   case "setRec":{if(!canSongs())return;const c=clone(s);c.rec=v;if(v==="studio"&&c.stage==="liverec")c.stage="production";if(v==="live"&&!c.parts.some(p=>p.key==="tracks"))c.parts.push({key:"tracks",name:"Tracks und Click vorbereitet",owner:"",status:"open",note:"",ext:false});saveSong(c);return}
   case "toggleCello":{if(!canSongs()){e.preventDefault();return}const c=clone(s);c.cello=!c.cello;saveSong(c);return}
@@ -1101,8 +1125,8 @@ document.addEventListener("click",e=>{
   case "ideaToSong":run(async()=>{put(D.songs,await api("promoteIdea",{id}));D.ideas=D.ideas.filter(x=>x.id!==id);toast(t("saved"))});return;
   case "prayKind":S.prayKind=v;render();return
   case "prayFilter":S.prayFilter=v;render();return
-  case "reactP":run(async()=>put(D.prayer,await api("reactPrayer",{id,emoji:v})));return
-  case "prayFor":run(async()=>put(D.prayer,await api("reactPrayer",{id,pray:true})));return
+  case "reactP":run(async()=>put(D.prayer,await api("reactPrayer",{id,emoji:v})),()=>{const p=D.prayer.find(x=>x.id===id);if(!p)return;const r=p.reacts&&typeof p.reacts==="object"?p.reacts:(p.reacts={});const l=Array.isArray(r[v])?r[v]:[];r[v]=l.includes(S.me)?l.filter(x=>x!==S.me):l.concat([S.me]);if(!r[v].length)delete r[v]});return
+  case "prayFor":run(async()=>put(D.prayer,await api("reactPrayer",{id,pray:true})),()=>{const p=D.prayer.find(x=>x.id===id);if(!p)return;const l=Array.isArray(p.pray)?p.pray:[];p.pray=l.includes(S.me)?l.filter(x=>x!==S.me):l.concat([S.me])});return
   case "answeredP":run(async()=>put(D.prayer,await api("answeredPrayer",{id})));return
   case "deleteP":if(!confirmDel(id))return;run(async()=>{await api("deletePrayer",{id});D.prayer=D.prayer.filter(x=>x.id!==id)});return
   case "newTaskFor":S.sheet={type:"newTask",link:"project:"+id};render();return
