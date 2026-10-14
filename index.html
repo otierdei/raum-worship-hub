@@ -531,9 +531,6 @@ body[data-area="sessions"] #view .date,#view .panel[data-area] .date{background:
 #view .row.lrow .chip.warn{background:transparent;color:var(--area);font:400 .95rem var(--head);letter-spacing:.14em;text-transform:uppercase;padding:0 0 0 4px}
 #sheetRoot[data-area="leitung"] .sheet{box-shadow:inset 0 4px 0 #1E4F9C}
 @media (min-width:900px){#sheetRoot[data-area="leitung"] .sheet.wide{box-shadow:inset 0 4px 0 #1E4F9C,0 30px 80px rgba(0,0,0,.35)}}
-#sheetRoot[data-area="leitung"] .sheet .panel{border-top-color:#1E4F9C}
-:root:not([data-theme="light"]) #sheetRoot[data-area="leitung"] .sheet .panel{border-top-color:var(--area)}
-@media (prefers-color-scheme: light){:root:not([data-theme="dark"]) #sheetRoot[data-area="leitung"] .sheet .panel{border-top-color:#1E4F9C}}
 /* Startseite: Songs als Treppe durch die Phasen (Oti, 13.10., Feedback Markus) */
 .stairs .st-legend{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;font:400 .72rem var(--head);letter-spacing:.06em;color:var(--muted);text-align:center;margin:2px 0 4px}
 .stairs .st-row{padding:9px 0;border-bottom:1px solid var(--line)}
@@ -546,16 +543,27 @@ body[data-area="sessions"] #view .date,#view .panel[data-area] .date{background:
 .stairs .st-steps i.on{background:var(--fg)} .stairs .st-steps i.now{background:var(--brand)}
 .stairs .st-rel{font:400 1rem var(--head);letter-spacing:.12em;color:var(--muted);padding-top:10px}
 .dash-end{display:block;margin-top:26px}
-/* Aufgabenseite: Songs ohne Überschrift, jeder Song in einem runden Kasten wie in der Bibel App (Oti, 14.10.) */
+/* Durchgängiges Design: jeder Eintrag ein runder Kasten mit Abstand, wie in der Bibel App (Oti, 14.10., Variante 2) */
 :root{--card:#FFFFFF}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--card:#1A1A1C}}
 :root[data-theme="dark"]{--card:#1A1A1C}
-body[data-area="tasks"] #view .panel:has(.ptab){border-top:0;padding-top:0}
-body[data-area="tasks"] #view .panel:has(.ptab)>.panel-head{display:none}
-body[data-area="tasks"] #view .panel:not(:has(.ptab)){margin-top:18px}
-body[data-area="tasks"] .ptab{display:flex;flex-direction:column;gap:12px}
-body[data-area="tasks"] .ptab .psong{padding:16px 18px 8px;background:var(--card);border-radius:18px}
-body[data-area="tasks"] .ptab .ppart:last-child{border-bottom:0}
+#view .panel,#view .panel[data-area]{border-top:0;padding-top:6px}
+#view .rows{display:flex;flex-direction:column;gap:10px}
+#view .row,#view .row.lrow{background:var(--card);border:0;border-radius:16px;padding:12px 14px;margin:0}
+#view .row:first-child{border-top:0}
+@media (max-width:760px){#view .row:has([data-act="openMember"]){padding-left:54px}}
+.stairs .st-row{background:var(--card);border:0;border-radius:16px;padding:12px 14px;margin-bottom:10px}
+.ptab{display:flex;flex-direction:column;gap:12px}
+.ptab .psong{background:var(--card);border-radius:18px;padding:16px 18px 8px}
+.ptab .ppart:last-child{border-bottom:0}
+.card{border:0;border-radius:16px;background:var(--card)}
+.col{border-radius:18px}
+#view .pcard,#view .panel.pcard{background:var(--card);border-radius:18px;padding:16px 18px}
+.sheet .panel{background:var(--card);border:0;border-radius:18px;padding:16px 18px 10px}
+#sheetRoot[data-area="leitung"] .sheet .panel{border-top:0;box-shadow:inset 0 3px 0 #1E4F9C}
+.ov-stat{background:var(--card);border:0;border-radius:16px;padding:12px 14px}
+#view .panel.collapsed>:not(.panel-head):not(h2){display:none!important}
+#view .panel:not(.collapsed):not(:has(.rows,.ptab,.stairs,.pcard,.board,.glist,.pfeed,.stagehead)){background:var(--card);border-radius:18px;padding:14px 18px 12px}
 
 </style>
 
@@ -839,7 +847,7 @@ function myParts(uid){
     return {s,items}}).filter(x=>x.items.length).sort((a,b)=>STAGES.indexOf(b.s.stage)-STAGES.indexOf(a.s.stage));}
 function myPartsPanel(uid){const l=myParts(uid);
   return `<div class="panel" data-area="songs"><div class="panel-head"><h2>${t("myParts")}</h2><span class="chip">${l.reduce((a,x)=>a+x.items.filter(i=>i.status!=="done").length,0)} ${t("open")}</span></div><div class="rows ptab">${l.map(({s,items})=>`<div class="psong"><div class="psong-h"><button type="button" class="ptitle" data-act="openSong" data-id="${s.id}">${esc(s.title)}</button><span class="pstage">${t("stages."+s.stage)}</span></div>${items.map(i=>`<div class="ppart s-${i.status}"><span>${esc(i.name)}</span><em>${t("st."+i.status)}</em></div>`).join("")}</div>`).join("")||`<p class="empty">${t("noParts")}</p>`}</div></div>`}
-function quickPanel(){if(!quickList().length)return "";return `<div class="panel"><h2>${t("quick")}</h2><div style="display:flex;flex-wrap:wrap;gap:6px">${quickList().map(([l,id])=>`<a class="chip acc" href="https://drive.google.com/drive/folders/${id}" target="_blank" rel="noopener">${esc(l)} ↗</a>`).join("")}</div></div>`}
+function quickPanel(){if(!quickList().length)return "";return `<div class="panel" data-defc="1"><h2>${t("quick")}</h2><div style="display:flex;flex-wrap:wrap;gap:6px">${quickList().map(([l,id])=>`<a class="chip acc" href="https://drive.google.com/drive/folders/${id}" target="_blank" rel="noopener">${esc(l)} ↗</a>`).join("")}</div></div>`}
 // start page: the invite only meetings I am part of
 function myMeetingsPanel(){const l=D.sessions.filter(s=>invitedTo(s)&&pd(s.date)>=TODAY).sort((a,b)=>a.date.localeCompare(b.date));if(!l.length)return "";
   return `<div class="panel" data-area="sessions"><div class="panel-head"><h2>${S.lang==="de"?"Meine Treffen":"My meetings"}</h2></div><div class="rows">${l.map(s=>`<div class="next" style="margin-bottom:10px">${dateBox(s)}<div><button type="button" class="link title" data-act="openSession" data-id="${s.id}" style="color:inherit;font-weight:700">${esc(s.title)}</button><div class="muted">${esc([s.time,s.place].filter(Boolean).join(" · "))}</div>${rsvp(s)}</div></div>`).join("")}</div></div>`}
@@ -875,13 +883,13 @@ dashboard(){
   ${over.length&&canAll()?`<div class="panel" data-area="tasks"><div class="panel-head"><h2>${t("overdue")}</h2><span class="chip ${over.length?"bad":"ok"}">${over.length}</span></div>
    <div class="rows">${over.length?over.map(taskRow).join(""):`<p class="empty">${t("nothing")}</p>`}</div></div>`:""}
   ${myPartsPanel(S.me)}
-  </div><div class="dcol">
   ${prayerTeaser()}
+  </div><div class="dcol">
   ${rel.length?`<div class="panel" data-area="songs"><h2>${t("releases")}</h2><div class="rows">${rel.length?rel.map(({s,r})=>{const ch=Object.values(r.checks),d=ch.filter(v=>v==="done").length;return `<div class="row"><div class="grow"><button type="button" class="link title" data-act="openSong" data-id="${s.id}" style="color:inherit">${esc(s.title)}</button><div class="muted" style="font-size:.8rem">${t(r.kind)} · ${d}/${ch.length}</div></div><span class="chip acc">${fmt(r.date)}</span></div>`}).join(""):`<p class="empty">${t("nothing")}</p>`}</div></div>`:""}
   <div class="panel" data-area="songs"><div class="panel-head"><h2>${t("songsByStage")}</h2><button type="button" class="link" data-nav="songs">${t("songs")} ›</button></div>
    ${songStairs()}</div>
-  <div class="dend">${D.money?`<div class="panel" data-area="neutral"><div class="panel-head"><h2>${t("budget")}</h2><button type="button" class="link" data-nav="money">${t("invoices")} ›</button></div><div class="money">${eur(balance())}</div><div class="muted" style="font-size:.85rem">${t("startBalance")} ${eur(D.money.start)} · ${t("spent")} ${eur(spent())}</div></div>`:""}</div>
-  </div></div><div class="dash dash-end">${quickPanel()}</div>`},
+  <div class="dend">${D.money?`<div class="panel" data-area="neutral"><div class="panel-head"><h2>${t("budget")}</h2><button type="button" class="link" data-nav="money">${t("invoices")} ›</button></div><div class="money">${eur(balance())}</div><div class="muted" style="font-size:.85rem">${t("startBalance")} ${eur(D.money.start)} · ${t("spent")} ${eur(spent())}</div></div>`:""}${quickPanel()}</div>
+  </div></div>`},
 songs(){
   const groups=[...STAGES,"tbd"].filter(k=>k!=="liverec"||D.songs.some(s=>s.rec==="live"));
   const board=groups.map(k=>{const l=D.songs.filter(s=>s.stage===k);return `<div class="col"><h3><span>${t("stages."+k)}</span><span class="mono muted">${l.length}</span></h3>${l.map(songCard).join("")}</div>`}).join("");
@@ -1073,7 +1081,7 @@ function applyCollapse(){
   document.querySelectorAll("#view .panel").forEach((p,i)=>{
     const h=p.querySelector(":scope>.panel-head>h2, :scope>h2");if(!h)return;
     const key=S.view+":"+h.textContent.trim();p.dataset.ckey=key;
-    const c=key in COLL?COLL[key]:(phone&&i>0);p.classList.toggle("collapsed",c);
+    const c=key in COLL?COLL[key]:((phone&&i>0)||p.dataset.defc==="1");p.classList.toggle("collapsed",c);
     h.setAttribute("role","button");h.tabIndex=0;h.setAttribute("aria-expanded",String(!c));h.classList.add("ctoggle");
   });
 }
