@@ -546,13 +546,16 @@ body[data-area="sessions"] #view .date,#view .panel[data-area] .date{background:
 .stairs .st-steps i.on{background:var(--fg)} .stairs .st-steps i.now{background:var(--brand)}
 .stairs .st-rel{font:400 1rem var(--head);letter-spacing:.12em;color:var(--muted);padding-top:10px}
 .dash-end{display:block;margin-top:26px}
-/* Aufgabenseite: Songs rot, Aufgaben blau getrennt (Oti, 13.10.) */
-:root{--taskrule:#1E4F9C}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--taskrule:#5C86D6}}
-:root[data-theme="dark"]{--taskrule:#5C86D6}
-body[data-area="tasks"] #view .panel:has(.ptab){border-top:6px solid var(--brand)}
-body[data-area="tasks"] #view .panel:has(.ptab) .panel-head h2{color:var(--accent)}
-body[data-area="tasks"] #view .panel:not(:has(.ptab)){border-top:6px solid var(--taskrule);margin-top:30px}
+/* Aufgabenseite: Songs ohne Überschrift, jeder Song in einem runden Kasten wie in der Bibel App (Oti, 14.10.) */
+:root{--card:#FFFFFF}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--card:#1A1A1C}}
+:root[data-theme="dark"]{--card:#1A1A1C}
+body[data-area="tasks"] #view .panel:has(.ptab){border-top:0;padding-top:0}
+body[data-area="tasks"] #view .panel:has(.ptab)>.panel-head{display:none}
+body[data-area="tasks"] #view .panel:not(:has(.ptab)){margin-top:18px}
+body[data-area="tasks"] .ptab{display:flex;flex-direction:column;gap:12px}
+body[data-area="tasks"] .ptab .psong{padding:16px 18px 8px;background:var(--card);border-radius:18px}
+body[data-area="tasks"] .ptab .ppart:last-child{border-bottom:0}
 
 </style>
 
@@ -566,7 +569,7 @@ body[data-area="tasks"] #view .panel:not(:has(.ptab)){border-top:6px solid var(-
       <h1 id="title"></h1>
       <div class="who">
         <button type="button" class="mebtn" id="meBtn" data-act="openMember" aria-label="Mein Profil"><span id="meAv"></span><span class="chip acc" id="meName"></span></button>
-        <div class="seg" role="group" aria-label="Sprache"><button type="button" data-lang="de">DE</button><button type="button" data-lang="en">EN</button></div>
+
       </div>
     </div>
     <section id="view"></section>
@@ -635,7 +638,7 @@ const DRIVE={file:id=>"https://drive.google.com/file/d/"+id+"/view"};
 const API="https://script.google.com/macros/s/AKfycbzFJmuOrMno2oh26DvmYSYK1WOkmO6cNmqB06Wq-4qQFgq5A6kgbNY01wt8UBE6Gvg5/exec";
 const LS={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
 let D=null;
-const S={lang:LS.get("rw-lang")||"de",me:null,view:(location.hash||"#dashboard").slice(1),taskFilter:"mine",sessFilter:"upcoming",sheet:null,busy:false};
+const S={lang:"de",me:null,view:(location.hash||"#dashboard").slice(1),taskFilter:"mine",sessFilter:"upcoming",sheet:null,busy:false};
 function persist(){LS.set("rw-lang",S.lang)}
 async function api(action,body){
   const r=await fetch(API,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(Object.assign({action,token:LS.get("rw-token")},body||{}))});
@@ -872,13 +875,12 @@ dashboard(){
   ${over.length&&canAll()?`<div class="panel" data-area="tasks"><div class="panel-head"><h2>${t("overdue")}</h2><span class="chip ${over.length?"bad":"ok"}">${over.length}</span></div>
    <div class="rows">${over.length?over.map(taskRow).join(""):`<p class="empty">${t("nothing")}</p>`}</div></div>`:""}
   ${myPartsPanel(S.me)}
-  <div class="dend">${D.money?`<div class="panel" data-area="neutral"><div class="panel-head"><h2>${t("budget")}</h2><button type="button" class="link" data-nav="money">${t("invoices")} ›</button></div><div class="money">${eur(balance())}</div><div class="muted" style="font-size:.85rem">${t("startBalance")} ${eur(D.money.start)} · ${t("spent")} ${eur(spent())}</div></div>`:""}
-  </div>
   </div><div class="dcol">
   ${prayerTeaser()}
   ${rel.length?`<div class="panel" data-area="songs"><h2>${t("releases")}</h2><div class="rows">${rel.length?rel.map(({s,r})=>{const ch=Object.values(r.checks),d=ch.filter(v=>v==="done").length;return `<div class="row"><div class="grow"><button type="button" class="link title" data-act="openSong" data-id="${s.id}" style="color:inherit">${esc(s.title)}</button><div class="muted" style="font-size:.8rem">${t(r.kind)} · ${d}/${ch.length}</div></div><span class="chip acc">${fmt(r.date)}</span></div>`}).join(""):`<p class="empty">${t("nothing")}</p>`}</div></div>`:""}
   <div class="panel" data-area="songs"><div class="panel-head"><h2>${t("songsByStage")}</h2><button type="button" class="link" data-nav="songs">${t("songs")} ›</button></div>
    ${songStairs()}</div>
+  <div class="dend">${D.money?`<div class="panel" data-area="neutral"><div class="panel-head"><h2>${t("budget")}</h2><button type="button" class="link" data-nav="money">${t("invoices")} ›</button></div><div class="money">${eur(balance())}</div><div class="muted" style="font-size:.85rem">${t("startBalance")} ${eur(D.money.start)} · ${t("spent")} ${eur(spent())}</div></div>`:""}</div>
   </div></div><div class="dash dash-end">${quickPanel()}</div>`},
 songs(){
   const groups=[...STAGES,"tbd"].filter(k=>k!=="liverec"||D.songs.some(s=>s.rec==="live"));
