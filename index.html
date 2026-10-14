@@ -567,6 +567,25 @@ body[data-area="sessions"] #view .date,#view .panel[data-area] .date{background:
 /* Zugeklappte Abschnitte als runde Kästen (Oti, 14.10., Variante 1) */
 #view .panel.collapsed{background:var(--card);border-radius:18px;padding:14px 18px}
 .dash,.dash>.dcol,.dend{gap:14px}
+/* Zugeklappte Abschnitte: Überschrift mittig, alle gleich hoch (Oti, 14.10.) */
+#view .panel.collapsed{display:flex;align-items:center;min-height:86px;padding-top:12px;padding-bottom:12px}
+#view .panel.collapsed>.panel-head{flex:1;margin:0;align-items:center}
+#view .panel.collapsed>h2{margin:0}
+/* Einträge in geöffneten Blättern ebenfalls als eigene Kästen (Oti, 14.10.) */
+.sheet .panel:has(>.rows){background:transparent;padding:6px 0 0}
+.sheet .rows{display:flex;flex-direction:column;gap:10px}
+.sheet .row{background:var(--card);border:0;border-radius:16px;padding:12px 14px;margin:0}
+.sheet .row:first-child{border-top:0}
+.owners{white-space:nowrap}
+/* Aufgaben: Datum und Priorität über dem Titel, Titel volle Breite (Oti, 14.10., Variante 2) */
+.row:has(>.check){display:grid;grid-template-columns:auto 1fr;column-gap:12px;row-gap:4px;align-items:start}
+.row:has(>.check)>.check{grid-row:1/3;align-self:center}
+.row:has(>.check)>div:last-child{grid-column:2;grid-row:1;justify-content:flex-start!important}
+.row:has(>.check)>.grow{grid-column:2;grid-row:2}
+.row:has(>.check)>div:last-child:empty{display:none}
+.row:has(>.check):has(>div:last-child:empty)>.grow{grid-row:1/3;align-self:center}
+/* eigener Name blau, damit er sich von "Hoch" abhebt */
+.mine-name{background:#1E4F9C;color:#fff}
 
 </style>
 
@@ -723,7 +742,7 @@ function ptRow(x){x=x||{};return `<div class="pt-row"><select class="pt-who" ari
 function protoDraft(id){try{const d=JSON.parse(localStorage.getItem("rw-proto-"+id)||"null");return d}catch(e){return null}}
 function readProtoForm(f){const g=n=>{const el=f.querySelector(`[name="${n}"]`);return el?el.value:""};return {agenda:g("agenda"),writer:g("writer"),info:g("info"),review:g("review"),att:[...f.querySelectorAll('input[name="att"]:checked')].map(x=>x.value),groups:[...f.querySelectorAll(".pg-row")].map(r=>({t:r.querySelector(".pg-t").value,who:r.querySelector(".pg-who").value,status:r.querySelector(".pg-st").value,note:r.querySelector(".pg-note").value})),tasks:[...f.querySelectorAll(".pt-row")].map(r=>({who:r.querySelector(".pt-who").value,title:r.querySelector(".pt-title").value,due:r.querySelector(".pt-due").value}))}}
 function protoForm(s,can){const dr=can?protoDraft(s.id):null;const p=dr?{writer:dr.writer,info:dr.info,review:dr.review,groups:dr.groups}:protoBase(s);const att=dr?dr.att:(s.attendees&&s.attendees.length)?s.attendees:Object.keys(s.rsvp||{}).filter(k=>s.rsvp[k]==="yes");
-  const open=D.tasks.filter(t=>t.status!=="done").sort((a,b)=>(a.due||"9999").localeCompare(b.due||"9999"));
+  const open=D.tasks.filter(t=>t.status!=="done").sort((a,b)=>(b.owners.includes(S.me)-a.owners.includes(S.me))||(a.due||"9999").localeCompare(b.due||"9999"));
   const next=D.sessions.filter(x=>sameSeries(x,s)&&x.date>s.date).sort((a,b)=>a.date.localeCompare(b.date))[0];
   const ro=can?"":"readonly disabled";
   return `<form class="grid protokoll" data-form="protocol" data-id="${s.id}" style="gap:12px">
@@ -874,7 +893,7 @@ function songCard(s){const p=progress(s);return `<button type="button" class="ca
 const VIEWS={
 dashboard(){
   const ns=nextSession(), yes=ns?Object.values(ns.rsvp).filter(v=>v==="yes").length:0;
-  const over=D.tasks.filter(isOver).sort((a,b)=>a.due.localeCompare(b.due));
+  const over=D.tasks.filter(isOver).sort((a,b)=>(b.owners.includes(S.me)-a.owners.includes(S.me))||a.due.localeCompare(b.due));
   const mine=D.tasks.filter(x=>x.owners.includes(S.me)&&x.status!=="done").sort((a,b)=>(a.due||"9").localeCompare(b.due||"9")).slice(0,6);
   const counts=[...STAGES,"tbd"].map(k=>[k,D.songs.filter(s=>s.stage===k).length]).filter(([k,c])=>c||k!=="liverec");
   const max=Math.max(...counts.map(c=>c[1]),1);
@@ -901,7 +920,8 @@ songs(){
 tasks(){
   const f=S.taskFilter;let l=D.tasks.slice();
   if(f==="mine")l=l.filter(x=>x.owners.includes(S.me));if(f==="over")l=l.filter(isOver);if(f==="done")l=l.filter(x=>x.status==="done");else if(f!=="all")l=l.filter(x=>x.status!=="done"||f==="mine");
-  if(f==="mine"||f==="all")l.sort((a,b)=>(a.status==="done")-(b.status==="done")||(a.due||"9").localeCompare(b.due||"9"));
+  if(f==="mine"||f==="all")l.sort((a,b)=>(a.status==="done")-(b.status==="done")||(b.owners.includes(S.me)-a.owners.includes(S.me))||(a.due||"9").localeCompare(b.due||"9"));
+  if(f==="over")l.sort((a,b)=>(b.owners.includes(S.me)-a.owners.includes(S.me))||(a.due||"9").localeCompare(b.due||"9"));
   const tab=(k,lab)=>`<button type="button" data-act="taskFilter" data-v="${k}" aria-pressed="${f===k}">${lab}</button>`;
   return `<div class="tabs">${tab("mine",t("myTasks"))}${tab("all",t("allTasks"))}${tab("over",t("overdue"))}${tab("done",t("done"))}${isLeader()?tab("ov",S.lang==="de"?"Übersicht":"Overview"):""}<button type="button" class="btn primary small" data-act="newTask" style="margin-left:auto">+ ${t("newTask")}</button></div>
   ${f==="ov"&&isLeader()?overviewPage():`<div class="grid">${f==="mine"?myPartsPanel(S.me):""}<div class="panel"><h2 style="margin-bottom:8px">${t("tasks")}</h2><div class="rows">${l.length?l.map(taskRow).join(""):`<p class="empty">${t("nothing")}</p>`}</div></div></div>`}`},
