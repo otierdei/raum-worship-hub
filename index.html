@@ -586,6 +586,15 @@ body[data-area="sessions"] #view .date,#view .panel[data-area] .date{background:
 .row:has(>.check):has(>div:last-child:empty)>.grow{grid-row:1/3;align-self:center}
 /* eigener Name blau, damit er sich von "Hoch" abhebt */
 .mine-name{background:#1E4F9C;color:#fff}
+/* Zusagen in Sessions: vier Zähler oben, Namen darunter (Oti, 14.10., Variante 2) */
+.rc{margin-top:12px}
+.rc-tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.rc-tiles>div{background:var(--sunk);border-radius:14px;padding:10px 6px;text-align:center}
+.rc-tiles b{display:block;font:400 2rem/1 var(--poster)}
+.rc-tiles span{font:400 .9rem/1.1 var(--head);letter-spacing:.1em;color:var(--muted)}
+.rc-tiles .rc-y b{color:var(--accent)}
+.rc-names{font:500 .88rem/1.5 var(--body);color:var(--muted);margin-top:6px}
+.rc-names b{color:var(--fg);font-weight:600}
 
 </style>
 
@@ -884,6 +893,7 @@ function songStairs(){const ST=STAGES.filter(k=>k!=="liverec");const de=S.lang==
   const ix=s=>s.stage==="liverec"?ST.indexOf("production"):ST.indexOf(s.stage);
   const act=D.songs.filter(s=>s.stage!=="release").sort((a,b)=>ix(b)-ix(a)||a.title.localeCompare(b.title));const rel=D.songs.length-act.length;
   return `<div class="stairs"><div class="st-legend" aria-hidden="true">${ST.map(k=>`<span>${SH[k]}</span>`).join("")}</div>${act.map(s=>{const n=ix(s);return `<div class="st-row"><div class="st-h"><button type="button" class="st-name" data-act="openSong" data-id="${s.id}">${esc(s.title)}</button><span class="st-stage">${t("stages."+s.stage)}</span></div><div class="st-steps" role="img" aria-label="${esc(t("stages."+s.stage))}">${ST.map((k,i)=>`<i class="${i<n?"on":i===n?"now":""}"></i>`).join("")}</div></div>`}).join("")||`<p class="empty">${t("nothing")}</p>`}${rel?`<div class="st-rel">+ ${rel} ${de?"veröffentlicht":"released"}</div>`:""}</div>`}
+function rsvpCounts(g){return `<div class="rc"><div class="rc-tiles">${g.map(([l,n,k])=>`<div class="rc-${k}"><b>${n.length}</b><span>${l}</span></div>`).join("")}</div>${g.filter(x=>x[1].length).map(([l,n])=>`<div class="rc-names"><b>${l}:</b> ${esc(n.join(", "))}</div>`).join("")}</div>`}
 function nextSession(){return D.sessions.filter(s=>pd(s.date)>=TODAY&&!isLeitung(s)&&!isGruppe(s)).sort((a,b)=>a.date.localeCompare(b.date))[0]}
 function dateBox(s){const d=pd(s.date);return `<div class="date"><b>${d.getDate()}</b><span>${d.toLocaleDateString(S.lang==="de"?"de-DE":"en-GB",{month:"short"})}</span></div>`}
 function rsvp(s){const v=s.rsvp[S.me];return `<div class="rsvp">${["yes","maybe","no"].map(k=>`<button type="button" data-act="rsvp" data-id="${s.id}" data-v="${k}" aria-pressed="${v===k}">${t(k)}</button>`).join("")}</div>`}
@@ -1016,7 +1026,7 @@ session(id){
   return `${head((isLeitung(s)?(S.lang==="de"?"Leiter Treffen · nur Leitung":"Leadership meeting · leaders only"):isGruppe(s)?(S.lang==="de"?"Treffen mit Einladung":"Invite only meeting"):"Creative Session")+(s.time?" · "+s.time:""),(isGruppe(s)?s.title+" · ":"")+fmt(s.date)+(s.place?" · "+s.place:""))}
   ${isLeader()?`<button type="button" class="btn small" data-act="editMeeting" data-id="${s.id}">✎ ${S.lang==="de"?"Datum, Ort und Einladung bearbeiten":"Edit date, place and invites"}</button>`:""}
   ${isGruppe(s)?`<div class="panel"><h3>${S.lang==="de"?"Eingeladen":"Invited"} · ${(s.invited||[]).length}</h3><div class="muted">${esc((s.invited||[]).map(nm).join(", "))}</div></div>`:""}
-  ${up?`<div class="panel"><h3>${t("coming")}</h3>${!isGruppe(s)||invitedTo(s)?rsvp(s):""}<div class="log" style="margin-top:8px">${t("yes")}: ${esc(byV("yes").join(", ")||"–")}<br>${t("maybe")}: ${esc(byV("maybe").join(", ")||"–")}<br>${t("no")}: ${esc(byV("no").join(", ")||"–")}<br>${S.lang==="de"?"Noch keine Antwort":"No answer yet"}: ${esc(D.members.filter(m=>m.active!==false&&!s.rsvp[m.id]&&(isGruppe(s)?invitedTo(s,m.id):(!isLeitung(s)||m.role==="leader"))).map(m=>m.name).join(", ")||"–")}</div></div>`:""}
+  ${up?`<div class="panel"><h3>${t("coming")}</h3>${!isGruppe(s)||invitedTo(s)?rsvp(s):""}${rsvpCounts([["Zugesagt",byV("yes"),"y"],["Vielleicht",byV("maybe"),"m"],["Abgesagt",byV("no"),"n"],["Noch offen",D.members.filter(m=>m.active!==false&&!s.rsvp[m.id]&&(isGruppe(s)?invitedTo(s,m.id):(!isLeitung(s)||m.role==="leader"))).map(m=>m.name),"o"]])}</div>`:""}
   ${s.attendees.length?`<div class="panel"><h3>${t("attendees")} · ${s.attendees.length}</h3><div class="muted">${esc(s.attendees.map(nm).join(", "))}</div></div>`:""}
   ${protoForm(s,can)}
   ${linksPanel("session",s.id,s.links,can)}
