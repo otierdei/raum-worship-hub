@@ -881,6 +881,8 @@ function handle_(body) {
   const fn = ACTIONS[action];
   if (!fn) return { ok: false, error: "bad_request", message: "Unbekannte Aktion." };
   const write = WRITE_ACTIONS.indexOf(action) >= 0;
+  // nach dem Umzug nach Cloudflare: alte App Fenster dürfen nichts mehr ins Sheet schreiben
+  if (write && P.getProperty("READONLY")) return { ok: false, error: "moved", message: "Raum Hub wurde gerade aktualisiert. Bitte die App ganz schließen und neu öffnen, dann nochmal versuchen." };
   const lock = write ? LockService.getScriptLock() : null;
   try {
     if (lock) lock.waitLock(20000);
