@@ -1,0 +1,20 @@
+# Raum Hub Backend auf Cloudflare (Testumgebung). Deploy über .github/workflows/worker.yml.
+# Drive Ordner IDs und das Geheimnis für den Dateidienst stehen NICHT hier, sondern im Cloudflare Dashboard
+# (Variablen DRIVE_PROTOKOLLE, DRIVE_QUICK, LEITUNG_PROTO_FOLDER, INVOICE_FOLDER, Secret FILE_SECRET). keep_vars lässt sie stehen.
+name = "raumhub-test"
+main = "worker.js"
+compatibility_date = "2026-10-01"
+workers_dev = true
+keep_vars = true
+
+[[d1_databases]]
+binding = "DB"
+database_name = "raumhub-test"
+database_id = "db1246e5-e282-4d60-bdda-10a2e8d09656"
+
+[vars]
+ALLOWED_ORIGINS = "https://otierdei.github.io"
+APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzFJmuOrMno2oh26DvmYSYK1WOkmO6cNmqB06Wq-4qQFgq5A6kgbNY01wt8UBE6Gvg5/exec"
+
+[observability]
+enabled = true
