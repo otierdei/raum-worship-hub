@@ -406,6 +406,32 @@ const ACTIONS = {
 
   bootstrap: (b, me) => bootstrap_(me),
 
+  // "Was ist neu": Einträge aus dem Protokoll seit einem Zeitpunkt, ohne eigene, ohne Login und Verwaltung, nur was man sehen darf
+  feed: (b, me) => {
+    const since = String(b.since || "");
+    const keep = { songs: 1, tasks: 1, sessions: 1, ideas: 1, prayer: 1 };
+    const tasks = {}, sessions = {};
+    readAll_("tasks").forEach(t => { tasks[t.id] = t; });
+    readAll_("sessions").forEach(x => { sessions[x.id] = x; });
+    const v = sheet_("log").getDataRange().getValues().slice(1);
+    const out = [], seen = {};
+    for (let i = v.length - 1; i >= 0 && out.length < 40; i--) {
+      const r = v[i];
+      const at = Object.prototype.toString.call(r[0]) === "[object Date]" ? r[0].toISOString() : String(r[0]);
+      if (since && at <= since) break;
+      const e = { at: at, by: String(r[1]), action: String(r[2]), entity: String(r[3]), id: String(r[4]), summary: String(r[5]) };
+      if (!keep[e.entity] || e.by === me.id || e.by === "system") continue;
+      if (e.entity === "prayer" && e.action !== "create") continue;
+      if (e.entity === "tasks" && tasks[e.id] && !seesTask_(tasks[e.id], me)) continue;
+      if (e.entity === "sessions" && sessions[e.id] && !seesSession_(sessions[e.id], me)) continue;
+      const k = [e.by, e.entity, e.id, e.action, e.action === "songOp:partStatus" ? e.summary.split(" · ")[1] : ""].join("|");
+      if (seen[k]) continue;
+      seen[k] = 1;
+      out.push(e);
+    }
+    return out;
+  },
+
   logout: (b, me) => {
     const m = get_("members", me.id);
     const h = sha_(b.token);
@@ -465,7 +491,9 @@ const ACTIONS = {
       s.links.splice(b.index, 1);
     } else throw err_("bad_request", "Unbekannte Aktion.");
     put_("songs", stamp_(s, me));
-    log_(me, "songOp:" + b.op, "songs", s.id, s.title);
+    let detail = "";
+    if (b.op === "partStatus") { const p = (s.parts || []).find(x => x.key === b.key); detail = " · " + (p ? p.name : b.key) + " · " + (p ? p.status : ""); }
+    log_(me, "songOp:" + b.op, "songs", s.id, s.title + detail);
     return s;
   },
 
@@ -526,6 +554,7 @@ const ACTIONS = {
     s.rsvp = s.rsvp || {};
     s.rsvp[me.id] = b.v;
     put_("sessions", stamp_(s, me));
+    log_(me, "rsvp", "sessions", s.id, b.v);
     return s;
   },
   saveSession: (b, me) => {
@@ -1070,6 +1099,51 @@ function pushToD1() {
   return { ok: same, sheet: r.report, d1: check, statements: r.statements.length };
 }
 
+/* ---------------- Rückweg: Daten aus Cloudflare D1 in ein NEUES Sheet holen (nur im Editor ausführen) ---------------- */
+// Überschreibt nichts. Legt im privaten Ordner Raum Leitung ein neues Sheet an. Für den Rückweg danach SHEET_ID auf dieses Sheet setzen.
+function pullFromD1() {
+  const stamp = Utilities.formatDate(new Date(), tz_(), "yyyy-MM-dd") + " " + Utilities.formatDate(new Date(), tz_(), "HH:mm");
+  const book = SpreadsheetApp.create("Raum Worship Hub Daten aus D1 " + stamp);
+  try { DriveApp.getFileById(book.getId()).moveTo(DriveApp.getFolderById(P.getProperty("LEITUNG_FOLDER"))); } catch (e) {}
+  const toCell = (tab, col, v) => {
+    if (v === null || v === undefined) return "";
+    if ((D1_BOOL_[tab] || []).indexOf(col) >= 0) return v === 1 || v === true ? "TRUE" : v === 0 || v === false ? "FALSE" : "";
+    return String(v);
+  };
+  const report = {};
+  const tabs = Object.keys(FIELDS);
+  tabs.forEach((tab, i) => {
+    const cols = FIELDS[tab];
+    const rows = d1Query_("SELECT * FROM \"" + tab + "\"" + (tab === "log" ? " ORDER BY \"seq\"" : ""));
+    const sh = i === 0 ? book.getSheets()[0].setName(tab) : book.insertSheet(tab);
+    const data = [cols].concat(rows.map(r => cols.map(c => toCell(tab, c, r[c]))));
+    sh.getRange(1, 1, Math.max(data.length, 1), cols.length).setNumberFormat("@").setValues(data);
+    sh.setFrozenRows(1);
+    report[tab] = rows.length;
+  });
+  // Profilbilder wieder in Stücke von 45.000 Zeichen teilen
+  const av = book.insertSheet("avatars"), out = [["id", "part", "data"]];
+  d1Query_("SELECT \"id\", \"data\" FROM \"avatars\"").forEach(r => {
+    const d = String(r.data || "");
+    for (let p = 0; p * AVATAR_PART < d.length; p++) out.push([String(r.id), String(p), d.slice(p * AVATAR_PART, (p + 1) * AVATAR_PART)]);
+  });
+  av.getRange(1, 1, out.length, 3).setNumberFormat("@").setValues(out);
+  report.avatars = new Set(out.slice(1).map(r => r[0])).size;
+  // gegenprüfen: im neuen Sheet zählen
+  const check = {};
+  tabs.forEach(tab => { check[tab] = book.getSheetByName(tab).getLastRow() - 1; });
+  const same = tabs.every(tab => check[tab] === report[tab]);
+  const msg = (same ? "Rückweg Sheet fertig: " : "ACHTUNG Zahlen weichen ab: ") + book.getUrl() + " | ID " + book.getId() + " | D1: " + JSON.stringify(report) + " Sheet: " + JSON.stringify(check);
+  Logger.log(msg);
+  return { ok: same, id: book.getId(), url: book.getUrl(), d1: report, sheet: check };
+}
+// Für den wöchentlichen Zeitauslöser: Sicherung aus D1; wenn Zahlen abweichen, schlägt der Lauf fehl und Google schickt eine Fehler Mail.
+function weeklyBackup() {
+  const r = pullFromD1();
+  if (!r.ok) throw new Error("Sicherung aus D1 unvollständig: " + JSON.stringify(r));
+  return r;
+}
+
 const STD_PARTS=[["drums","Drums","oti"],["percs","Percs","oti"],["bass","Bass","fini"],["synth","Synth","jeremy"],["egit","E-Gitarren",""],["acoustic","Akustik",""],["piano","Piano",""],["keys","Keys",""],["cello","Cello","suli"]];
 function stdParts(o){return STD_PARTS.map(([key,name,owner])=>Object.assign({key,name,owner,status:"open",note:"",ext:false},o[key]||{}))}
 function wEnvIds_(env) {
@@ -1085,18 +1159,19 @@ const W_INIT_SQL_ = [
   "CREATE TABLE IF NOT EXISTS \"cache\" (\"k\" TEXT PRIMARY KEY, \"v\" TEXT, \"exp\" INTEGER)"
 ];
 const W_GUARD_ = "(SELECT \"v\" FROM \"meta\" WHERE \"k\" = 'ver') = ?";
-function wPlan_(text) { let a = ""; try { a = String(JSON.parse(text).action || ""); } catch (e) {} return { avatars: a === "setAvatar" || a === "getAvatar" }; }
+function wPlan_(text) { let a = ""; try { a = String(JSON.parse(text).action || ""); } catch (e) {} return { avatars: a === "setAvatar" || a === "getAvatar", log: a === "feed" }; }
 function wLoadSql_(plan) {
   const q = W_TABLES_.map(t => ({ name: t, sql: "SELECT * FROM \"" + t + "\"" }));
   q.push({ name: "__cache", sql: "SELECT * FROM \"cache\"" }, { name: "__ver", sql: "SELECT \"v\" FROM \"meta\" WHERE \"k\" = 'ver'" });
   if (plan.avatars) q.push({ name: "__avatars", sql: "SELECT * FROM \"avatars\"" });
+  if (plan.log) q.push({ name: "__log", sql: "SELECT * FROM (SELECT * FROM \"log\" ORDER BY \"seq\" DESC LIMIT 600) ORDER BY \"seq\"" });
   return q;
 }
 function wSnap_(plan, results) { // results: Array von Zeilenlisten, gleiche Reihenfolge wie wLoadSql_
-  const q = wLoadSql_(plan), s = { tables: {}, cache: [], ver: 0, avatars: null };
+  const q = wLoadSql_(plan), s = { tables: {}, cache: [], ver: 0, avatars: null, log: [] };
   q.forEach((x, i) => { const rows = results[i] || [];
     if (x.name === "__cache") s.cache = rows; else if (x.name === "__ver") s.ver = Number((rows[0] || {}).v || 0);
-    else if (x.name === "__avatars") s.avatars = rows; else s.tables[x.name] = rows; });
+    else if (x.name === "__avatars") s.avatars = rows; else if (x.name === "__log") s.log = rows; else s.tables[x.name] = rows; });
   return s;
 }
 function wToSheet_(tab, col, v) {
@@ -1114,7 +1189,7 @@ function wToD1_(tab, col, v) {
 }
 function wProcess_(snap, text, env) {
   const sheets = W_TABLES_.map(t => shimSheet_(t, FIELDS[t], (snap.tables[t] || []).map(r => FIELDS[t].map(c => wToSheet_(t, c, r[c])))));
-  sheets.push(shimSheet_("log", FIELDS.log, []));
+  sheets.push(shimSheet_("log", FIELDS.log, (snap.log || []).map(r => FIELDS.log.map(c => r[c] === null || r[c] === undefined ? "" : String(r[c])))));
   if (snap.avatars) sheets.push(shimSheet_("avatars", ["id", "part", "data"], snap.avatars.map(r => [String(r.id), "0", String(r.data || "")])));
   const cache = new Map(); snap.cache.forEach(r => { if (Number(r.exp) > Date.now()) cache.set(r.k, { v: r.v, exp: Number(r.exp) }); });
   const cacheOrig = JSON.stringify([...cache]);
@@ -1141,7 +1216,7 @@ function wProcess_(snap, text, env) {
     orig.forEach((v, id) => { if (!now.has(id)) st.push({ sql: "DELETE FROM \"" + t + "\" WHERE \"" + key + "\" = ? AND " + W_GUARD_, params: [id, mark] }); });
   });
   // Protokoll: nur anhängen
-  book.getSheetByName("log")._rows.slice(1).forEach(r => st.push({ sql: "INSERT INTO \"log\" (\"at\",\"by\",\"action\",\"entity\",\"id\",\"summary\") SELECT ?,?,?,?,?,? WHERE " + W_GUARD_, params: r.slice(0, 6).map(x => x === "" ? null : String(x)).concat([mark]) }));
+  book.getSheetByName("log")._rows.slice(1 + (snap.log || []).length).forEach(r => st.push({ sql: "INSERT INTO \"log\" (\"at\",\"by\",\"action\",\"entity\",\"id\",\"summary\") SELECT ?,?,?,?,?,? WHERE " + W_GUARD_, params: r.slice(0, 6).map(x => x === "" ? null : String(x)).concat([mark]) }));
   // Profilbilder: Teile zusammensetzen
   const av = book.getSheetByName("avatars");
   if (av) {

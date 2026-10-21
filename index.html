@@ -596,6 +596,14 @@ body[data-area="sessions"] #view .date,#view .panel[data-area] .date{background:
 .rc-names{font:500 .88rem/1.5 var(--body);color:var(--muted);margin-top:6px}
 .rc-names b{color:var(--fg);font-weight:600}
 
+/* Feed "Was ist neu" (21.10.2026, Variante 1) */
+.feed .feedrow{display:flex;gap:10px;align-items:center;width:100%;text-align:left;background:var(--sunk);border:0;border-radius:16px;padding:10px 12px;margin:0 0 8px;color:inherit;font:inherit;cursor:pointer}
+.feed .feedrow .grow{display:flex;flex-direction:column;min-width:0}
+.feed .ftxt{line-height:1.3}
+.feed .fwhen{font-size:.78rem;margin-top:2px}
+.feed .feedrow .chip{flex:none}
+.feed .feedfoot{text-align:center;font-size:.82rem;margin:4px 0 0}
+
 </style>
 
 <div class="app">
@@ -811,7 +819,40 @@ function shell(){
   document.getElementById("title").textContent=t(S.view);
 }
 function render(){if(!D){renderGate();return}document.getElementById("gate").hidden=true;try{localStorage.setItem("rw-data",JSON.stringify(D))}catch(e){}if(!T.de[S.view]||(false))S.view="dashboard";shell();const v=document.getElementById("view");v.innerHTML=(VIEWS[S.view]||VIEWS.dashboard)();renderSheet();const sr=document.getElementById("sheetRoot");if(sr)sr.dataset.area=S.sheet?((S.sheet.type==="session"&&typeof isLeitung==="function"&&isLeitung(sess(S.sheet.id)))?"leitung":sheetArea(S.sheet.type)):areaOf(S.view);if(typeof applyCollapse==="function")applyCollapse();numberPanels();persist()}
-function numberPanels(){const l=[...document.querySelectorAll("#view .dash:not(.dash-end) .panel")].map(p=>{const r=p.getBoundingClientRect();return {p,x:Math.round(r.left),y:r.top}});l.sort((a,b)=>a.x-b.x||a.y-b.y);l.push(...[...document.querySelectorAll("#view .dash-end .panel")].map(p=>({p})));l.forEach((o,i)=>{const h=o.p.querySelector("h2");if(h)h.dataset.n=String(i+1).padStart(2,"0")})}
+function numberPanels(){const l=[...document.querySelectorAll("#view .dash:not(.dash-end) .panel")].map(p=>{const r=p.getBoundingClientRect();return {p,x:Math.round(r.left),y:r.top}});l.sort((a,b)=>a.x-b.x||a.y-b.y);l.push(...[...document.querySelectorAll("#view .dash-end .panel")].map(p=>({p})));let n=0;l.forEach(o=>{const h=o.p.querySelector("h2");if(!h)return;if(o.p.classList.contains("feed")){delete h.dataset.n;return}h.dataset.n=String(++n).padStart(2,"0")})}
+/* ---------- Was ist neu (Feed) ---------- */
+// seit dem letzten Öffnen der App auf diesem Gerät; beim ersten Mal die letzten 7 Tage
+function loadFeed(){if(!D||!S.me)return;if(!S.feedSince){const k="rw-lastvisit-"+S.me;S.feedSince=LS.get(k)||new Date(Date.now()-7*864e5).toISOString();LS.set(k,new Date().toISOString())}
+  api("feed",{since:S.feedSince}).then(f=>{S.feed=Array.isArray(f)?f:[];if(S.view==="dashboard"&&!S.sheet)render()}).catch(()=>{})}
+const FEED_ST={open:"offen",prog:"in Arbeit",done:"fertig"};
+const FEED_RSVP={yes:"zugesagt",maybe:"vielleicht",no:"abgesagt"};
+const FEED_PRAY={impuls:"einen Impuls",vers:"einen Vers",anliegen:"ein Anliegen",dank:"einen Dank"};
+function feedAgo(at){const d=new Date(at),m=Math.round((Date.now()-d)/6e4);if(m<1)return "gerade eben";if(m<60)return "vor "+m+" Min.";const h=Math.round(m/60);if(h<24&&d.toDateString()===new Date().toDateString())return "vor "+h+" Std.";const y=new Date(Date.now()-864e5);if(d.toDateString()===y.toDateString())return "gestern";return d.toLocaleDateString("de-DE",{weekday:"short",day:"2-digit",month:"2-digit"})}
+function feedRow(e){const who=`<b>${esc(nm(e.by))}</b>`,parts=String(e.summary||"").split(" · ");let txt="",chip="",act="",id=esc(e.id);
+  if(e.entity==="songs"){const s=song(e.id),title=esc(s?s.title:parts[0]);act=s?`data-act="openSong" data-id="${id}"`:"";
+    if(e.action==="songOp:partStatus"){txt=`${who} · ${esc(parts[1]||"")} bei <b>${title}</b>`;chip=parts[2]?`<span class="chip ${parts[2]==="done"?"ok":parts[2]==="prog"?"warn":""}">${FEED_ST[parts[2]]||esc(parts[2])}</span>`:""}
+    else if(e.action==="create")txt=`${who} hat den Song <b>${title}</b> angelegt`;
+    else if(e.action==="delete")txt=`${who} hat einen Song entfernt`;
+    else txt=`${who} hat <b>${title}</b> bearbeitet`}
+  else if(e.entity==="tasks"){const k=task(e.id),title=esc(k?k.title:parts[0]);act=k?`data-act="openTask" data-id="${id}"`:"";
+    if(e.action==="comment")txt=`${who} hat <b>${title}</b> kommentiert`;
+    else if(e.action==="delete")txt=`${who} hat eine Aufgabe entfernt`;
+    else if(e.action==="create")txt=`${who} hat die Aufgabe <b>${title}</b> angelegt`;
+    else if(parts[parts.length-1]==="done"){txt=`${who} hat <b>${title}</b> erledigt`;chip=`<span class="chip ok">erledigt</span>`}
+    else txt=`${who} hat <b>${title}</b> geändert`}
+  else if(e.entity==="sessions"){const x=sess(e.id),title=x?esc(x.title||("Session "+fmt(x.date))):"eine Session";act=x?`data-act="openSession" data-id="${id}"`:"";
+    if(e.action==="rsvp"){txt=`${who} hat für <b>${title}</b> ${FEED_RSVP[e.summary]||"geantwortet"}`;chip=`<span class="chip ${e.summary==="yes"?"ok":e.summary==="maybe"?"warn":""}">${e.summary==="yes"?"Ja":e.summary==="maybe"?"Vielleicht":"Nein"}</span>`}
+    else if(e.action==="saveProtocol")txt=`${who} hat das Protokoll für <b>${title}</b> geschrieben`;
+    else if(e.action==="exportProtocol")txt=`${who} hat das Protokoll für <b>${title}</b> als PDF abgelegt`;
+    else if(e.action==="create")txt=`${who} hat <b>${title}</b> geplant`;
+    else txt=`${who} hat <b>${title}</b> geändert`}
+  else if(e.entity==="prayer"){act=`data-nav="prayer"`;txt=`${who} hat ${FEED_PRAY[e.summary]||"etwas"} geteilt`;chip=`<span aria-hidden="true">🙏</span>`}
+  else if(e.entity==="ideas"){act=`data-nav="ideas"`;txt=e.action==="promote"?`${who} hat die Idee <b>${esc(parts[0])}</b> zum Song gemacht`:`${who} hat eine neue Idee: <b>${esc(parts[0])}</b>`}
+  else return "";
+  return `<button type="button" class="row feedrow" ${act}>${avatarHtml(mem(e.by))}<span class="grow"><span class="ftxt">${txt}</span><span class="muted fwhen">${feedAgo(e.at)}</span></span>${chip}</button>`}
+function feedPanel(){if(S.feedHidden||!Array.isArray(S.feed))return "";const rows=S.feed.map(feedRow).filter(Boolean);if(!rows.length)return "";const n=S.feedAll?rows.length:4;
+  return `<div class="panel feed" data-area="neutral"><div class="panel-head"><h2>Neu seit deinem letzten Besuch</h2><span class="chip acc">${rows.length}</span></div><div class="rows">${rows.slice(0,n).join("")}</div>
+  <p class="muted feedfoot">${rows.length>n?`<button type="button" class="link" data-act="feedMore">+ ${rows.length-n} weitere</button> · `:""}<button type="button" class="link" data-act="feedSeen">alles als gesehen markieren</button></p></div>`}
 addEventListener("resize",()=>{clearTimeout(window._np);window._np=setTimeout(numberPanels,150)});
 function toast(msg){const r=document.getElementById("toastRoot");r.innerHTML=`<div class="toast" role="status">${esc(msg)}</div>`;clearTimeout(toast.h);toast.h=setTimeout(()=>r.innerHTML="",1800)}
 
@@ -909,6 +950,7 @@ dashboard(){
   const max=Math.max(...counts.map(c=>c[1]),1);
   const rel=D.songs.flatMap(s=>s.releases.map(r=>({s,r}))).filter(x=>x.r.date&&pd(x.r.date)>=TODAY).sort((a,b)=>a.r.date.localeCompare(b.r.date));
   return `${heroBlock(ns,yes)}<div class="dash"><div class="dcol">
+  ${feedPanel()}
   ${myMeetingsPanel()}
   <div class="panel" data-area="tasks"><div class="panel-head"><h2>${t("myTasks")}</h2><button type="button" class="link" data-nav="tasks">${t("tasks")} ›</button></div>
    <div class="rows">${mine.length?mine.map(taskRow).join(""):`<p class="empty">${t("nothing")}</p>`}</div></div>
@@ -1054,8 +1096,8 @@ async function boot(){
   if(LS.get("rw-token")&&!D){const c=cached();if(c){D=c;S.me=D.me.id}}
   render();
   if(!LS.get("rw-token"))return;
-  if(D){refresh(true);return}
-  try{D=await api("bootstrap");S.me=D.me.id;render()}
+  if(D){refresh(true);loadFeed();return}
+  try{D=await api("bootstrap");S.me=D.me.id;render();loadFeed()}
   catch(e){if(e.code==="auth"){forget();render()}else{const g=document.getElementById("gate");g.innerHTML=`<div class="gatebox"><div class="mark">R</div><p>${t("offline")}</p><button class="btn" type="button" onclick="boot()">↻</button></div>`}}
 }
 async function refresh(force){
@@ -1139,6 +1181,8 @@ document.addEventListener("click",e=>{
   case "openSong":S.sheet={type:"song",id};break;
   case "openMember":S.sheet={type:"member",id};break;
   case "openTask":S.sheet={type:"task",id};break;
+  case "feedMore":S.feedAll=true;render();return;
+  case "feedSeen":S.feedHidden=true;LS.set("rw-lastvisit-"+S.me,new Date().toISOString());render();return;
   case "openSession":if(!id)return;S.sheet={type:"session",id};break;
   case "newMeeting":S.sheet={type:"newMeeting"};break;
   case "editP":S.editP=id;break;
@@ -1206,7 +1250,7 @@ document.addEventListener("submit",e=>{
     // visible feedback while the backend checks the code and loads the data (takes a few seconds)
     if(btn){if(btn.disabled)return;btn.disabled=true;btn.innerHTML=`<span class="spin" aria-hidden="true"></span> ${S.lang==="de"?"Wird angemeldet…":"Signing in…"}`}if(bar)bar.hidden=false;
     const reset=()=>{if(btn){btn.disabled=false;btn.textContent=t("login")}if(bar)bar.hidden=true};
-    api("login",{member:fd.get("member"),code:fd.get("code")}).then(r=>{LS.set("rw-token",r.token);LS.set("rw-member",fd.get("member"));D=r.data;S.me=D.me.id;render()}).catch(x=>{reset();err.textContent=x.message});return}
+    api("login",{member:fd.get("member"),code:fd.get("code")}).then(r=>{LS.set("rw-token",r.token);LS.set("rw-member",fd.get("member"));D=r.data;S.me=D.me.id;render();loadFeed()}).catch(x=>{reset();err.textContent=x.message});return}
   case "editP":{const tx=String(fd.get("text")||"").trim();if(!tx)return;run(async()=>{const np=await api("editPrayer",{id,text:tx,ref:String(fd.get("ref")||"")});D.prayer=D.prayer.map(x=>x.id===id?np:x);S.editP=null;toast(t("saved"))});return}
   case "taskTitle":{const ti=String(fd.get("title")||"").trim();const c=clone(task(id));if(!ti||c.title===ti)return;c.title=ti;saveTask(c);toast(t("saved"));return}
   case "meeting":{const ex=id?clone(sess(id)):null,kind=ex?(ex.kind||""):String(fd.get("kind")||""),date=String(fd.get("date")||""),title=String(fd.get("title")||"").trim(),inv=fd.getAll("inv");if(!date)return;
