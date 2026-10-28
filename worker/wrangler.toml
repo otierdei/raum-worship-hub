@@ -15,6 +15,7 @@ database_id = "1933d512-0110-4763-bde3-704e3e638e72"
 [vars]
 ALLOWED_ORIGINS = "https://otierdei.github.io"
 APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzFJmuOrMno2oh26DvmYSYK1WOkmO6cNmqB06Wq-4qQFgq5A6kgbNY01wt8UBE6Gvg5/exec"
+DEMO_UPLOAD = "1"
 
 [observability]
 enabled = true
