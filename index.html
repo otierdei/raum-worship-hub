@@ -625,6 +625,7 @@ body[data-area="sessions"] #view .date,#view .panel[data-area] .date{background:
 .next.soon .grow{flex:1;min-width:0}
 .urgentfoot{font-size:.82rem;margin:8px 0 0;text-align:right}
 .feedempty .empty{margin:0}
+#view .panel[data-area] .next.soon.lmeet .date,#view .next.soon.lmeet .date{background:#1E4F9C;color:#fff;border-color:#1E4F9C}
 
 /* Variante Eckig: alles kantig, nur Personenbilder bleiben rund */
 *:not(.avatar):not(.spin):not(img),*::before,*::after{border-radius:0!important}
@@ -890,7 +891,7 @@ function soonItems(days){const end=new Date(TODAY.getTime()+days*864e5);
 function soonRow(x){const de=S.lang==="de";
   if(x.r){const d=pd(x.d);return `<div class="next soon">${`<div class="date"><b>${d.getDate()}</b><span>${d.toLocaleDateString(de?"de-DE":"en-GB",{month:"short"}).replace(".","")}</span></div>`}<div class="grow"><button type="button" class="link title" data-act="openSong" data-id="${x.song.id}" style="color:inherit;font-weight:700">Release · ${esc(x.song.title)}</button><div class="muted">${t(x.r.kind)}</div></div></div>`}
   const s=x.s,title=isGruppe(s)?s.title:isLeitung(s)?(de?"Leiter Treffen":"Leadership meeting"):"Creative Session",yes=Object.values(s.rsvp||{}).filter(v=>v==="yes").length;
-  return `<div class="next soon">${dateBox(s)}<div class="grow"><button type="button" class="link title" data-act="openSession" data-id="${s.id}" style="color:inherit;font-weight:700">${esc(title)}</button><div class="muted">${esc([s.time,s.place].filter(Boolean).join(" · "))}${s.time||s.place?" · ":""}${yes} ${de?"Zusagen":"yes"}</div>${rsvp(s)}</div></div>`}
+  return `<div class="next soon${isLeitung(s)?" lmeet":""}">${dateBox(s)}<div class="grow"><button type="button" class="link title" data-act="openSession" data-id="${s.id}" style="color:inherit;font-weight:700">${esc(title)}</button><div class="muted">${esc([s.time,s.place].filter(Boolean).join(" · "))}${s.time||s.place?" · ":""}${yes} ${de?"Zusagen":"yes"}</div>${rsvp(s)}</div></div>`}
 function nextPanel(skip){const de=S.lang==="de",l=soonItems(14).filter(x=>!(skip&&x.s&&x.s.id===skip.id));
   return `<div class="panel" data-area="sessions" data-defc="1"><div class="panel-head"><h2>${de?"Als Nächstes":"Coming up"}</h2><button type="button" class="link" data-nav="sessions">${de?"14 Tage":"14 days"} ›</button></div><div class="rows">${l.map(soonRow).join("")||`<p class="empty">${skip?(de?"Danach nichts in den nächsten 14 Tagen.":"Nothing else in the next 14 days."):(de?"Nichts in den nächsten 14 Tagen.":"Nothing in the next 14 days.")}</p>`}</div></div>`}
 function urgentItems(n){const wk=new Date(TODAY.getTime()+7*864e5);
