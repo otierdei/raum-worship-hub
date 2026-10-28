@@ -631,6 +631,22 @@ body[data-area="sessions"] #view .date,#view .panel[data-area] .date{background:
 *:not(.avatar):not(.spin):not(img),*::before,*::after{border-radius:0!important}
 #view .panel,#view .panel[data-area],.sheet .panel,.card,.col,#view .pcard,.fb-card,.lightbox img,#view .row,#view .row.lrow,.sheet .row,.feed .feedrow,.stairs .st-row,.ptab .psong,.rc-tiles>div,.ov-stat,.btn,.rsvp button,.tabs button,.seg,.steps button,.nav button,input,select,textarea,.dropzone,.toast,.note,.fact,.date,.mark,.quickadd input,.pquote,.seg button,.chip,.badge,.attchip,.ov-person,.stagehead .cnt,.preacts .chip,.mine-name,.check,.prog,.prog i,.ov-bar,.ov-bar>div,.sb .track,.sb .fill,.st-steps i,.loadbar,.loadbar>div,#bottomnav,.bottom,.bottom button,.hero{border-radius:0!important}
 
+/* Richard Feedback 28.10.2026: Startseite mit reinem Bandfoto, Neu rechts am Desktop */
+.heroimg{margin:0 0 16px;height:378px;background:#141414 url("img/band.jpg") 50% 28%/cover no-repeat}
+@media (min-width:900px){.heroimg{height:399px}.dash3>.dcol:first-child{order:2}}
+@media (max-width:899px){.heroimg{margin:0 -16px 14px;height:calc(390px + env(safe-area-inset-top,0px))}}
+.chip.lchip{background:#1E4F9C;color:#fff}
+.vischeck{display:flex;gap:8px;align-items:center;font-size:.9rem}
+#title[hidden]{display:none!important}
+.top .who{margin-left:auto}
+.tsimple{flex-wrap:wrap}.tsimple button{white-space:nowrap}
+.tsimple button b{color:var(--accent);margin-left:4px}
+.tgh{font:400 .95rem var(--head);letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin:14px 0 8px}
+.tgh:first-child{margin-top:0}
+.tgh span{color:var(--accent)}
+.trow{gap:10px;align-items:center}
+.trow .ts{font-size:.8rem;margin-top:2px}
+
 </style>
 
 <div class="app">
@@ -849,7 +865,7 @@ function shell(){
   document.getElementById("sidenav").innerHTML=NAV().map(k=>`<button type="button" data-nav="${k}" data-area="${areaOf(k)}" ${S.view===k?'aria-current="page"':""}>${icon(k)}${t(k)}${k==="tasks"?badge:""}</button>`).join("");
   const moreViews=["projects","ideas","prayer","members","vision","money","more"];
   document.getElementById("bottomnav").innerHTML=BOTTOM.map(k=>{const cur=k==="more"?moreViews.includes(S.view):S.view===k;return `<button type="button" data-nav="${k}" data-area="${areaOf(k==="more"&&cur?S.view:k)}" ${cur?'aria-current="page"':""}>${icon(k)}<span>${t(k)}</span>${k==="tasks"?badge:""}</button>`}).join("");
-  document.getElementById("title").textContent=t(S.view);
+  document.getElementById("title").textContent=t(S.view);document.getElementById("title").hidden=S.view==="dashboard";
 }
 function render(){if(!D){renderGate();return}document.getElementById("gate").hidden=true;try{localStorage.setItem("rw-data",JSON.stringify(D))}catch(e){}if(!T.de[S.view]||(false))S.view="dashboard";shell();const v=document.getElementById("view");v.innerHTML=(VIEWS[S.view]||VIEWS.dashboard)();renderSheet();const sr=document.getElementById("sheetRoot");if(sr)sr.dataset.area=S.sheet?((S.sheet.type==="session"&&typeof isLeitung==="function"&&isLeitung(sess(S.sheet.id)))?"leitung":sheetArea(S.sheet.type)):areaOf(S.view);if(typeof applyCollapse==="function")applyCollapse();numberPanels();persist()}
 function numberPanels(){const l=[...document.querySelectorAll("#view .dash:not(.dash-end) .panel")].map(p=>{const r=p.getBoundingClientRect();return {p,x:Math.round(r.left),y:r.top}});l.sort((a,b)=>a.x-b.x||a.y-b.y);l.push(...[...document.querySelectorAll("#view .dash-end .panel")].map(p=>({p})));let n=0;l.forEach(o=>{const h=o.p.querySelector("h2");if(!h)return;if(o.p.classList.contains("feed")){delete h.dataset.n;return}h.dataset.n=String(++n).padStart(2,"0")})}
@@ -893,13 +909,13 @@ function soonRow(x){const de=S.lang==="de";
   const s=x.s,title=isGruppe(s)?s.title:isLeitung(s)?(de?"Leiter Treffen":"Leadership meeting"):"Creative Session",yes=Object.values(s.rsvp||{}).filter(v=>v==="yes").length;
   return `<div class="next soon${isLeitung(s)?" lmeet":""}">${dateBox(s)}<div class="grow"><button type="button" class="link title" data-act="openSession" data-id="${s.id}" style="color:inherit;font-weight:700">${esc(title)}</button><div class="muted">${esc([s.time,s.place].filter(Boolean).join(" · "))}${s.time||s.place?" · ":""}${yes} ${de?"Zusagen":"yes"}</div>${rsvp(s)}</div></div>`}
 function nextPanel(skip){const de=S.lang==="de",l=soonItems(14).filter(x=>!(skip&&x.s&&x.s.id===skip.id));
-  return `<div class="panel" data-area="sessions" data-defc="1"><div class="panel-head"><h2>${de?"Als Nächstes":"Coming up"}</h2><button type="button" class="link" data-nav="sessions">${de?"14 Tage":"14 days"} ›</button></div><div class="rows">${l.map(soonRow).join("")||`<p class="empty">${skip?(de?"Danach nichts in den nächsten 14 Tagen.":"Nothing else in the next 14 days."):(de?"Nichts in den nächsten 14 Tagen.":"Nothing in the next 14 days.")}</p>`}</div></div>`}
+  return `<div class="panel" data-area="sessions" data-defc="${l.length?0:1}"><div class="panel-head"><h2>${de?"Als Nächstes":"Coming up"}</h2><button type="button" class="link" data-nav="sessions">${de?"14 Tage":"14 days"} ›</button></div><div class="rows">${l.map(soonRow).join("")||`<p class="empty">${skip?(de?"Danach nichts in den nächsten 14 Tagen.":"Nothing else in the next 14 days."):(de?"Nichts in den nächsten 14 Tagen.":"Nothing in the next 14 days.")}</p>`}</div></div>`}
 function urgentItems(n){const wk=new Date(TODAY.getTime()+7*864e5);
   const tk=D.tasks.filter(x=>x.owners.includes(S.me)&&x.status!=="done").map(x=>({k:isOver(x)?0:x.due&&pd(x.due)<=wk?1:x.prio==="high"?2:4,d:x.due||"9999",html:taskRow(x)}));
   const pr=myParts(S.me).flatMap(({s,items})=>items.filter(i=>i.status==="prog").map(i=>({k:3,d:"9999",html:`<div class="row"><div class="grow"><button type="button" class="link title" data-act="openSong" data-id="${s.id}" style="color:inherit;font-weight:600">${esc(i.name)}</button><div class="muted" style="font-size:.8rem">${esc(s.title)} · ${t("stages."+s.stage)}</div></div>${stChip(i.status)}</div>`})));
   return tk.concat(pr).sort((a,b)=>a.k-b.k||a.d.localeCompare(b.d)).slice(0,n)}
 function urgentPanel(){const de=S.lang==="de",l=urgentItems(3),open=D.tasks.filter(x=>x.owners.includes(S.me)&&x.status!=="done").length,parts=myParts(S.me).reduce((n,x)=>n+x.items.filter(i=>i.status!=="done").length,0);
-  return `<div class="panel" data-area="tasks" data-defc="1"><div class="panel-head"><h2>${de?"Deine dringendsten Aufgaben":"Your most urgent tasks"}</h2><button type="button" class="link" data-nav="tasks">${de?"alle":"all"} ›</button></div><div class="rows">${l.map(x=>x.html).join("")||`<p class="empty">${de?"Nichts Dringendes.":"Nothing urgent."}</p>`}</div><p class="muted urgentfoot">${open} ${de?"offene Aufgaben":"open tasks"} · ${parts} ${de?"offene Parts":"open parts"}</p></div>`}
+  return `<div class="panel" data-area="tasks" data-defc="${l.length?0:1}"><div class="panel-head"><h2>${de?"Deine Aufgaben":"Your tasks"}</h2><button type="button" class="link" data-nav="tasks">${de?"alle":"all"} ›</button></div><div class="rows">${l.map(x=>x.html).join("")||`<p class="empty">${de?"Nichts Dringendes.":"Nothing urgent."}</p>`}</div><p class="muted urgentfoot">${open} ${de?"offene Aufgaben":"open tasks"} · ${parts} ${de?"offene Parts":"open parts"}</p></div>`}
 function feedPanel(){if(S.feedHidden||!Array.isArray(S.feed))return "";const rows=S.feed.map(feedRow).filter(Boolean);if(!rows.length)return "";const n=S.feedAll?rows.length:4;
   return `<div class="panel feed" data-area="neutral"><div class="panel-head"><h2>Neu seit deinem letzten Besuch</h2><span class="chip acc">${rows.length}</span></div><div class="rows">${rows.slice(0,n).join("")}</div>
   <p class="muted feedfoot">${rows.length>n?`<button type="button" class="link" data-act="feedMore">+ ${rows.length-n} weitere</button> · `:""}<button type="button" class="link" data-act="feedSeen">alles als gesehen markieren</button></p></div>`}
@@ -921,7 +937,7 @@ function taskRow(tk){
   const com=tk.comments.length?`<span class="chip">💬 ${tk.comments.length}</span>`:"";
   return `<div class="row"><button type="button" class="check ${cls}" data-act="cycleTask" data-id="${tk.id}" ${can?"":"disabled"} aria-label="${t("status")}: ${t("st."+tk.status)}">${tk.status==="done"?tick:""}</button>
   <div class="grow"><button type="button" class="link title ${tk.status==="done"?"struck":""}" data-act="openTask" data-id="${tk.id}" style="color:inherit">${esc(tk.title)}</button>
-  <div class="muted" style="font-size:.8rem;display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:2px">${ownersHtml(tk.owners)}${tk.link?" · "+esc(linkName(tk.link)):""} ${subs}${com}</div></div>
+  <div class="muted" style="font-size:.8rem;display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:2px">${ownersHtml(tk.owners)}${tk.link?" · "+esc(linkName(tk.link)):""} ${subs}${com}${tk.vis==="leaders"?`<span class="chip lchip">${S.lang==="de"?"nur Leitung":"leaders"}</span>`:""}</div></div>
   <div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end">${prioChip(tk.prio)}${dueChip(tk)}</div></div>`}
 // project manager overview: every open task, grouped by project, plus who is carrying what
 function overviewPage(){
@@ -1006,26 +1022,34 @@ function songCard(s){const p=progress(s);return `<button type="button" class="ca
 const VIEWS={
 dashboard(){
   // 28.10.2026 Startseite nach Vorschlag 1: nur drei Fragen. Was ist neu? Was steht an? Was ist dringend?
-  const de=S.lang==="de",ns=nextSession(),yes=ns?Object.values(ns.rsvp).filter(v=>v==="yes").length:0;
-  return `${heroBlock(ns,yes)}<div class="dash dash3"><div class="dcol">
+  const de=S.lang==="de";
+  return `<figure class="heroimg" role="img" aria-label="Raum Worship"></figure><div class="dash dash3"><div class="dcol">
   ${feedPanel()||`<div class="panel feed feedempty" data-area="neutral"><div class="panel-head"><h2>${de?"Neu seit deinem letzten Besuch":"New since your last visit"}</h2></div><p class="empty">${de?"Nichts Neues. Alles gesehen.":"Nothing new."}</p></div>`}
   </div><div class="dcol">
-  ${nextPanel(ns)}
+  ${nextPanel()}
   ${urgentPanel()}
   </div></div>`},
 songs(){
   const groups=[...STAGES,"tbd"].filter(k=>k!=="liverec"||D.songs.some(s=>s.rec==="live"));
   const board=groups.map(k=>{const l=D.songs.filter(s=>s.stage===k);return `<div class="col"><h3><span>${t("stages."+k)}</span><span class="mono muted">${l.length}</span></h3>${l.map(songCard).join("")}</div>`}).join("");
   const list=groups.map(k=>{const l=D.songs.filter(s=>s.stage===k);if(!l.length)return "";return `<div><h2 class="stagehead">${t("stages."+k)}<span class="cnt">${l.length}</span></h2><div class="grid" style="gap:8px">${l.map(songCard).join("")}</div></div>`}).join("");
-  return `<div class="panel" data-area="songs" data-defc="1"><div class="panel-head"><h2>${t("songsByStage")}</h2></div>${songStairs()}</div><div class="board">${board}</div><div class="glist">${list}</div>`},
+  return `${canSongs()?`<div class="tabs"><button type="button" class="btn primary small" data-act="newSong" style="margin-left:auto">+ ${S.lang==="de"?"Neuer Song":"New song"}</button></div>`:""}<div class="panel" data-area="songs" data-defc="1"><div class="panel-head"><h2>${t("songsByStage")}</h2></div>${songStairs()}</div><div class="board">${board}</div><div class="glist">${list}</div>`},
 tasks(){
-  const f=S.taskFilter;let l=D.tasks.slice();
-  if(f==="mine")l=l.filter(x=>x.owners.includes(S.me));if(f==="over")l=l.filter(isOver);if(f==="done")l=l.filter(x=>x.status==="done");else if(f!=="all")l=l.filter(x=>x.status!=="done"||f==="mine");
-  if(f==="mine"||f==="all")l.sort((a,b)=>(a.status==="done")-(b.status==="done")||(b.owners.includes(S.me)-a.owners.includes(S.me))||(a.due||"9").localeCompare(b.due||"9"));
-  if(f==="over")l.sort((a,b)=>(b.owners.includes(S.me)-a.owners.includes(S.me))||(a.due||"9").localeCompare(b.due||"9"));
+  // 29.10.2026 Entwurf B: Aufgaben nach Datum gruppiert, Parts als eigener Reiter (Richards Feedback "zu überladen")
+  const de=S.lang==="de";let f=S.taskFilter;if(f==="over")f="mine";
+  const open=D.tasks.filter(x=>x.status!=="done");
+  const pl=myParts(S.me),po=pl.reduce((n,x)=>n+x.items.filter(i=>i.status!=="done").length,0);
   const tab=(k,lab)=>`<button type="button" data-act="taskFilter" data-v="${k}" aria-pressed="${f===k}">${lab}</button>`;
-  return `<div class="tabs">${tab("mine",t("myTasks"))}${tab("all",t("allTasks"))}${tab("over",t("overdue"))}${tab("done",t("done"))}${isLeader()?tab("ov",S.lang==="de"?"Übersicht":"Overview"):""}<button type="button" class="btn primary small" data-act="newTask" style="margin-left:auto">+ ${t("newTask")}</button></div>
-  ${f==="ov"&&isLeader()?overviewPage():`<div class="grid">${f==="mine"?myPartsPanel(S.me):""}<div class="panel"><h2 style="margin-bottom:8px">${t("tasks")}</h2><div class="rows">${l.length?l.map(taskRow).join(""):`<p class="empty">${t("nothing")}</p>`}</div></div></div>`}`},
+  const head=`<div class="tabs tsimple">${tab("mine",de?"Aufgaben":"Tasks")}${tab("parts",(de?"Parts":"Parts")+(po?` <b>${po}</b>`:""))}${tab("all",t("allTasks"))}${tab("done",t("done"))}${isLeader()?tab("ov",de?"Übersicht":"Overview"):""}<button type="button" class="btn primary small" data-act="newTask" style="margin-left:auto">+ ${de?"Neu":"New"}</button></div>`;
+  if(f==="ov"&&isLeader())return head+overviewPage();
+  if(f==="parts")return head+`<div class="panel"><div class="rows">${pl.map(({s,items})=>{const o=items.filter(i=>i.status!=="done");return `<div class="row trow"><div class="grow"><button type="button" class="link title" data-act="openSong" data-id="${s.id}" style="color:inherit;font-weight:600">${esc(s.title)}</button><div class="muted ts">${o.length?esc(o.map(i=>i.name).join(", ")):(de?"alles erledigt":"all done")}</div></div><span class="chip">${t("stages."+s.stage)}</span></div>`}).join("")||`<p class="empty">${t("nothing")}</p>`}</div></div>`;
+  if(f==="done"){const l=D.tasks.filter(x=>x.status==="done").sort((a,b)=>(b.due||"").localeCompare(a.due||""));return head+`<div class="panel"><div class="rows">${l.map(taskRow).join("")||`<p class="empty">${t("nothing")}</p>`}</div></div>`}
+  const l=f==="all"?open:open.filter(x=>x.owners.includes(S.me));
+  const wk=new Date(TODAY.getTime()+7*864e5);
+  const g=[[de?"Überfällig":"Overdue",x=>isOver(x)],[de?"Diese Woche":"This week",x=>!isOver(x)&&x.due&&pd(x.due)<=wk],[de?"Später":"Later",x=>x.due&&pd(x.due)>wk],[de?"Ohne Datum":"No date",x=>!x.due]];
+  const srt=a=>a.sort((x,y)=>(f==="all"?(y.owners.includes(S.me)-x.owners.includes(S.me)):0)||(x.due||"9").localeCompare(y.due||"9"));
+  const body=g.map(([h,fn])=>{const r=srt(l.filter(fn));return r.length?`<div class="tgh">${h} <span>${r.length}</span></div><div class="rows">${r.map(taskRow).join("")}</div>`:""}).join("");
+  return head+`<div class="panel tgroups">${body||`<p class="empty">${t("nothing")}</p>`}</div>`},
 sessions(){
   const f=S.sessFilter, up=D.sessions.filter(s=>pd(s.date)>=TODAY).sort((a,b)=>a.date.localeCompare(b.date)), past=D.sessions.filter(s=>pd(s.date)<TODAY).sort((a,b)=>b.date.localeCompare(a.date));
   const l=f==="upcoming"?up:past;
@@ -1045,7 +1069,7 @@ ideas(){
   return `<div class="grid cols-2"><div class="panel"><h2>${t("ideaNew")}</h2><form class="form" data-form="idea"><div class="field full"><label class="label" for="ideaTitle">${t("ideaTitle")}</label><input id="ideaTitle" name="title" required></div><div class="field full"><label class="label" for="ideaText">${t("lyrics")}</label><textarea id="ideaText" name="text"></textarea></div><div class="field full"><label class="label" for="ideaMemo">${t("memoLink")}</label><input id="ideaMemo" name="memo" type="url" placeholder="https://drive.google.com/…"></div><div class="full"><button class="btn primary" type="submit">${t("add")}</button></div></form></div>
   <div class="panel"><h2>${t("ideas")}</h2><div class="rows">${D.ideas.map(i=>`<div class="row"><div class="grow"><div class="title">${esc(i.title)}</div><div class="muted" style="font-size:.85rem">${t("from")} ${esc(nm(i.by))} · ${fmt(i.date)}${i.memo?` · <a href="${esc(i.memo)}" target="_blank" rel="noopener">🎙 Memo</a>`:""}</div>${i.text?`<div style="font-size:.9rem;margin-top:4px;white-space:pre-wrap">${esc(i.text)}</div>`:""}</div>${canAll()?`<button type="button" class="btn small" data-act="ideaToSong" data-id="${i.id}">${t("toPipeline")}</button>`:""}</div>`).join("")||`<p class="empty">${t("nothing")}</p>`}</div></div></div>`},
 members(){
-  return `<div class="panel"><div class="rows">${D.members.map(m=>`<div class="row">${avatarHtml(m)}<div class="grow"><button type="button" class="link title" data-act="openMember" data-id="${m.id}" style="color:inherit">${esc(m.name)}</button>${m.full?` <span class="muted" style="font-size:.85rem">(${esc(m.full)})</span>`:""}<div class="muted" style="font-size:.82rem">${esc(m.groups.join(", "))}</div>${(m.skills||[]).length?`<div class="skills">${esc(m.skills.join(" · "))}</div>`:""}</div>${isLeader()?`<button type="button" class="btn small" data-act="prodToggle" data-id="${m.id}" aria-pressed="${(m.perms||[]).includes("songs")}">${(m.perms||[]).includes("songs")?"✓ ":""}${t("production")}</button><button type="button" class="btn small" data-act="invite" data-id="${m.id}">${t("invite")}</button>`:((m.perms||[]).includes("songs")?`<span class="chip warn">${t("production")}</span>`:"")}<span class="chip ${m.role==="leader"?"acc":m.role==="middle"?"warn":""}">${t("roles."+m.role)}</span></div>`).join("")}</div></div>`},
+  return `<div class="panel"><div class="rows">${D.members.map(m=>`<div class="row">${avatarHtml(m)}<div class="grow"><button type="button" class="link title" data-act="openMember" data-id="${m.id}" style="color:inherit">${esc(m.name)}</button>${m.full?` <span class="muted" style="font-size:.85rem">(${esc(m.full)})</span>`:""}<div class="muted" style="font-size:.82rem">${esc(m.groups.join(", "))}</div>${(m.skills||[]).length?`<div class="skills">${esc(m.skills.join(" · "))}</div>`:""}</div>${isLeader()?`<button type="button" class="btn small" data-act="prodToggle" data-id="${m.id}" title="${S.lang==="de"?"Erlaubt diesem Mitglied, alle Songs zu bearbeiten: Phasen, Parts und Arrangement":"Lets this member edit all songs"}" aria-pressed="${(m.perms||[]).includes("songs")}">${(m.perms||[]).includes("songs")?"✓ ":""}${S.lang==="de"?"Darf Songs bearbeiten":"Can edit songs"}</button><button type="button" class="btn small" data-act="invite" data-id="${m.id}">${t("invite")}</button>`:((m.perms||[]).includes("songs")?`<span class="chip warn">${S.lang==="de"?"bearbeitet Songs":"edits songs"}</span>`:"")}<span class="chip ${m.role==="leader"?"acc":m.role==="middle"?"warn":""}">${t("roles."+m.role)}</span></div>`).join("")}</div></div>`},
 vision(){return visionPage()},
 prayer(){return prayerPage()},
 more(){
@@ -1063,6 +1087,7 @@ function renderSheet(){
 const head=(eyebrow,title)=>`<div class="sheet-head"><div><div class="label">${esc(eyebrow)}</div><h1>${esc(title)}</h1></div><button type="button" class="x" data-act="close" aria-label="Schließen">✕</button></div>`;
 const RCHK=[["dist","Distributor Upload (RecordJet)"],["date","Release Datum"],["cover","Cover"],["shoot","Shooting"],["profile","Profil"],["reel","Reel"],["posts","Posts"],["lyrics","Lyrics Check"],["rights","GEMA und CCLI"]];
 const SHEETS={
+newSong(){const de=S.lang==="de";return `${head(t("songs"),de?"Neuer Song":"New song")}<form class="form" data-form="newSong"><div class="field full"><label class="label" for="ns-title">${t("title")}</label><input id="ns-title" name="title" required></div><div class="field"><label class="label" for="ns-stage">${t("stage")}</label><select id="ns-stage" name="stage">${STAGES.filter(k=>k!=="liverec").map(k=>`<option value="${k}" ${k==="writing"?"selected":""}>${t("stages."+k)}</option>`).join("")}</select></div><div class="full"><button class="btn primary" type="submit">${t("add")}</button></div></form>`},
 song(id){
   const s=D.songs.find(x=>x.id===id);if(!s)return "";const all=canSongs(), wEdit=!(s.gema||s.ccli)||isLeader();
   const st=[...stagesFor(s),"tbd"], idx=st.indexOf(s.stage);
@@ -1090,7 +1115,7 @@ task(id){
   return `${head(t("tasks")+(tk.link?" · "+linkName(tk.link):""),tk.title)}
   ${can?`<form class="quickadd titleedit" data-form="taskTitle" data-id="${tk.id}"><input name="title" value="${esc(tk.title)}" aria-label="${S.lang==="de"?"Titel bearbeiten":"Edit title"}" required><button class="btn small" type="submit">${S.lang==="de"?"Titel speichern":"Save title"}</button></form>`:""}
   <div style="display:flex;gap:6px;flex-wrap:wrap">${stChip(tk.status)}${prioChip(tk.prio)}${dueChip(tk)}</div>
-  <div class="panel"><div class="label">${t("owner")}</div>${canAll()||projTask(tk)?`<div class="attgrid">${D.members.filter(m=>m.active!==false).map(m=>`<label class="attchip"><input type="checkbox" data-act="taskOwner" data-id="${tk.id}" value="${m.id}" ${tk.owners.includes(m.id)?"checked":""}>${esc(m.name)}</label>`).join("")}</div><div class="label" style="margin-top:12px">${t("dueDate")}</div><input type="date" class="reldate" data-act="taskDue" data-id="${tk.id}" value="${esc(tk.due||"")}" aria-label="${t("dueDate")}">`:`<div>${esc(tk.owners.map(nm).join(", "))}</div>`}${can?"":`<p class="log">${t("readOnly")}</p>`}
+  <div class="panel"><div class="label">${t("owner")}</div>${canAll()||projTask(tk)?`<div class="attgrid">${D.members.filter(m=>m.active!==false).map(m=>`<label class="attchip"><input type="checkbox" data-act="taskOwner" data-id="${tk.id}" value="${m.id}" ${tk.owners.includes(m.id)?"checked":""}>${esc(m.name)}</label>`).join("")}</div><div class="label" style="margin-top:12px">${t("dueDate")}</div><input type="date" class="reldate" data-act="taskDue" data-id="${tk.id}" value="${esc(tk.due||"")}" aria-label="${t("dueDate")}">`:`<div>${esc(tk.owners.map(nm).join(", "))}</div>`}${can?"":`<p class="log">${t("readOnly")}</p>`}${isLeader()?`<div><button type="button" class="btn small" data-act="taskVis" data-id="${tk.id}" aria-pressed="${tk.vis==="leaders"}" style="margin-top:10px">${tk.vis==="leaders"?"✓ ":""}${S.lang==="de"?"Nur für die Leitung":"Leaders only"}</button></div>`:""}
    ${can?`<div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">${["open","prog","done"].map(k=>`<button type="button" class="btn small" data-act="setTask" data-id="${tk.id}" data-v="${k}" ${tk.status===k?'aria-pressed="true" style="background:var(--fg);color:var(--bg)"':""}>${t("st."+k)}</button>`).join("")}</div>`:""}</div>
   <div class="panel"><h3 style="margin-bottom:6px">${t("subtasks")}</h3><div class="rows">${tk.subs.map((s,i)=>`<div class="row"><button type="button" class="check ${s.d?"done":""}" data-act="toggleSub" data-id="${tk.id}" data-i="${i}" ${can?"":"disabled"} aria-label="${esc(s.t)}">${s.d?tick:""}</button><div class="grow ${s.d?"struck":""}">${esc(s.t)}</div></div>`).join("")||`<p class="empty">${t("nothing")}</p>`}</div>
    ${can?`<form data-form="sub" data-id="${tk.id}" style="display:flex;gap:8px;margin-top:8px"><div class="field" style="flex:1"><input id="sub-${tk.id}" name="t" placeholder="${t("addSub")}" aria-label="${t("addSub")}"></div><button class="btn" type="submit">${t("add")}</button></form>`:""}</div>
@@ -1109,6 +1134,7 @@ newTask(){
   <div class="field"><label class="label" for="nt-owner">${t("owner")}</label><select id="nt-owner" name="owner">${ownerOpts}</select></div>
   <div class="field"><label class="label" for="nt-due">${t("dueDate")}</label><input id="nt-due" name="due" type="date"></div>
   <div class="field"><label class="label" for="nt-prio">${t("priority")}</label><select id="nt-prio" name="prio"><option value="mid">${t("prio.mid")}</option><option value="high">${t("prio.high")}</option><option value="low">${t("prio.low")}</option></select></div>
+  ${isLeader()?`<label class="field full vischeck"><input type="checkbox" name="vis" value="leaders"> ${S.lang==="de"?"Nur für die Leitung sichtbar (gilt, solange nur Leiter zuständig sind)":"Visible to leaders only"}</label>`:""}
   <div class="field"><label class="label" for="nt-link">${t("link")}</label><select id="nt-link" name="link">${opts}</select></div>
   <div class="full"><button class="btn primary" type="submit">${t("add")}</button></div></form>`},
 session(id){
@@ -1225,6 +1251,8 @@ document.addEventListener("click",e=>{
   const a=e.target.closest("[data-act]");if(!a||!D)return;const {act,id,v,i,ri}=a.dataset;
   if(act==="closeBg"&&e.target!==a)return;
   if(act==="projLeadDel"){setProjLead(v,id,false);return}
+  if(act==="newSong"){S.sheet={type:"newSong"};render();return}
+  if(act==="taskVis"){const c=clone(task(id));c.vis=c.vis==="leaders"?"":"leaders";saveTask(c);return}
   const s=id&&song(id);
   switch(act){
   case "close":case "closeBg":S.sheet=null;break;
@@ -1311,12 +1339,15 @@ document.addEventListener("submit",e=>{
     const s=ex||{id:(kind==="leitung"?"l":kind==="gruppe"?"g":"s")+date.replace(/-/g,"")+"_"+Date.now().toString(36).slice(-5),kind,agenda:"",results:[],decisions:[],attendees:[],rsvp:{},links:[]};
     Object.assign(s,{date,time:String(fd.get("time")||"").trim(),place:String(fd.get("place")||"").trim(),title:kind==="gruppe"?title:"",invited:kind==="gruppe"?inv:[]});
     S.sheet={type:"session",id:s.id};saveSession(s);toast(t("saved"));return}
-  case "task":{const l=fd.get("link");const tk={id:"t"+Date.now(),title:fd.get("title"),owners:[fd.get("owner")],due:fd.get("due")||"",status:"open",prio:fd.get("prio"),link:l?{type:l.split(":")[0],id:l.split(":")[1]}:null,subs:[],comments:[],links:[]};S.sheet=null;saveTask(tk);return}
+  case "task":{const l=fd.get("link");const tk={id:"t"+Date.now(),title:fd.get("title"),owners:[fd.get("owner")],due:fd.get("due")||"",status:"open",prio:fd.get("prio"),link:l?{type:l.split(":")[0],id:l.split(":")[1]}:null,subs:[],comments:[],links:[]};if(fd.get("vis")==="leaders")tk.vis="leaders";S.sheet=null;saveTask(tk);return}
   case "sub":{const v=(fd.get("t")||"").trim();if(!v)return;const c=clone(task(id));c.subs.push({t:v,d:false});saveTask(c);return}
   case "comment":{const v=(fd.get("text")||"").trim();if(!v)return;run(async()=>put(D.tasks,await api("commentTask",{id,text:v})));return}
   case "writers":{const raw=(fd.get("w")||"").split(",").map(x=>x.trim()).filter(Boolean);const ids=raw.map(n=>{const m=D.members.find(x=>x.name.toLowerCase()===n.toLowerCase());return m?m.id:n});songOp(id,"writers",{writers:ids});return}
   case "prayer":{const tx=String(fd.get("text")||"").trim();if(!tx)return;run(async()=>{const r=await api("addPrayer",{kind:fd.get("kind"),text:tx,ref:fd.get("ref")||""});D.prayer=[r].concat(D.prayer||[]);toast(S.lang==="de"?"Geteilt 🙏":"Shared 🙏")});return}
   case "commentP":{const tx=String(fd.get("text")||"").trim();if(!tx)return;run(async()=>put(D.prayer,await api("commentPrayer",{id,text:tx})));return}
+  case "newSong":{const ti=String(fd.get("title")||"").trim();if(!ti)return;const sid=(ti.toLowerCase().replace(/ä/g,"ae").replace(/ö/g,"oe").replace(/ü/g,"ue").replace(/ß/g,"ss").replace(/[^a-z0-9]+/g,"").slice(0,20)||"song")+"_"+Date.now().toString(36).slice(-4);
+    const st=String(fd.get("stage")||"writing");const sg={id:sid,title:ti,stage:STAGES.includes(st)?st:"writing",rec:"studio",leads:[],writers:[],key:"",tempo:"",meter:"",cello:false,gema:false,ccli:false,arr:{v:"open",i:"open"},parts:stdParts({}),releases:[],links:[],note:"",log:[]};
+    S.sheet={type:"song",id:sid};saveSong(sg);toast(t("saved"));return}
   case "newProject":{const ti=String(fd.get("title")||"").trim();if(!ti)return;const p={id:"p"+Date.now().toString(36),title:ti,when:String(fd.get("when")||"").trim(),note:""};run(async()=>{put(D.projects,await api("saveProject",{project:p}));toast(t("saved"))},()=>put(D.projects,p));return}
   case "quickTodo":{const ti=String(fd.get("title")||"").trim();if(!ti)return;saveTask({id:"t"+Date.now(),title:ti,owners:[S.me],due:"",status:"open",prio:"mid",link:{type:"project",id},subs:[],comments:[],links:[]});return}
   case "protocol":{const s=sess(id);const f2=e.target.closest("form");
