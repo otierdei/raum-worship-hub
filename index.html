@@ -416,7 +416,7 @@ main{background-image:none}
 .x{border-radius:0;background:transparent;border:1.5px solid var(--fg)}
 
 /* Zu oder Absage: drei Felder nebeneinander wie auf dem Plakat */
-.rsvp{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;border:1.5px solid var(--fg);max-width:420px}
+.rsvp{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0;border:1.5px solid var(--fg);max-width:420px}
 .rsvp button{border:0;border-left:1.5px solid var(--fg);border-radius:0;background:transparent;font:400 1.05rem/2.2 var(--head);letter-spacing:.16em;padding:0}
 .rsvp button:first-child{border-left:0}
 .rsvp button[aria-pressed="true"]{background:var(--brand);color:#fff}
@@ -532,13 +532,13 @@ body[data-area="sessions"] #view .date,#view .panel[data-area] .date{background:
 #sheetRoot[data-area="leitung"] .sheet{box-shadow:inset 0 4px 0 #1E4F9C}
 @media (min-width:900px){#sheetRoot[data-area="leitung"] .sheet.wide{box-shadow:inset 0 4px 0 #1E4F9C,0 30px 80px rgba(0,0,0,.35)}}
 /* Startseite: Songs als Treppe durch die Phasen (Oti, 13.10., Feedback Markus) */
-.stairs .st-legend{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;font:400 .72rem var(--head);letter-spacing:.06em;color:var(--muted);text-align:center;margin:2px 0 4px}
+.stairs .st-legend{display:grid;grid-template-columns:repeat(8,1fr);gap:3px;font:400 .72rem var(--head);letter-spacing:.06em;color:var(--muted);text-align:center;margin:2px 0 4px}
 .stairs .st-row{padding:9px 0;border-bottom:1px solid var(--line)}
 .stairs .st-h{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
 .stairs .st-name{all:unset;cursor:pointer;font:600 .95rem/1.3 var(--body)}
 .stairs .st-name:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .stairs .st-stage{font:400 .95rem var(--head);letter-spacing:.12em;color:var(--muted);text-transform:uppercase;white-space:nowrap}
-.stairs .st-steps{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-top:6px}
+.stairs .st-steps{display:grid;grid-template-columns:repeat(8,1fr);gap:3px;margin-top:6px}
 .stairs .st-steps i{height:10px;background:var(--sunk)}
 .stairs .st-steps i.on{background:var(--fg)} .stairs .st-steps i.now{background:var(--brand)}
 .stairs .st-rel{font:400 1rem var(--head);letter-spacing:.12em;color:var(--muted);padding-top:10px}
@@ -588,7 +588,7 @@ body[data-area="sessions"] #view .date,#view .panel[data-area] .date{background:
 .mine-name{background:#1E4F9C;color:#fff}
 /* Zusagen in Sessions: vier Zähler oben, Namen darunter (Oti, 14.10., Variante 2) */
 .rc{margin-top:12px}
-.rc-tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.rc-tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
 .rc-tiles>div{background:var(--sunk);border-radius:14px;padding:10px 6px;text-align:center}
 .rc-tiles b{display:block;font:400 2rem/1 var(--poster)}
 .rc-tiles span{font:400 .9rem/1.1 var(--head);letter-spacing:.1em;color:var(--muted)}
@@ -603,6 +603,21 @@ body[data-area="sessions"] #view .date,#view .panel[data-area] .date{background:
 .feed .fwhen{font-size:.78rem;margin-top:2px}
 .feed .feedrow .chip{flex:none}
 .feed .feedfoot{text-align:center;font-size:.82rem;margin:4px 0 0}
+
+/* Band Feedback 28.10.2026 */
+.attchip.declined{color:var(--muted)}
+.attchip.declined input:not(:checked){appearance:none;-webkit-appearance:none;width:14px;height:14px;margin:0;border:1px solid var(--muted);position:relative;flex:none}
+.attchip.declined input:not(:checked)::after{content:"✕";position:absolute;inset:0;display:grid;place-items:center;font:700 11px/1 var(--body);color:var(--accent)}
+.projleads{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:0 0 10px}
+.projleads .label{margin:0 4px 0 0}
+.projleads select{border:1px solid var(--line);background:var(--surface);color:inherit;font:inherit;font-size:.82rem;padding:3px 6px}
+.chipx{all:unset;cursor:pointer;margin-left:6px;opacity:.7}
+.chipx:hover,.chipx:focus-visible{opacity:1}
+.newproj{display:flex;gap:8px;flex-wrap:wrap}
+.newproj input{flex:1 1 160px}
+.dropzone{display:flex;flex-direction:column;gap:2px;align-items:center;text-align:center;margin-top:10px;padding:14px 12px;border:1.5px dashed var(--line);color:var(--muted);cursor:pointer;font-size:.85rem}
+.dropzone b{color:var(--fg);font-weight:600}
+.dropzone.over,.dropzone:hover{border-color:var(--accent);color:var(--fg)}
 
 </style>
 
@@ -644,13 +659,13 @@ protocolBy:"Protokoll: Ricsi",pdf:"PDF in Drive",exportPdf:"Als PDF nach Drive",
 budget:"Budget",onlyLeaders:"Nur für Leitung sichtbar",ideaNew:"Neue Idee",ideaTitle:"Titel der Idee",lyrics:"Lyrics oder Notiz",memo:"Sprachmemo (Datei)",
 toPipeline:"In Pipeline übernehmen",from:"von",roles:{leader:"Leitung",middle:"Leitung Social Media",member:"Mitglied"},
 readOnly:"Nur ansehen. Du kannst das nicht bearbeiten.",tbd:"Zu klären",progress:"Fortschritt",
-stages:{idea:"Idee",writing:"Songwriting",rawdemo:"Raw Demo",arrangement:"Arrangement",production:"Produktion",liverec:"Live Recording",mix:"Mix und Master",release:"Release",tbd:"Zu klären"},
+stages:{idea:"Idee",writing:"Songwriting",rawdemo:"Raw Demo",arrangement:"Arrangement",vocalarr:"Vocal Arrangement",production:"Produktion",liverec:"Live Recording",mix:"Mix und Master",release:"Release",tbd:"Zu klären"},
 st:{open:"offen",prog:"in Arbeit",done:"erledigt"},reset:"Beispieldaten zurücksetzen",resetDone:"Beispieldaten zurückgesetzt",saved:"Gespeichert",
 settings:"Einstellungen",project:"Projekt",session:"Session",song:"Song",where:"Ort",groups:"Gruppen",extern:"extern",
 nextStepsNote:"Die echte App lädt diese Daten aus dem Google Sheet. Änderungen hier bleiben nur in deinem Browser.",
 expense:"Ausgaben",balance:"Stand",addSub:"Teilaufgabe hinzufügen",attendees:"Anwesend",yesCount:"Zusagen",
 liveNote:"Live Recording: Tracks und Click aus der Studioproduktion laufen live mit.",lineup:"Live Lineup",event:"Event",
-moveOnHint:"Weiter erst, wenn Vocal und Instrumental erledigt sind.",releasesTitle:"Releases",money:"Finanzen",invoices:"Rechnungen",invoiceNew:"Rechnung erfassen",vendor:"Von",invNr:"Rechnungsnr.",items:"Leistung",amount:"Betrag (€)",paid:"bezahlt",unpaid:"offen",startBalance:"Start",spent:"Ausgegeben",invHint:"Die PDF kommt in Drive in den Ordner Rechnungen. Bankdaten aus Rechnungen werden in der App nicht angezeigt.",forSong:"Für Song",date:"Datum",hello:"Willkommen bei Raum Hub",enterCode:"Gib deinen 6 stelligen Code ein. Du bekommst ihn von der Leitung per WhatsApp.",whoAreYou:"Wer bist du?",login:"Anmelden",logout:"Abmelden",loading:"Lädt…",noLink:"Öffne bitte deinen persönlichen Link aus WhatsApp.",invite:"Einladen",inviteTitle:"Einladung",inviteHint:"Schick das per WhatsApp. Der Code gilt 14 Tage und funktioniert im Browser und in der installierten App.",copy:"Kopieren",production:"Produktion",errSave:"Nicht gespeichert",offline:"Keine Verbindung. Bitte später nochmal.",pdfDone:"PDF liegt in Protokolle › Creative Sessions",memoLink:"Sprachmemo Link (Drive)",pdfLink:"PDF Link (Drive)",installHint:"Auf dem iPhone: Teilen › Zum Home Bildschirm. Danach in der App einmal den Code eingeben.",leadDoes:"Lead Vocal baut es",celloQ:"Cello in diesem Song",links:"Drive Links",addLink:"Link hinzufügen",linkLabel:"Bezeichnung",linkUrl:"Drive Link (https://…)",myParts:"Meine Songs und Parts",quick:"Drive Ordner",noParts:"Dir ist noch kein Part zugeteilt.",exportOld:"Meine Klicks aus älteren Versionen kopieren",exportHint:"Kopiert deine Änderungen aus den vorherigen Prototyp Versionen. Füge den Text danach im Chat mit Claude ein.",copied:"Kopiert. Jetzt im Chat einfügen.",selectCopy:"Text markieren und kopieren:",badUrl:"Bitte einen Link mit https:// eingeben.",helpers:"Hilfe",vocalArr:"Vocal Arrangement",instrArr:"Instrumental Arrangement"},
+moveOnHint:"Weiter erst, wenn dieser Schritt unten erledigt ist.",releasesTitle:"Releases",money:"Finanzen",invoices:"Rechnungen",invoiceNew:"Rechnung erfassen",vendor:"Von",invNr:"Rechnungsnr.",items:"Leistung",amount:"Betrag (€)",paid:"bezahlt",unpaid:"offen",startBalance:"Start",spent:"Ausgegeben",invHint:"Die PDF kommt in Drive in den Ordner Rechnungen. Bankdaten aus Rechnungen werden in der App nicht angezeigt.",forSong:"Für Song",date:"Datum",hello:"Willkommen bei Raum Hub",enterCode:"Gib deinen 6 stelligen Code ein. Du bekommst ihn von der Leitung per WhatsApp.",whoAreYou:"Wer bist du?",login:"Anmelden",logout:"Abmelden",loading:"Lädt…",noLink:"Öffne bitte deinen persönlichen Link aus WhatsApp.",invite:"Einladen",inviteTitle:"Einladung",inviteHint:"Schick das per WhatsApp. Der Code gilt 14 Tage und funktioniert im Browser und in der installierten App.",copy:"Kopieren",production:"Produktion",errSave:"Nicht gespeichert",offline:"Keine Verbindung. Bitte später nochmal.",pdfDone:"PDF liegt in Protokolle › Creative Sessions",memoLink:"Sprachmemo Link (Drive)",pdfLink:"PDF Link (Drive)",installHint:"Auf dem iPhone: Teilen › Zum Home Bildschirm. Danach in der App einmal den Code eingeben.",leadDoes:"Lead Vocal baut es",celloQ:"Cello in diesem Song",links:"Drive Links",addLink:"Link hinzufügen",linkLabel:"Bezeichnung",linkUrl:"Drive Link (https://…)",myParts:"Meine Songs und Parts",quick:"Drive Ordner",noParts:"Dir ist noch kein Part zugeteilt.",exportOld:"Meine Klicks aus älteren Versionen kopieren",exportHint:"Kopiert deine Änderungen aus den vorherigen Prototyp Versionen. Füge den Text danach im Chat mit Claude ein.",copied:"Kopiert. Jetzt im Chat einfügen.",selectCopy:"Text markieren und kopieren:",badUrl:"Bitte einen Link mit https:// eingeben.",helpers:"Hilfe",vocalArr:"Vocal Arrangement",instrArr:"Instrumental Arrangement"},
 en:{dashboard:"Home",songs:"Songs",tasks:"Tasks",sessions:"Sessions",projects:"Projects",ideas:"Ideas",members:"Members",vision:"Vision & values",prayer:"Prayer & thoughts",more:"More",
 proto:"Prototype with sample data",viewAs:"View as",nextSession:"Next session",coming:"Are you coming?",yes:"Yes",no:"No",maybe:"Maybe",
 overdue:"Overdue",myTasks:"My tasks",allTasks:"All",open:"Open",inprog:"In progress",done:"Done",songsByStage:"Songs by stage",
@@ -665,13 +680,13 @@ protocolBy:"Protocol: Ricsi",pdf:"PDF in Drive",exportPdf:"Export PDF to Drive",
 budget:"Budget",onlyLeaders:"Visible to leaders only",ideaNew:"New idea",ideaTitle:"Idea title",lyrics:"Lyrics or note",memo:"Voice memo (file)",
 toPipeline:"Move into pipeline",from:"from",roles:{leader:"Leader",middle:"Head of Social Media",member:"Member"},
 readOnly:"View only. You can't edit this.",tbd:"To be decided",progress:"Progress",
-stages:{idea:"Idea",writing:"Songwriting",rawdemo:"Raw Demo",arrangement:"Arrangement",production:"Production",liverec:"Live Recording",mix:"Mix and Master",release:"Release",tbd:"To be decided"},
+stages:{idea:"Idea",writing:"Songwriting",rawdemo:"Raw Demo",arrangement:"Arrangement",vocalarr:"Vocal Arrangement",production:"Production",liverec:"Live Recording",mix:"Mix and Master",release:"Release",tbd:"To be decided"},
 st:{open:"open",prog:"in progress",done:"done"},reset:"Reset sample data",resetDone:"Sample data reset",saved:"Saved",
 settings:"Settings",project:"Project",session:"Session",song:"Song",where:"Place",groups:"Groups",extern:"external",
 nextStepsNote:"The real app loads this data from the Google Sheet. Changes here stay in your browser only.",
 expense:"Expenses",balance:"Balance",addSub:"Add subtask",attendees:"Present",yesCount:"Coming",
 liveNote:"Live recording: tracks and click from the studio production run live.",lineup:"Live lineup",event:"Event",
-moveOnHint:"Moves on only when Vocal and Instrumental are done.",releasesTitle:"Releases",money:"Finances",invoices:"Invoices",invoiceNew:"Add invoice",vendor:"From",invNr:"Invoice no.",items:"Service",amount:"Amount (€)",paid:"paid",unpaid:"open",startBalance:"Start",spent:"Spent",invHint:"The PDF goes into the Drive folder Rechnungen. Bank details from invoices are not shown in the app.",forSong:"For song",date:"Date",hello:"Welcome to Raum Hub",enterCode:"Enter your 6 digit code. A leader sends it to you on WhatsApp.",whoAreYou:"Who are you?",login:"Log in",logout:"Log out",loading:"Loading…",noLink:"Please open your personal link from WhatsApp.",invite:"Invite",inviteTitle:"Invitation",inviteHint:"Send this on WhatsApp. The code is valid for 14 days and works in the browser and in the installed app.",copy:"Copy",production:"Production",errSave:"Not saved",offline:"No connection. Please try again later.",pdfDone:"PDF saved in Protokolle › Creative Sessions",memoLink:"Voice memo link (Drive)",pdfLink:"PDF link (Drive)",installHint:"On iPhone: Share › Add to Home Screen. Then enter the code once in the app.",leadDoes:"lead vocal builds it",celloQ:"Cello in this song",links:"Drive links",addLink:"Add link",linkLabel:"Label",linkUrl:"Drive link (https://…)",myParts:"My songs and parts",quick:"Drive folders",noParts:"No part assigned to you yet.",exportOld:"Copy my clicks from older versions",exportHint:"Copies your changes from the earlier prototype versions. Paste the text into the chat with Claude.",copied:"Copied. Now paste it into the chat.",selectCopy:"Select and copy this text:",badUrl:"Please enter a link starting with https://.",helpers:"Help",vocalArr:"Vocal arrangement",instrArr:"Instrumental arrangement"}};
+moveOnHint:"Moves on only when this step below is done.",releasesTitle:"Releases",money:"Finances",invoices:"Invoices",invoiceNew:"Add invoice",vendor:"From",invNr:"Invoice no.",items:"Service",amount:"Amount (€)",paid:"paid",unpaid:"open",startBalance:"Start",spent:"Spent",invHint:"The PDF goes into the Drive folder Rechnungen. Bank details from invoices are not shown in the app.",forSong:"For song",date:"Date",hello:"Welcome to Raum Hub",enterCode:"Enter your 6 digit code. A leader sends it to you on WhatsApp.",whoAreYou:"Who are you?",login:"Log in",logout:"Log out",loading:"Loading…",noLink:"Please open your personal link from WhatsApp.",invite:"Invite",inviteTitle:"Invitation",inviteHint:"Send this on WhatsApp. The code is valid for 14 days and works in the browser and in the installed app.",copy:"Copy",production:"Production",errSave:"Not saved",offline:"No connection. Please try again later.",pdfDone:"PDF saved in Protokolle › Creative Sessions",memoLink:"Voice memo link (Drive)",pdfLink:"PDF link (Drive)",installHint:"On iPhone: Share › Add to Home Screen. Then enter the code once in the app.",leadDoes:"lead vocal builds it",celloQ:"Cello in this song",links:"Drive links",addLink:"Add link",linkLabel:"Label",linkUrl:"Drive link (https://…)",myParts:"My songs and parts",quick:"Drive folders",noParts:"No part assigned to you yet.",exportOld:"Copy my clicks from older versions",exportHint:"Copies your changes from the earlier prototype versions. Paste the text into the chat with Claude.",copied:"Copied. Now paste it into the chat.",selectCopy:"Select and copy this text:",badUrl:"Please enter a link starting with https://.",helpers:"Help",vocalArr:"Vocal arrangement",instrArr:"Instrumental arrangement"}};
 
 /* ---------- constants ---------- */
 const STD_PARTS=[["drums","Drums","oti"],["percs","Percs","oti"],["bass","Bass","fini"],["synth","Synth","jeremy"],["egit","E-Gitarren",""],["acoustic","Akustik",""],["piano","Piano",""],["keys","Keys",""],["cello","Cello","suli"]];
@@ -679,7 +694,7 @@ function stdParts(o){return STD_PARTS.map(([key,name,owner])=>Object.assign({key
 const showPart=(s,p)=>p.key!=="cello"||s.cello;
 // Drive folder shortcuts arrive from the backend after login (bootstrap: drive.quick), so no folder IDs sit in the public page
 const quickList=()=>(D&&D.drive&&Array.isArray(D.drive.quick))?D.drive.quick:[];
-const STAGES=["idea","writing","rawdemo","arrangement","production","liverec","mix","release"];
+const STAGES=["idea","writing","rawdemo","arrangement","vocalarr","production","liverec","mix","release"];
 const DRIVE={file:id=>"https://drive.google.com/file/d/"+id+"/view"};
 /* ---------- state and API ---------- */
 const API="https://raumhub.othniel-erdei.workers.dev/";
@@ -702,6 +717,10 @@ const role=()=>me().role;
 const canAll=()=>role()!=="member";
 const isLeader=()=>role()==="leader";
 const canSongs=()=>canAll()||(me().perms||[]).includes("songs");
+// 28.10.2026: Projektverantwortliche (perms "proj:<id>") ändern und verteilen alle Aufgaben ihres Projekts
+const canProj=pid=>!!pid&&(canAll()||(me().perms||[]).includes("proj:"+pid));
+const projTask=tk=>!!(tk&&tk.link&&tk.link.type==="project"&&canProj(tk.link.id));
+const leadsAnyProj=()=>(me().perms||[]).some(x=>String(x).indexOf("proj:")===0);
 const partMine=(p,u)=>!!u&&(p.owner===u||(p.co||[]).includes(u));
 const AREA={dashboard:"dashboard",songs:"songs",tasks:"tasks",sessions:"sessions",projects:"projects",ideas:"ideas",prayer:"prayer"};const areaOf=v=>AREA[v]||"neutral";
 // vision: kept by the leadership in the Sheet, rendered as plain sections (h heading, p paragraphs, list bullets, rows two column table)
@@ -765,7 +784,7 @@ function protoForm(s,can){const dr=can?protoDraft(s.id):null;const p=dr?{writer:
   return `<form class="grid protokoll" data-form="protocol" data-id="${s.id}" style="gap:12px">
   <div class="panel"><h3>Agenda (vorab)</h3><textarea name="agenda" ${ro} placeholder="Was steht heute an?">${esc(dr?dr.agenda:(s.agenda||""))}</textarea></div>
   <div class="panel"><h3>Kopf</h3><div class="field"><label class="label" for="pw-${s.id}">Protokoll geführt von</label><select id="pw-${s.id}" name="writer" ${ro}>${D.members.map(m=>`<option value="${m.id}" ${m.id===p.writer?"selected":""}>${esc(m.name)}</option>`).join("")}</select></div>
-   <div class="label" style="margin-top:10px">Anwesende · aus den Zusagen vorausgefüllt</div><div class="attgrid">${D.members.filter(m=>m.active!==false&&(!isLeitung(s)||m.role==="leader")).map(m=>`<label class="attchip"><input type="checkbox" name="att" value="${m.id}" ${att.includes(m.id)?"checked":""} ${ro}>${esc(m.name)}</label>`).join("")}</div></div>
+   <div class="label" style="margin-top:10px">Anwesende · aus den Zusagen vorausgefüllt</div><div class="attgrid">${D.members.filter(m=>m.active!==false&&(!isLeitung(s)||m.role==="leader")).map(m=>`<label class="attchip${(s.rsvp||{})[m.id]==="no"?" declined":""}"${(s.rsvp||{})[m.id]==="no"?` title="${S.lang==="de"?"hat abgesagt":"declined"}"`:""}><input type="checkbox" name="att" value="${m.id}" ${att.includes(m.id)?"checked":""} ${ro}>${esc(m.name)}</label>`).join("")}</div></div>
   <div class="panel"><h3>1. Allgemeine Infos</h3><textarea name="info" ${ro} placeholder="Ein Punkt pro Zeile. Mit zwei Leerzeichen am Anfang wird daraus ein Unterpunkt.">${esc(p.info||"")}</textarea></div>
   <div class="panel"><h3>2. Review letztes Treffen</h3><textarea name="review" ${ro} placeholder="Was ist seit dem letzten Treffen passiert?">${esc(p.review||"")}</textarea></div>
   <div class="panel"><h3>3. Heutiges Treffen: Aufgaben und Zuständigkeiten</h3><div class="pg-list">${p.groups.map(pgRow).join("")}</div>${can?`<button type="button" class="btn small" data-act="addPg">+ Zeile</button>`:""}</div>
@@ -784,6 +803,8 @@ const fmt=s=>{const d=pd(s);if(!d)return "";return d.toLocaleDateString(S.lang==
 const isOver=tk=>tk.status!=="done"&&tk.due&&pd(tk.due)<TODAY;
 const isToday=tk=>tk.due&&pd(tk.due).getTime()===TODAY.getTime();
 const stagesFor=s=>STAGES.filter(x=>x!=="liverec"||s.rec==="live");
+// 28.10.2026: Arrangement ist jetzt Instrumental, danach eigene Phase Vocal Arrangement; weiter erst, wenn der jeweilige Teil erledigt ist
+const stageGate=s=>s.stage==="arrangement"?(s.arr||{}).i!=="done":s.stage==="vocalarr"?(s.arr||{}).v!=="done":false;
 const progress=s=>{if(s.stage==="tbd")return 0;const st=stagesFor(s);let i=st.indexOf(s.stage);if(i<0)i=0;const rel=s.stage==="release"&&s.releases.some(r=>Object.values(r.checks).every(v=>v==="done"));return Math.round((rel?st.length:i)/st.length*100)};
 
 /* ---------- icons ---------- */
@@ -863,7 +884,7 @@ function ownersHtml(a){const me=a.includes(S.me),rest=a.filter(x=>x!==S.me),show
 function stChip(s){return `<span class="chip ${s==="done"?"ok":s==="prog"?"warn":""}">${t("st."+s)}</span>`}
 function dueChip(tk){if(!tk.due)return "";if(tk.status==="done")return `<span class="chip">${fmt(tk.due)}</span>`;if(isOver(tk))return `<span class="chip bad">${t("overdue")} · ${fmt(tk.due)}</span>`;if(isToday(tk))return `<span class="chip warn">${t("today")}</span>`;return `<span class="chip">${fmt(tk.due)}</span>`}
 function prioChip(p){return p==="high"?`<span class="chip bad">${t("prio.high")}</span>`:p==="low"?`<span class="chip">${t("prio.low")}</span>`:""}
-function canTask(tk){return canAll()||tk.owners.includes(S.me)}
+function canTask(tk){return canAll()||tk.owners.includes(S.me)||projTask(tk)}
 function linkName(l){if(!l)return "";if(l.type==="song"){const s=D.songs.find(x=>x.id===l.id);return s?"♪ "+s.title:""}if(l.type==="project"){const p=D.projects.find(x=>x.id===l.id);return p?p.title:""}if(l.type==="session"){const s=D.sessions.find(x=>x.id===l.id);return s?t("session")+" "+fmt(s.date):""}return ""}
 function taskRow(tk){
   const can=canTask(tk), cls=tk.status==="done"?"done":tk.status==="prog"?"prog":"";
@@ -906,9 +927,21 @@ function meetingForm(id){
   <div class="field full"><label class="label" for="mt-place">${de?"Ort":"Place"}</label><input id="mt-place" name="place" value="${esc(s?s.place||"":"")}" placeholder="Raumhaus"></div>
   ${k==="gruppe"||!s?`<div class="field full"><div class="label">${de?"Eingeladen":"Invited"}${s?"":de?" · nur bei Treffen mit Einladung":" · invite only meetings"}</div><div class="attgrid">${D.members.filter(m=>m.active!==false).map(m=>`<label class="attchip"><input type="checkbox" name="inv" value="${m.id}" ${inv.includes(m.id)?"checked":""}>${esc(m.name)}</label>`).join("")}</div></div>`:""}
   <div class="full" style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn primary" type="submit">${t("save")}</button>${s&&!hasProto?`<button type="button" class="btn" data-act="delMeeting" data-id="${s.id}">${de?"Treffen löschen":"Delete meeting"}</button>`:""}</div></form>`}
+function projLeadsHtml(p){const de=S.lang==="de",L=D.members.filter(m=>(m.perms||[]).includes("proj:"+p.id));
+  const add=isLeader()?D.members.filter(m=>m.active!==false&&m.role==="member"&&!L.includes(m)):[];
+  return `<div class="projleads"><span class="label">${de?"Verantwortlich":"Responsible"}</span>${L.map(m=>`<span class="chip">${esc(m.name)}${isLeader()?`<button type="button" class="chipx" data-act="projLeadDel" data-id="${esc(p.id)}" data-v="${m.id}" aria-label="${de?"entfernen":"remove"}">✕</button>`:""}</span>`).join("")||`<span class="muted">${de?"Leitung":"Leaders"}</span>`}${add.length?`<select data-act="projLeadAdd" data-id="${esc(p.id)}" aria-label="${de?"Verantwortliche hinzufügen":"Add responsible person"}"><option value="">+ ${de?"Person":"Person"}</option>${add.map(m=>`<option value="${m.id}">${esc(m.name)}</option>`).join("")}</select>`:""}</div>`}
+function setProjLead(mid,pid,on){const m=mem(mid);if(!m)return;const p=(m.perms||[]).filter(x=>x!=="proj:"+pid);if(on)p.push("proj:"+pid);run(async()=>{put(D.members,await api("saveMember",{member:Object.assign({},m,{perms:p})}));toast(t("saved"))})}
+function newProjectForm(){const de=S.lang==="de";return `<form class="panel quickadd newproj" data-form="newProject"><input name="title" placeholder="${de?"Neues Projekt, z.B. Worship Night Mannheim":"New project"}" aria-label="${de?"Projektname":"Project name"}" required><input name="when" placeholder="${de?"Wann":"When"}" aria-label="${de?"Wann":"When"}"><button class="btn small" type="submit">+</button></form>`}
+// 28.10.2026: Dateien direkt am Song in den Drive Ordner Demos hochladen (bis 9 MB)
+function readAny(file){return new Promise((ok,fail)=>{if(file.size>9e6)return fail(new Error(S.lang==="de"?"Datei ist größer als 9 MB. Bitte als Drive Link hinzufügen.":"File is larger than 9 MB. Please add a Drive link."));const fr=new FileReader();fr.onload=()=>ok({name:file.name,mime:file.type||"application/octet-stream",data:String(fr.result).split(",")[1]||""});fr.onerror=()=>fail(new Error(S.lang==="de"?"Datei konnte nicht gelesen werden.":"Could not read the file."));fr.readAsDataURL(file)})}
+function uploadSongFile(id,file){if(!file)return;run(async()=>{const u=await readAny(file);toast(S.lang==="de"?"Lädt hoch…":"Uploading…");put(D.songs,await api("songOp",{id,op:"upload",name:u.name,mime:u.mime,data:u.data}));toast(t("saved"))},()=>{})}
+function dropZone(type,id){if(type!=="song"||!(D.drive&&D.drive.upload))return "";const de=S.lang==="de";return `<label class="dropzone" data-drop="${esc(id)}"><b>${de?"Datei hierher ziehen":"Drop a file here"}</b><span>${de?"oder antippen zum Auswählen · bis 9 MB · landet im Drive Ordner Demos":"or tap to choose · up to 9 MB · goes to the Drive folder Demos"}</span><input type="file" data-act="songFile" data-id="${esc(id)}" hidden></label>`}
+document.addEventListener("dragover",e=>{const z=e.target.closest&&e.target.closest("[data-drop]");if(z){e.preventDefault();z.classList.add("over")}});
+document.addEventListener("dragleave",e=>{const z=e.target.closest&&e.target.closest("[data-drop]");if(z)z.classList.remove("over")});
+document.addEventListener("drop",e=>{const z=e.target.closest&&e.target.closest("[data-drop]");if(!z)return;e.preventDefault();z.classList.remove("over");const f=e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files[0];if(f&&D)uploadSongFile(z.dataset.drop,f)});
 function linksPanel(type,id,links,can){
   return `<div class="panel"><div class="panel-head"><h3>${t("links")}</h3></div><div class="rows">${links.map((l,i)=>`<div class="row"><div class="grow"><a href="${esc(l.u)}" target="_blank" rel="noopener">${esc(l.l)} ↗</a></div>${can?`<button type="button" class="btn small" data-act="delLink" data-type="${type}" data-id="${id}" data-i="${i}" aria-label="Link entfernen">✕</button>`:""}</div>`).join("")||`<p class="empty">${t("nothing")}</p>`}</div>
-  ${can?`<form data-form="link" data-type="${type}" data-id="${id}" class="form" style="margin-top:8px"><div class="field"><input id="ll-${type}-${id}" name="l" placeholder="${t("linkLabel")}" aria-label="${t("linkLabel")}" required></div><div class="field"><input id="lu-${type}-${id}" name="u" placeholder="${t("linkUrl")}" aria-label="${t("linkUrl")}" required></div><div class="full"><button class="btn small" type="submit">${t("addLink")}</button></div></form>`:""}</div>`}
+  ${can?dropZone(type,id):""}${can?`<form data-form="link" data-type="${type}" data-id="${id}" class="form" style="margin-top:8px"><div class="field"><input id="ll-${type}-${id}" name="l" placeholder="${t("linkLabel")}" aria-label="${t("linkLabel")}" required></div><div class="field"><input id="lu-${type}-${id}" name="u" placeholder="${t("linkUrl")}" aria-label="${t("linkUrl")}" required></div><div class="full"><button class="btn small" type="submit">${t("addLink")}</button></div></form>`:""}</div>`}
 function holderOf(type,id){return type==="song"?D.songs.find(x=>x.id===id):type==="task"?D.tasks.find(x=>x.id===id):D.sessions.find(x=>x.id===id)}
 function myParts(uid){
   return D.songs.filter(s=>s.stage!=="tbd"&&STAGES.indexOf(s.stage)>=STAGES.indexOf("rawdemo")).map(s=>{const items=[];
@@ -924,20 +957,20 @@ function quickPanel(){if(!quickList().length)return "";return `<div class="panel
 function myMeetingsPanel(){const l=D.sessions.filter(s=>invitedTo(s)&&pd(s.date)>=TODAY).sort((a,b)=>a.date.localeCompare(b.date));if(!l.length)return "";
   return `<div class="panel" data-area="sessions"><div class="panel-head"><h2>${S.lang==="de"?"Meine Treffen":"My meetings"}</h2></div><div class="rows">${l.map(s=>`<div class="next" style="margin-bottom:10px">${dateBox(s)}<div><button type="button" class="link title" data-act="openSession" data-id="${s.id}" style="color:inherit;font-weight:700">${esc(s.title)}</button><div class="muted">${esc([s.time,s.place].filter(Boolean).join(" · "))}</div>${rsvp(s)}</div></div>`).join("")}</div></div>`}
 function heroBlock(ns,yes){const de=S.lang==="de";const hi=(de?"Hallo ":"Hi ")+esc((me().name||"").split(" ")[0]);
-  const top=`<div class="hero-top"><span>Raum Hub</span><button type="button" data-act="openMember" data-id="${esc(S.me||"")}">${hi}</button></div>`;
+  const top=`<div class="hero-top" aria-hidden="true"></div>`;
   if(!ns)return `<section class="hero">${top}<div><div class="hero-k">${t("nextSession")}</div><h2>${de?"Gerade nichts geplant":"Nothing planned"}</h2></div></section>`;
   const d=pd(ns.date),wd=d.toLocaleDateString(de?"de-DE":"en-GB",{weekday:"short"}).replace(".","");
   const dd=String(d.getDate()).padStart(2,"0")+"."+String(d.getMonth()+1).padStart(2,"0")+".";
   return `<section class="hero" aria-label="${t("nextSession")}">${top}<div><div class="hero-k">${t("nextSession")} · ${esc(wd)} ${dd}</div><h2>${esc(ns.title||"Creative Session")}</h2><div class="hero-m">${esc([ns.time,ns.place].filter(Boolean).join(" · "))} · ${yes} ${t("yesCount")} · <button type="button" data-act="openSession" data-id="${ns.id}">${t("agenda")} ›</button></div></div></section><div class="hero-rsvp">${rsvp(ns)}</div>`}
 function songStairs(){const ST=STAGES.filter(k=>k!=="liverec");const de=S.lang==="de";
-  const SH=de?{idea:"Idee",writing:"Writing",rawdemo:"Demo",arrangement:"Arr.",production:"Prod.",mix:"Mix",release:"Release"}:{idea:"Idea",writing:"Writing",rawdemo:"Demo",arrangement:"Arr.",production:"Prod.",mix:"Mix",release:"Release"};
+  const SH=de?{idea:"Idee",writing:"Writing",rawdemo:"Demo",arrangement:"Arr.",vocalarr:"Vocal",production:"Prod.",mix:"Mix",release:"Rel."}:{idea:"Idea",writing:"Writing",rawdemo:"Demo",arrangement:"Arr.",vocalarr:"Vocal",production:"Prod.",mix:"Mix",release:"Rel."};
   const ix=s=>s.stage==="liverec"?ST.indexOf("production"):ST.indexOf(s.stage);
   const act=D.songs.filter(s=>s.stage!=="release").sort((a,b)=>ix(b)-ix(a)||a.title.localeCompare(b.title));const rel=D.songs.length-act.length;
   return `<div class="stairs"><div class="st-legend" aria-hidden="true">${ST.map(k=>`<span>${SH[k]}</span>`).join("")}</div>${act.map(s=>{const n=ix(s);return `<div class="st-row"><div class="st-h"><button type="button" class="st-name" data-act="openSong" data-id="${s.id}">${esc(s.title)}</button><span class="st-stage">${t("stages."+s.stage)}</span></div><div class="st-steps" role="img" aria-label="${esc(t("stages."+s.stage))}">${ST.map((k,i)=>`<i class="${i<n?"on":i===n?"now":""}"></i>`).join("")}</div></div>`}).join("")||`<p class="empty">${t("nothing")}</p>`}${rel?`<div class="st-rel">+ ${rel} ${de?"veröffentlicht":"released"}</div>`:""}</div>`}
 function rsvpCounts(g){return `<div class="rc"><div class="rc-tiles">${g.map(([l,n,k])=>`<div class="rc-${k}"><b>${n.length}</b><span>${l}</span></div>`).join("")}</div>${g.filter(x=>x[1].length).map(([l,n])=>`<div class="rc-names"><b>${l}:</b> ${esc(n.join(", "))}</div>`).join("")}</div>`}
 function nextSession(){return D.sessions.filter(s=>pd(s.date)>=TODAY&&!isLeitung(s)&&!isGruppe(s)).sort((a,b)=>a.date.localeCompare(b.date))[0]}
 function dateBox(s){const d=pd(s.date);return `<div class="date"><b>${d.getDate()}</b><span>${d.toLocaleDateString(S.lang==="de"?"de-DE":"en-GB",{month:"short"})}</span></div>`}
-function rsvp(s){const v=s.rsvp[S.me];return `<div class="rsvp">${["yes","maybe","no"].map(k=>`<button type="button" data-act="rsvp" data-id="${s.id}" data-v="${k}" aria-pressed="${v===k}">${t(k)}</button>`).join("")}</div>`}
+function rsvp(s){const v=s.rsvp[S.me];return `<div class="rsvp">${["yes","no"].map(k=>`<button type="button" data-act="rsvp" data-id="${s.id}" data-v="${k}" aria-pressed="${v===k}">${t(k)}</button>`).join("")}</div>`}
 function songCard(s){const p=progress(s);return `<button type="button" class="card" data-act="openSong" data-id="${s.id}"><span class="t">${esc(s.title)}</span><span class="m">${s.key?`<span class="mono">${esc(s.key)}</span>`:""}${s.tempo?`<span class="mono">${esc(s.tempo)} bpm</span>`:""}${s.rec==="live"?`<span class="chip acc">Live</span>`:""}${(s.releases||[]).map(r=>`<span class="chip rel">${t(r.kind)} ${r.date?fmt(r.date):"?"}</span>`).join("")}${s.parts.length?`<span>${s.parts.filter(x=>showPart(s,x)&&x.status==="done").length}/${s.parts.filter(x=>showPart(s,x)).length} ${t("parts")}</span>`:""}</span><div class="prog"><i style="width:${p}%"></i></div></button>`}
 
 /* ---------- views ---------- */
@@ -981,10 +1014,10 @@ sessions(){
   const f=S.sessFilter, up=D.sessions.filter(s=>pd(s.date)>=TODAY).sort((a,b)=>a.date.localeCompare(b.date)), past=D.sessions.filter(s=>pd(s.date)<TODAY).sort((a,b)=>b.date.localeCompare(a.date));
   const l=f==="upcoming"?up:past;
   return `<div class="tabs"><button type="button" data-act="sessFilter" data-v="upcoming" aria-pressed="${f==="upcoming"}">${t("upcoming")}</button><button type="button" data-act="sessFilter" data-v="past" aria-pressed="${f==="past"}">${t("past")}</button></div>
-  <div class="panel"><div class="rows">${l.map(s=>{const y=Object.values(s.rsvp).filter(v=>v==="yes").length;return `<div class="row${isLeitung(s)?" lrow":""}"${isLeitung(s)?" data-area=\"leitung\"":""}>${dateBox(s)}<div class="grow"><button type="button" class="link title" data-act="openSession" data-id="${s.id}" style="color:inherit">${esc(sessName(s))}</button>${isGruppe(s)?` <span class="chip gchip">👥 ${esc(owners(s.invited||[]))}</span>`:""}${isLeitung(s)?` <span class="chip warn">${S.lang==="de"?"nur Leitung":"leaders only"}</span>`:""}<div class="muted" style="font-size:.85rem">${esc([s.time,s.place].filter(Boolean).join(" · ")||(S.lang==="de"?"Uhrzeit und Ort offen":"Time and place open"))}</div></div>${f==="upcoming"?`<span class="chip ${s.rsvp[S.me]==="yes"?"ok":""}">${y} ${t("yesCount")}${Object.values(s.rsvp).filter(v=>v==="maybe").length?` · ${Object.values(s.rsvp).filter(v=>v==="maybe").length} ${t("maybe")}`:""}</span>`:s.pdf?(isLeitung(s)?`<button type="button" class="chip acc" data-act="protoOpen" data-id="${s.id}" style="border:0">${t("pdf")}</button>`:`<a class="chip acc" href="${DRIVE.file(s.pdf)}" target="_blank" rel="noopener">${t("pdf")}</a>`):""}</div>`}).join("")}</div></div>${isLeader()?`<button type="button" class="btn primary" data-act="newMeeting" style="margin:12px 8px 0 0">+ ${S.lang==="de"?"Neues Treffen":"New meeting"}</button>`:""}${isLeader()?`<button type="button" class="btn" data-act="addLeitung" style="margin-top:12px">+ ${S.lang==="de"?"Nächstes Leiter Treffen (in 2 Wochen)":"Next leadership meeting (in 2 weeks)"}</button>`:""}${visionPanel("sessions")}`},
+  <div class="panel"><div class="rows">${l.map(s=>{const y=Object.values(s.rsvp).filter(v=>v==="yes").length;return `<div class="row${isLeitung(s)?" lrow":""}"${isLeitung(s)?" data-area=\"leitung\"":""}>${dateBox(s)}<div class="grow"><button type="button" class="link title" data-act="openSession" data-id="${s.id}" style="color:inherit">${esc(sessName(s))}</button>${isGruppe(s)?` <span class="chip gchip">👥 ${esc(owners(s.invited||[]))}</span>`:""}${isLeitung(s)?` <span class="chip warn">${S.lang==="de"?"nur Leitung":"leaders only"}</span>`:""}<div class="muted" style="font-size:.85rem">${esc([s.time,s.place].filter(Boolean).join(" · ")||(S.lang==="de"?"Uhrzeit und Ort offen":"Time and place open"))}</div></div>${f==="upcoming"?`<span class="chip ${s.rsvp[S.me]==="yes"?"ok":""}">${y} ${t("yesCount")}</span>`:s.pdf?(isLeitung(s)?`<button type="button" class="chip acc" data-act="protoOpen" data-id="${s.id}" style="border:0">${t("pdf")}</button>`:`<a class="chip acc" href="${DRIVE.file(s.pdf)}" target="_blank" rel="noopener">${t("pdf")}</a>`):""}</div>`}).join("")}</div></div>${isLeader()?`<button type="button" class="btn primary" data-act="newMeeting" style="margin:12px 8px 0 0">+ ${S.lang==="de"?"Neues Treffen":"New meeting"}</button>`:""}${isLeader()?`<button type="button" class="btn" data-act="addLeitung" style="margin-top:12px">+ ${S.lang==="de"?"Nächstes Leiter Treffen (in 2 Wochen)":"Next leadership meeting (in 2 weeks)"}</button>`:""}${visionPanel("sessions")}`},
 projects(){
-  return `<div class="grid cols-2">${D.projects.map(p=>{const l=D.tasks.filter(x=>x.link&&x.link.type==="project"&&x.link.id===p.id);const d=l.filter(x=>x.status==="done").length;return `<div class="panel"><div class="panel-head"><h2>${esc(p.title)}</h2><span class="chip">${esc(p.when)}</span></div><p class="muted" style="margin:0 0 8px">${esc(p.note)}</p><div class="label">${t("tasks")} · ${d}/${l.length}</div><div class="rows">${l.map(taskRow).join("")||`<p class="empty">${t("nothing")}</p>`}</div><form class="quickadd" data-form="quickTodo" data-id="${p.id}"><input name="title" placeholder="${S.lang==="de"?"Neues To-do, Enter zum Speichern":"New to-do, press Enter"}" aria-label="To-do" required><button class="btn small" type="submit">+</button></form><button type="button" class="link" data-act="newTaskFor" data-id="${p.id}" style="margin-top:6px">+ ${S.lang==="de"?"Aufgabe mit Zuständigen und Datum":"Task with owner and date"}</button></div>`}).join("")}
-  </div>`},
+  return `<div class="grid cols-2">${D.projects.map(p=>{const l=D.tasks.filter(x=>x.link&&x.link.type==="project"&&x.link.id===p.id);const d=l.filter(x=>x.status==="done").length;return `<div class="panel"><div class="panel-head"><h2>${esc(p.title)}</h2><span class="chip">${esc(p.when)}</span></div><p class="muted" style="margin:0 0 8px">${esc(p.note)}</p>${projLeadsHtml(p)}<div class="label">${t("tasks")} · ${d}/${l.length}</div><div class="rows">${l.map(taskRow).join("")||`<p class="empty">${t("nothing")}</p>`}</div><form class="quickadd" data-form="quickTodo" data-id="${p.id}"><input name="title" placeholder="${S.lang==="de"?"Neues To-do, Enter zum Speichern":"New to-do, press Enter"}" aria-label="To-do" required><button class="btn small" type="submit">+</button></form><button type="button" class="link" data-act="newTaskFor" data-id="${p.id}" style="margin-top:6px">+ ${S.lang==="de"?"Aufgabe mit Zuständigen und Datum":"Task with owner and date"}</button></div>`}).join("")}
+  </div>${canAll()?newProjectForm():""}`},
 money(){
   if(!D.money)return `<p class="empty">${t("nothing")}</p>`;
   const inv=D.money.invoices.slice().sort((a,b)=>b.date.localeCompare(a.date));
@@ -1017,7 +1050,7 @@ const SHEETS={
 song(id){
   const s=D.songs.find(x=>x.id===id);if(!s)return "";const all=canSongs(), wEdit=!(s.gema||s.ccli)||isLeader();
   const st=[...stagesFor(s),"tbd"], idx=st.indexOf(s.stage);
-  const arrBlocked=s.stage==="arrangement"&&!(s.arr.v==="done"&&s.arr.i==="done");
+  const arrBlocked=stageGate(s);
   const steps=st.map((k,i)=>`<button type="button" class="${k===s.stage?"now":i<idx&&s.stage!=="tbd"?"past":""}" data-act="setStage" data-id="${s.id}" data-v="${k}" ${all?"":"disabled"}>${t("stages."+k)}</button>`).join("");
   const parts=s.parts.map((p,i)=>{if(!showPart(s,p))return "";const can=all||partMine(p,S.me);const ownerLabel=p.ext?`${esc(p.owner)} <span class="chip">${t("extern")}</span>`:p.owner?esc([p.owner].concat(p.co||[]).map(nm).join(" & ")):`<span class="muted">${t("none")}</span>`;
     return `<div class="row"><button type="button" class="check ${p.status==="done"?"done":p.status==="prog"?"prog":""}" data-act="cyclePart" data-id="${s.id}" data-i="${i}" ${can?"":"disabled"} aria-label="${t("status")}">${p.status==="done"?tick:""}</button><div class="grow"><div class="title" style="font-weight:500">${esc(p.name)}${p.note?` <span class="muted" style="font-weight:400">· ${esc(p.note)}</span>`:""}</div><div class="muted" style="font-size:.8rem">${ownerLabel}</div></div>${all&&!p.ext?`<select data-act="partOwner" data-id="${s.id}" data-i="${i}" aria-label="${t("owner")}" style="max-width:120px;border:1px solid var(--line);border-radius:6px;background:var(--surface);padding:3px">${["",...D.members.map(m=>m.id)].map(o=>`<option value="${o}" ${o===p.owner?"selected":""}>${o?esc(nm(o)):"–"}</option>`).join("")}</select><select data-act="partCo" data-id="${s.id}" data-i="${i}" aria-label="${t("owner")} 2" style="max-width:110px;border:1px solid var(--line);border-radius:6px;background:var(--surface);padding:3px">${["",...D.members.map(m=>m.id)].map(o=>`<option value="${o}" ${o===((p.co||[])[0]||"")?"selected":""}>${o?"+ "+esc(nm(o)):"+"}</option>`).join("")}</select>`:""}${stChip(p.status)}</div>`}).join("");
@@ -1033,7 +1066,7 @@ song(id){
    ${s.log.length?`<div class="log" style="margin-top:6px">${s.log.slice(-3).map(l=>`${esc(l.v||"–")} · ${t("changedBy")} ${esc(nm(l.by))}, ${fmt(l.at)}`).join("<br>")}</div>`:""}
    ${isLeader()?`<div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap"><button type="button" class="btn small" data-act="toggleReg" data-id="${s.id}" data-v="gema">${t("gema")} ${s.gema?"✓":"○"}</button><button type="button" class="btn small" data-act="toggleReg" data-id="${s.id}" data-v="ccli">${t("ccli")} ${s.ccli?"✓":"○"}</button></div>`:""}</div>
   ${linksPanel("song",s.id,s.links,true)}
-  <div class="panel"><div class="panel-head"><h3>${t("arrangement")}</h3></div><div class="rows">${arrRow("v",t("vocal")+" · "+t("leadDoes"),s.leads.concat(s.arr.vhelp||[]))}${arrRow("i",t("instrumental"),s.arr.io)}</div></div>
+  <div class="panel"><div class="panel-head"><h3>${t("arrangement")}</h3></div><div class="rows">${arrRow("i",t("instrumental"),s.arr.io)}${arrRow("v",t("vocalArr")+" · "+t("leadDoes"),s.leads.concat(s.arr.vhelp||[]))}</div></div>
   <div class="panel"><div class="panel-head"><h3>${t("parts")}</h3><label style="display:flex;gap:6px;align-items:center;font-size:.85rem"><input type="checkbox" id="cello-${s.id}" data-act="toggleCello" data-id="${s.id}" ${s.cello?"checked":""} ${all?"":"disabled"}> ${t("celloQ")}</label></div><div class="rows">${parts||`<p class="empty">${t("nothing")}</p>`}</div></div>
   ${rels}`},
 task(id){
@@ -1041,7 +1074,7 @@ task(id){
   return `${head(t("tasks")+(tk.link?" · "+linkName(tk.link):""),tk.title)}
   ${can?`<form class="quickadd titleedit" data-form="taskTitle" data-id="${tk.id}"><input name="title" value="${esc(tk.title)}" aria-label="${S.lang==="de"?"Titel bearbeiten":"Edit title"}" required><button class="btn small" type="submit">${S.lang==="de"?"Titel speichern":"Save title"}</button></form>`:""}
   <div style="display:flex;gap:6px;flex-wrap:wrap">${stChip(tk.status)}${prioChip(tk.prio)}${dueChip(tk)}</div>
-  <div class="panel"><div class="label">${t("owner")}</div>${canAll()?`<div class="attgrid">${D.members.filter(m=>m.active!==false).map(m=>`<label class="attchip"><input type="checkbox" data-act="taskOwner" data-id="${tk.id}" value="${m.id}" ${tk.owners.includes(m.id)?"checked":""}>${esc(m.name)}</label>`).join("")}</div><div class="label" style="margin-top:12px">${t("dueDate")}</div><input type="date" class="reldate" data-act="taskDue" data-id="${tk.id}" value="${esc(tk.due||"")}" aria-label="${t("dueDate")}">`:`<div>${esc(tk.owners.map(nm).join(", "))}</div>`}${can?"":`<p class="log">${t("readOnly")}</p>`}
+  <div class="panel"><div class="label">${t("owner")}</div>${canAll()||projTask(tk)?`<div class="attgrid">${D.members.filter(m=>m.active!==false).map(m=>`<label class="attchip"><input type="checkbox" data-act="taskOwner" data-id="${tk.id}" value="${m.id}" ${tk.owners.includes(m.id)?"checked":""}>${esc(m.name)}</label>`).join("")}</div><div class="label" style="margin-top:12px">${t("dueDate")}</div><input type="date" class="reldate" data-act="taskDue" data-id="${tk.id}" value="${esc(tk.due||"")}" aria-label="${t("dueDate")}">`:`<div>${esc(tk.owners.map(nm).join(", "))}</div>`}${can?"":`<p class="log">${t("readOnly")}</p>`}
    ${can?`<div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">${["open","prog","done"].map(k=>`<button type="button" class="btn small" data-act="setTask" data-id="${tk.id}" data-v="${k}" ${tk.status===k?'aria-pressed="true" style="background:var(--fg);color:var(--bg)"':""}>${t("st."+k)}</button>`).join("")}</div>`:""}</div>
   <div class="panel"><h3 style="margin-bottom:6px">${t("subtasks")}</h3><div class="rows">${tk.subs.map((s,i)=>`<div class="row"><button type="button" class="check ${s.d?"done":""}" data-act="toggleSub" data-id="${tk.id}" data-i="${i}" ${can?"":"disabled"} aria-label="${esc(s.t)}">${s.d?tick:""}</button><div class="grow ${s.d?"struck":""}">${esc(s.t)}</div></div>`).join("")||`<p class="empty">${t("nothing")}</p>`}</div>
    ${can?`<form data-form="sub" data-id="${tk.id}" style="display:flex;gap:8px;margin-top:8px"><div class="field" style="flex:1"><input id="sub-${tk.id}" name="t" placeholder="${t("addSub")}" aria-label="${t("addSub")}"></div><button class="btn" type="submit">${t("add")}</button></form>`:""}</div>
@@ -1055,7 +1088,7 @@ newMeeting(){return meetingForm(null)},
 editMeeting(id){return meetingForm(id)},
 newTask(){
   const opts=[`<option value="">${t("none")}</option>`,...D.songs.map(s=>`<option value="song:${s.id}">♪ ${esc(s.title)}</option>`),...D.projects.map(p=>`<option value="project:${p.id}" ${S.sheet&&S.sheet.link==="project:"+p.id?"selected":""}>${esc(p.title)}</option>`)].join("");
-  const ownerOpts=(canAll()?D.members:[me()]).map(m=>`<option value="${m.id}" ${m.id===S.me?"selected":""}>${esc(m.name)}</option>`).join("");
+  const ownerOpts=(canAll()||leadsAnyProj()?D.members.filter(m=>m.active!==false):[me()]).map(m=>`<option value="${m.id}" ${m.id===S.me?"selected":""}>${esc(m.name)}</option>`).join("");
   return `${head(t("tasks"),t("newTask"))}<form class="form" data-form="task"><div class="field full"><label class="label" for="nt-title">${t("title")}</label><input id="nt-title" name="title" required></div>
   <div class="field"><label class="label" for="nt-owner">${t("owner")}</label><select id="nt-owner" name="owner">${ownerOpts}</select></div>
   <div class="field"><label class="label" for="nt-due">${t("dueDate")}</label><input id="nt-due" name="due" type="date"></div>
@@ -1068,7 +1101,7 @@ session(id){
   return `${head((isLeitung(s)?(S.lang==="de"?"Leiter Treffen · nur Leitung":"Leadership meeting · leaders only"):isGruppe(s)?(S.lang==="de"?"Treffen mit Einladung":"Invite only meeting"):"Creative Session")+(s.time?" · "+s.time:""),(isGruppe(s)?s.title+" · ":"")+fmt(s.date)+(s.place?" · "+s.place:""))}
   ${isLeader()?`<button type="button" class="btn small" data-act="editMeeting" data-id="${s.id}">✎ ${S.lang==="de"?"Datum, Ort und Einladung bearbeiten":"Edit date, place and invites"}</button>`:""}
   ${isGruppe(s)?`<div class="panel"><h3>${S.lang==="de"?"Eingeladen":"Invited"} · ${(s.invited||[]).length}</h3><div class="muted">${esc((s.invited||[]).map(nm).join(", "))}</div></div>`:""}
-  ${up?`<div class="panel"><h3>${t("coming")}</h3>${!isGruppe(s)||invitedTo(s)?rsvp(s):""}${rsvpCounts([["Zugesagt",byV("yes"),"y"],["Vielleicht",byV("maybe"),"m"],["Abgesagt",byV("no"),"n"],["Noch offen",D.members.filter(m=>m.active!==false&&!s.rsvp[m.id]&&(isGruppe(s)?invitedTo(s,m.id):(!isLeitung(s)||m.role==="leader"))).map(m=>m.name),"o"]])}</div>`:""}
+  ${up?`<div class="panel"><h3>${t("coming")}</h3>${!isGruppe(s)||invitedTo(s)?rsvp(s):""}${rsvpCounts([["Zugesagt",byV("yes"),"y"],["Abgesagt",byV("no"),"n"],["Noch offen",D.members.filter(m=>m.active!==false&&s.rsvp[m.id]!=="yes"&&s.rsvp[m.id]!=="no"&&(isGruppe(s)?invitedTo(s,m.id):(!isLeitung(s)||m.role==="leader"))).map(m=>m.name),"o"]])}</div>`:""}
   ${s.attendees.length?`<div class="panel"><h3>${t("attendees")} · ${s.attendees.length}</h3><div class="muted">${esc(s.attendees.map(nm).join(", "))}</div></div>`:""}
   ${protoForm(s,can)}
   ${linksPanel("session",s.id,s.links,can)}
@@ -1175,6 +1208,7 @@ document.addEventListener("click",e=>{
   const lang=e.target.closest("[data-lang]");if(lang){S.lang=lang.dataset.lang;persist();render();return}
   const a=e.target.closest("[data-act]");if(!a||!D)return;const {act,id,v,i,ri}=a.dataset;
   if(act==="closeBg"&&e.target!==a)return;
+  if(act==="projLeadDel"){setProjLead(v,id,false);return}
   const s=id&&song(id);
   switch(act){
   case "close":case "closeBg":S.sheet=null;break;
@@ -1197,7 +1231,7 @@ document.addEventListener("click",e=>{
   case "setTask":{const c=clone(task(id));c.status=v;saveTask(c);return}
   case "toggleSub":{const c=clone(task(id));c.subs[i].d=!c.subs[i].d;saveTask(c);return}
   case "rsvp":run(async()=>{put(D.sessions,await api("rsvp",{id,v}));toast(t("saved"))},()=>{const x=sess(id);if(x){x.rsvp=x.rsvp||{};x.rsvp[S.me]=v}});return;
-  case "setStage":{if(!canSongs())return;const st=stagesFor(s);if(s.stage==="arrangement"&&!(s.arr.v==="done"&&s.arr.i==="done")&&st.indexOf(v)>st.indexOf("arrangement")){toast(t("moveOnHint"));return}const c=clone(s);c.stage=v;saveSong(c);return}
+  case "setStage":{if(!canSongs())return;const st=stagesFor(s);if(stageGate(s)&&st.indexOf(v)>st.indexOf(s.stage)){toast(t("moveOnHint"));return}const c=clone(s);c.stage=v;saveSong(c);return}
   case "setRec":{if(!canSongs())return;const c=clone(s);c.rec=v;if(v==="studio"&&c.stage==="liverec")c.stage="production";if(v==="live"&&!c.parts.some(p=>p.key==="tracks"))c.parts.push({key:"tracks",name:"Tracks und Click vorbereitet",owner:"",status:"open",note:"",ext:false});saveSong(c);return}
   case "toggleCello":{if(!canSongs()){e.preventDefault();return}const c=clone(s);c.cello=!c.cello;saveSong(c);return}
   case "cyclePart":{const p=s.parts[i];if(!(canSongs()||partMine(p,S.me)))return;const st=cyc(p.status);songOp(id,"partStatus",{key:p.key,status:st},()=>{p.status=st});return}
@@ -1224,7 +1258,7 @@ document.addEventListener("click",e=>{
   case "exportPdf":run(async()=>{put(D.sessions,await api("exportProtocol",{id}));toast(t("pdfDone"))});return;
   case "invite":run(async()=>{const inv=await api("invite",{id});S.inviteHtml=inviteSheet(inv);S.sheet={type:"invite"}});return;
   case "copyInvite":{const ta=document.getElementById("inviteText");const txt=ta.value;try{navigator.clipboard.writeText(txt).then(()=>toast(t("saved")),()=>{ta.focus();ta.select()})}catch(_){ta.focus();ta.select()}return}
-  case "prodToggle":{const m=mem(id);const perms=(m.perms||[]).includes("songs")?[]:["songs"];run(async()=>put(D.members,await api("saveMember",{member:Object.assign({},m,{perms})})));return}
+  case "prodToggle":{const m=mem(id);const keep=(m.perms||[]).filter(x=>x!=="songs");const perms=(m.perms||[]).includes("songs")?keep:keep.concat(["songs"]);run(async()=>put(D.members,await api("saveMember",{member:Object.assign({},m,{perms})})));return}
   case "avatarView":{const m=mem(id);if(!m||!m.avatar)return;const big=AVBIG[id];const box=document.createElement("div");box.className="lightbox";box.setAttribute("role","dialog");box.innerHTML=`<img src="${big||m.avatar}" alt="${esc(m.name)}" class="${big?"":"loading"}"><div class="lbname">${esc(m.name)}${m.full?" ("+esc(m.full)+")":""}</div><div class="lbhint">${big?"":(S.lang==="de"?"Lädt in voller Qualität…":"Loading full quality…")}</div>`;box.addEventListener("click",()=>box.remove());document.addEventListener("keydown",function k(ev){if(ev.key==="Escape"){box.remove();document.removeEventListener("keydown",k)}});document.body.appendChild(box);if(big)return;api("getAvatar",{id}).then(r=>{if(r&&r.image){AVBIG[id]=r.image;const im=box.querySelector("img");if(im){im.onload=()=>{im.classList.remove("loading");const h=box.querySelector(".lbhint");if(h)h.textContent=""};im.src=r.image}}}).catch(()=>{const h=box.querySelector(".lbhint");if(h)h.textContent=""});return}
   case "addPg":{const l=document.querySelector(".pg-list");if(l)l.insertAdjacentHTML("beforeend",pgRow({status:"open"}));return}
   case "addPt":{const l=document.querySelector(".pt-list");if(l)l.insertAdjacentHTML("beforeend",ptRow());return}
@@ -1234,6 +1268,8 @@ document.addEventListener("click",e=>{
   render();
 });
 document.addEventListener("change",e=>{
+  const sf=e.target.closest("[data-act='songFile']");if(sf&&D&&sf.files&&sf.files[0]){uploadSongFile(sf.dataset.id,sf.files[0]);sf.value="";return}
+  const pla=e.target.closest("[data-act='projLeadAdd']");if(pla&&D){if(pla.value)setProjLead(pla.value,pla.dataset.id,true);return}
   const a=e.target.closest("[data-act='partOwner']");if(a&&D){const c=clone(song(a.dataset.id));c.parts[a.dataset.i].owner=a.value;saveSong(c)}
   const af=e.target.closest("[data-act='avatarFile']");if(af&&D&&af.files&&af.files[0]){const f=af.files[0];run(async()=>{const img=await shrinkImage(f);const big=await shrinkImage(f,1080,400000);const r=await api("setAvatar",{image:img,large:big});put(D.members,r);toast(t("saved"))},()=>{});return}
   const tow=e.target.closest("[data-act='taskOwner']");if(tow&&D){const c=clone(D.tasks.find(x=>x.id===tow.dataset.id));const sel=[...document.querySelectorAll(`[data-act='taskOwner'][data-id='${tow.dataset.id}']:checked`)].map(x=>x.value);if(!sel.length){tow.checked=true;toast(S.lang==="de"?"Mindestens eine Person muss zuständig sein.":"At least one owner is needed.");return}c.owners=sel;saveTask(c);return}
@@ -1265,6 +1301,7 @@ document.addEventListener("submit",e=>{
   case "writers":{const raw=(fd.get("w")||"").split(",").map(x=>x.trim()).filter(Boolean);const ids=raw.map(n=>{const m=D.members.find(x=>x.name.toLowerCase()===n.toLowerCase());return m?m.id:n});songOp(id,"writers",{writers:ids});return}
   case "prayer":{const tx=String(fd.get("text")||"").trim();if(!tx)return;run(async()=>{const r=await api("addPrayer",{kind:fd.get("kind"),text:tx,ref:fd.get("ref")||""});D.prayer=[r].concat(D.prayer||[]);toast(S.lang==="de"?"Geteilt 🙏":"Shared 🙏")});return}
   case "commentP":{const tx=String(fd.get("text")||"").trim();if(!tx)return;run(async()=>put(D.prayer,await api("commentPrayer",{id,text:tx})));return}
+  case "newProject":{const ti=String(fd.get("title")||"").trim();if(!ti)return;const p={id:"p"+Date.now().toString(36),title:ti,when:String(fd.get("when")||"").trim(),note:""};run(async()=>{put(D.projects,await api("saveProject",{project:p}));toast(t("saved"))},()=>put(D.projects,p));return}
   case "quickTodo":{const ti=String(fd.get("title")||"").trim();if(!ti)return;saveTask({id:"t"+Date.now(),title:ti,owners:[S.me],due:"",status:"open",prio:"mid",link:{type:"project",id},subs:[],comments:[],links:[]});return}
   case "protocol":{const s=sess(id);const f2=e.target.closest("form");
     const groups=[...f2.querySelectorAll(".pg-row")].map(r=>({t:r.querySelector(".pg-t").value.trim(),who:r.querySelector(".pg-who").value.trim(),status:r.querySelector(".pg-st").value,note:r.querySelector(".pg-note").value.trim()})).filter(g=>g.t);

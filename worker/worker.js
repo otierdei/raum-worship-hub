@@ -130,7 +130,7 @@ let DRIVE_QUICK = [];
 const INVITE_DAYS = 14;
 const MAX_FAILS = 5;
 const ROLES = ["leader", "middle", "member"];
-const STAGE_KEYS = ["idea","writing","rawdemo","arrangement","production","liverec","mix","release","tbd"];
+const STAGE_KEYS = ["idea","writing","rawdemo","arrangement","vocalarr","production","liverec","mix","release","tbd"];
 const STATUS = ["open","prog","done"];
 
 const FIELDS = {
@@ -292,6 +292,7 @@ function storeInvoiceFile_(r, up) {
   file.setName(name);
   return "drive:" + file.getId();
 }
+function demoFolder_() { const d = (DRIVE_QUICK || []).find(x => x && x[0] === "Demos"); return d ? String(d[1] || "") : ""; }
 function log_(me, action, entity, id, summary) {
   sheet_("log").appendRow([new Date().toISOString(), me ? me.id : "system", action, entity, id || "", String(summary || "").slice(0, 300)]);
 }
@@ -321,6 +322,9 @@ const canAll_ = m => m.role === "leader" || m.role === "middle";
 const isLeitung_ = s => !!s && s.kind === "leitung";
 const seesSession_ = (s, me) => !isLeitung_(s) || isLeader_(me);
 const seesTask_ = (t, me) => !t || t.vis !== "leaders" || isLeader_(me);
+// Projektverantwortliche (28.10.2026): perms "proj:<id>" erlaubt alle Aufgaben dieses Projekts zu ändern und anzulegen
+const canProj_ = (m, pid) => !!pid && (canAll_(m) || (Array.isArray(m.perms) && m.perms.indexOf("proj:" + pid) >= 0));
+const projOf_ = t => t && t.link && t.link.type === "project" ? String(t.link.id || "") : "";
 const canSongs_ = m => canAll_(m) || (Array.isArray(m.perms) && m.perms.indexOf("songs") >= 0);
 function need_(ok, msg) { if (!ok) throw err_("forbidden", msg || "Dafür hast du keine Berechtigung."); }
 
@@ -356,7 +360,7 @@ function bootstrap_(me) {
     prayer: readAll_("prayer").sort((a, c) => String(c.date).localeCompare(String(a.date))).slice(0, 200),
     money: null,
     vision: null,
-    drive: { quick: DRIVE_QUICK },
+    drive: { quick: DRIVE_QUICK, upload: P.getProperty("DEMO_UPLOAD") === "1" && !!demoFolder_() },
     server_time: now_()
   };
   const st = {}; readAll_("settings").forEach(x => { st[x.key] = x.value; });
@@ -484,6 +488,19 @@ const ACTIONS = {
       const u = String(b.url || "");
       need_(/^https:\/\//.test(u), "Link muss mit https:// beginnen.");
       s.links = (s.links || []).concat([{ l: String(b.label || "Link").slice(0, 80), u: u.slice(0, 500), by: me.id }]);
+    } else if (b.op === "upload") {
+      // Datei direkt aus der App in den Drive Ordner Demos, danach als Link am Song (28.10.2026)
+      need_(P.getProperty("DEMO_UPLOAD") === "1", "Hochladen ist noch nicht eingeschaltet.");
+      const folder = demoFolder_();
+      need_(!!folder, "Der Ordner Demos fehlt.");
+      need_(typeof b.data === "string" && /^[A-Za-z0-9+\/=]+$/.test(b.data) && b.data.length > 0 && b.data.length < 12500000, "Datei ist zu groß (höchstens 9 MB).");
+      const name = String(b.name || "").replace(/[\\\/:*?"<>|\u0000-\u001f]/g, "_").trim().slice(0, 100);
+      need_(!!name, "Die Datei braucht einen Namen.");
+      const mime = /^[\w.+-]+\/[\w.+-]+$/.test(String(b.mime || "")) ? String(b.mime) : "application/octet-stream";
+      const full = s.title + " · " + name;
+      const f = DriveApp.getFolderById(folder).createFile(Utilities.newBlob(Utilities.base64Decode(b.data), mime, full));
+      f.setName(full);
+      s.links = (s.links || []).concat([{ l: name.slice(0, 80), u: "https://drive.google.com/file/d/" + f.getId() + "/view", by: me.id }]);
     } else if (b.op === "delLink") {
       const l = (s.links || [])[b.index];
       need_(!!l, "Link nicht gefunden.");
@@ -492,6 +509,7 @@ const ACTIONS = {
     } else throw err_("bad_request", "Unbekannte Aktion.");
     put_("songs", stamp_(s, me));
     let detail = "";
+    if (b.op === "upload") detail = " · Datei";
     if (b.op === "partStatus") { const p = (s.parts || []).find(x => x.key === b.key); detail = " · " + (p ? p.name : b.key) + " · " + (p ? p.status : ""); }
     log_(me, "songOp:" + b.op, "songs", s.id, s.title + detail);
     return s;
@@ -510,14 +528,17 @@ const ACTIONS = {
     // a private leader task becomes visible as soon as someone outside the leadership is responsible for it
     if (t.vis === "leaders") { const lead = readAll_("members").filter(m => m.role === "leader").map(m => m.id); if ((t.owners || []).some(o => lead.indexOf(o) < 0)) t.vis = ""; }
     if (cur) {
-      need_(canAll_(me) || (cur.owners || []).indexOf(me.id) >= 0, "Nur Zuständige oder Leitung können diese Aufgabe ändern.");
+      const viaProj = !canAll_(me) && canProj_(me, projOf_(cur));
+      need_(canAll_(me) || viaProj || (cur.owners || []).indexOf(me.id) >= 0, "Nur Zuständige oder Leitung können diese Aufgabe ändern.");
       checkBase_(cur, b.base);
-      if (!canAll_(me)) t.owners = cur.owners;
+      if (viaProj) { if (!canProj_(me, projOf_(t))) t.link = cur.link; }
+      else if (!canAll_(me)) t.owners = cur.owners;
       t.comments = cur.comments || [];
     } else {
-      if (!canAll_(me)) t.owners = [me.id];
+      if (!canAll_(me) && !canProj_(me, projOf_(t))) t.owners = [me.id];
       t.comments = [];
     }
+    t.owners = (Array.isArray(t.owners) ? t.owners : []).map(String).slice(0, 12);
     t.status = cleanStatus_(t.status);
     put_("tasks", stamp_(t, me));
     log_(me, cur ? "update" : "create", "tasks", t.id, t.title + " · " + t.status);
@@ -549,7 +570,7 @@ const ACTIONS = {
   rsvp: (b, me) => {
     const s = get_("sessions", b.id);
     need_(!!s && seesSession_(s, me), "Session nicht gefunden.");
-    need_(["yes","no","maybe"].indexOf(b.v) >= 0, "Ungültige Antwort.");
+    need_(["yes","no"].indexOf(b.v) >= 0, "Bitte Ja oder Nein wählen.");
     need_(s.kind !== "gruppe" || (s.invited || []).indexOf(me.id) >= 0, "Zu diesem Treffen bist du nicht eingeladen.");
     s.rsvp = s.rsvp || {};
     s.rsvp[me.id] = b.v;
@@ -842,7 +863,7 @@ const ACTIONS = {
     need_(ROLES.indexOf(m.role) >= 0, "Unbekannte Rolle.");
     const cur = get_("members", m.id) || {};
     const list = (a, n, len) => (Array.isArray(a) ? a : []).map(x => String(x).trim().slice(0, len)).filter(Boolean).slice(0, n);
-    const o = Object.assign({}, cur, { id: m.id, name: m.name, role: m.role, groups: list(m.groups, 12, 60), active: m.active !== false, perms: (m.perms || []).filter(x => x === "songs") });
+    const o = Object.assign({}, cur, { id: m.id, name: m.name, role: m.role, groups: list(m.groups, 12, 60), active: m.active !== false, perms: (m.perms || []).map(String).filter(x => x === "songs" || /^proj:[A-Za-z0-9_-]{1,60}$/.test(x)).slice(0, 20) });
     if (m.skills !== undefined) o.skills = list(m.skills, 12, 80);
     if (m.full !== undefined) o.full = String(m.full || "").trim().slice(0, 60);
     if (o.active === false) o.token_hashes = [];
@@ -869,7 +890,7 @@ const PUBLIC_ACTIONS = ["ping","login","names"];
 function fileOps_(b) {
   const secret = P.getProperty("FILE_SECRET");
   if (!secret || typeof b.secret !== "string" || sha_(b.secret) !== sha_(secret)) throw err_("auth", "Nicht erlaubt.");
-  const allowed = [DRIVE_PROTOKOLLE, P.getProperty("LEITUNG_PROTO_FOLDER"), P.getProperty("INVOICE_FOLDER")].filter(Boolean);
+  const allowed = [DRIVE_PROTOKOLLE, P.getProperty("LEITUNG_PROTO_FOLDER"), P.getProperty("INVOICE_FOLDER"), demoFolder_()].filter(Boolean);
   const folderOk = id => { need_(allowed.indexOf(String(id)) >= 0, "Ordner nicht erlaubt."); return DriveApp.getFolderById(String(id)); };
   const ops = Array.isArray(b.ops) ? b.ops.slice(0, 5) : [];
   return ops.map(o => {
