@@ -136,7 +136,7 @@ const STATUS = ["open","prog","done"];
 const FIELDS = {
   members:  ["id","name","role","groups","active","invite_hash","invite_expires","token_hashes","updated_at","updated_by","perms","skills","full","avatar","avatar_lg"],
   songs:    ["id","title","stage","rec","leads","writers","key","tempo","meter","cello","gema","ccli","arr","parts","releases","links","note","log","updated_at","updated_by"],
-  tasks:    ["id","title","owners","due","status","prio","link","subs","comments","links","updated_at","updated_by","vis"],
+  tasks:    ["id","title","owners","due","status","prio","link","subs","comments","links","updated_at","updated_by","vis","note"],
   sessions: ["id","date","time","place","pdf","agenda","results","decisions","attendees","rsvp","links","updated_at","updated_by","proto","kind","title","invited"],
   projects: ["id","title","when","note","updated_at","updated_by"],
   ideas:    ["id","title","by","text","memo","date","updated_at","updated_by"],
@@ -532,13 +532,18 @@ const ACTIONS = {
       need_(canAll_(me) || viaProj || (cur.owners || []).indexOf(me.id) >= 0, "Nur Zuständige oder Leitung können diese Aufgabe ändern.");
       checkBase_(cur, b.base);
       if (viaProj) { if (!canProj_(me, projOf_(t))) t.link = cur.link; }
-      else if (!canAll_(me)) t.owners = cur.owners;
+      // 02.11.2026 (Markus): Zuständige dürfen weitere Zuständige hinzufügen und entfernen
+      else if (!canAll_(me) && !(Array.isArray(t.owners) && t.owners.length)) t.owners = cur.owners;
       t.comments = cur.comments || [];
     } else {
       if (!canAll_(me) && !canProj_(me, projOf_(t))) t.owners = [me.id];
       t.comments = [];
     }
-    t.owners = (Array.isArray(t.owners) ? t.owners : []).map(String).slice(0, 12);
+    const ids = readAll_("members").map(m => m.id);
+    t.owners = (Array.isArray(t.owners) ? t.owners : []).map(String).filter((x, i, a) => ids.indexOf(x) >= 0 && a.indexOf(x) === i).slice(0, 12);
+    need_(t.owners.length > 0, "Mindestens eine Person muss zuständig sein.");
+    t.note = String(t.note || "").slice(0, 4000);
+    t.subs = (Array.isArray(t.subs) ? t.subs : []).slice(0, 60).map(x => ({ t: String((x && x.t) || "").slice(0, 200), d: !!(x && x.d) })).filter(x => x.t);
     t.status = cleanStatus_(t.status);
     put_("tasks", stamp_(t, me));
     log_(me, cur ? "update" : "create", "tasks", t.id, t.title + " · " + t.status);
@@ -552,6 +557,30 @@ const ACTIONS = {
     t.comments = (t.comments || []).concat([{ by: me.id, text: text, at: now_().slice(0, 10) }]);
     put_("tasks", stamp_(t, me));
     log_(me, "comment", "tasks", t.id, text.slice(0, 60));
+    return t;
+  },
+  // 02.11.2026 (Markus): eigene Kommentare bearbeiten und löschen, die Leitung darf fremde löschen
+  editComment: (b, me) => {
+    const t = get_("tasks", b.id);
+    need_(!!t && seesTask_(t, me), "Aufgabe nicht gefunden.");
+    const c = (t.comments || [])[Number(b.index)];
+    need_(!!c && c.by === me.id && c.at === b.at && c.text === b.old, "Nur eigene Kommentare, und nur wenn sie sich nicht inzwischen geändert haben.");
+    const text = String(b.text || "").trim().slice(0, 1000);
+    need_(!!text, "Kommentar ist leer.");
+    c.text = text; c.edited = now_().slice(0, 10);
+    put_("tasks", stamp_(t, me));
+    log_(me, "editComment", "tasks", t.id, text.slice(0, 60));
+    return t;
+  },
+  deleteComment: (b, me) => {
+    const t = get_("tasks", b.id);
+    need_(!!t && seesTask_(t, me), "Aufgabe nicht gefunden.");
+    const i = Number(b.index), c = (t.comments || [])[i];
+    need_(!!c && c.at === b.at && c.text === b.old, "Kommentar nicht gefunden. Bitte neu laden.");
+    need_(c.by === me.id || isLeader_(me), "Löschen kann nur, wer ihn geschrieben hat, oder die Leitung.");
+    t.comments.splice(i, 1);
+    put_("tasks", stamp_(t, me));
+    log_(me, "deleteComment", "tasks", t.id, "");
     return t;
   },
   deleteTask: (b, me) => { need_(canAll_(me)); need_(seesTask_(get_("tasks", b.id), me), "Aufgabe nicht gefunden."); del_("tasks", b.id); log_(me, "delete", "tasks", b.id, ""); return { done: true }; },
@@ -881,7 +910,7 @@ const ACTIONS = {
     return { id: m.id, name: m.name, code: code, link: inviteLink_(m.id), expires: m.invite_expires };
   }
 };
-const WRITE_ACTIONS = ["login","logout","saveSong","songOp","deleteSong","saveTask","commentTask","deleteTask","rsvp","saveSession","deleteSession","saveProtocol","exportProtocol","addIdea","promoteIdea","saveProject","saveInvoice","deleteInvoice","setStartBalance","saveVision","setAvatar","addPrayer","reactPrayer","commentPrayer","answeredPrayer","editPrayer","deletePrayer","saveMember","invite"];
+const WRITE_ACTIONS = ["login","logout","saveSong","songOp","deleteSong","saveTask","commentTask","editComment","deleteComment","deleteTask","rsvp","saveSession","deleteSession","saveProtocol","exportProtocol","addIdea","promoteIdea","saveProject","saveInvoice","deleteInvoice","setStartBalance","saveVision","setAvatar","addPrayer","reactPrayer","commentPrayer","answeredPrayer","editPrayer","deletePrayer","saveMember","invite"];
 const PUBLIC_ACTIONS = ["ping","login","names"];
 
 /* ---------------- HTTP ---------------- */

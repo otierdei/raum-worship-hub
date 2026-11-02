@@ -647,6 +647,17 @@ body[data-area="sessions"] #view .date,#view .panel[data-area] .date{background:
 .trow{gap:10px;align-items:center}
 .trow .ts{font-size:.8rem;margin-top:2px}
 
+/* Markus Feedback 02.11.2026 */
+.subedit{flex:1;min-width:0;border:0;border-bottom:1px solid transparent;background:transparent;color:inherit;font:inherit;padding:2px 0}
+.subedit:focus{outline:0;border-bottom-color:var(--accent)}
+.subedit.struck{text-decoration:line-through;color:var(--muted)}
+.subdel{padding:4px 6px}
+.tnote{width:100%;box-sizing:border-box;border:1px solid var(--line);background:var(--surface);color:inherit;font:inherit;padding:10px;resize:vertical}
+.tnote-ro{white-space:pre-wrap;margin:0}
+.cact{display:flex;gap:14px;margin-top:4px;font-size:.82rem}
+.row:has(> .subedit){display:flex!important;flex-direction:row!important;align-items:center;gap:10px}
+.row:has(> .subedit) .subedit{flex:1 1 auto}
+
 </style>
 
 <div class="app">
@@ -1115,12 +1126,13 @@ task(id){
   return `${head(t("tasks")+(tk.link?" · "+linkName(tk.link):""),tk.title)}
   ${can?`<form class="quickadd titleedit" data-form="taskTitle" data-id="${tk.id}"><input name="title" value="${esc(tk.title)}" aria-label="${S.lang==="de"?"Titel bearbeiten":"Edit title"}" required><button class="btn small" type="submit">${S.lang==="de"?"Titel speichern":"Save title"}</button></form>`:""}
   <div style="display:flex;gap:6px;flex-wrap:wrap">${stChip(tk.status)}${prioChip(tk.prio)}${dueChip(tk)}</div>
-  <div class="panel"><div class="label">${t("owner")}</div>${canAll()||projTask(tk)?`<div class="attgrid">${D.members.filter(m=>m.active!==false).map(m=>`<label class="attchip"><input type="checkbox" data-act="taskOwner" data-id="${tk.id}" value="${m.id}" ${tk.owners.includes(m.id)?"checked":""}>${esc(m.name)}</label>`).join("")}</div><div class="label" style="margin-top:12px">${t("dueDate")}</div><input type="date" class="reldate" data-act="taskDue" data-id="${tk.id}" value="${esc(tk.due||"")}" aria-label="${t("dueDate")}">`:`<div>${esc(tk.owners.map(nm).join(", "))}</div>`}${can?"":`<p class="log">${t("readOnly")}</p>`}${isLeader()?`<div><button type="button" class="btn small" data-act="taskVis" data-id="${tk.id}" aria-pressed="${tk.vis==="leaders"}" style="margin-top:10px">${tk.vis==="leaders"?"✓ ":""}${S.lang==="de"?"Nur für die Leitung":"Leaders only"}</button></div>`:""}
+  <div class="panel"><div class="label">${t("owner")}</div>${canAll()||projTask(tk)||tk.owners.includes(S.me)?`<div class="attgrid">${D.members.filter(m=>m.active!==false).map(m=>`<label class="attchip"><input type="checkbox" data-act="taskOwner" data-id="${tk.id}" value="${m.id}" ${tk.owners.includes(m.id)?"checked":""}>${esc(m.name)}</label>`).join("")}</div><div class="label" style="margin-top:12px">${t("dueDate")}</div><input type="date" class="reldate" data-act="taskDue" data-id="${tk.id}" value="${esc(tk.due||"")}" aria-label="${t("dueDate")}">`:`<div>${esc(tk.owners.map(nm).join(", "))}</div>`}${can?"":`<p class="log">${t("readOnly")}</p>`}${isLeader()?`<div><button type="button" class="btn small" data-act="taskVis" data-id="${tk.id}" aria-pressed="${tk.vis==="leaders"}" style="margin-top:10px">${tk.vis==="leaders"?"✓ ":""}${S.lang==="de"?"Nur für die Leitung":"Leaders only"}</button></div>`:""}
    ${can?`<div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">${["open","prog","done"].map(k=>`<button type="button" class="btn small" data-act="setTask" data-id="${tk.id}" data-v="${k}" ${tk.status===k?'aria-pressed="true" style="background:var(--fg);color:var(--bg)"':""}>${t("st."+k)}</button>`).join("")}</div>`:""}</div>
-  <div class="panel"><h3 style="margin-bottom:6px">${t("subtasks")}</h3><div class="rows">${tk.subs.map((s,i)=>`<div class="row"><button type="button" class="check ${s.d?"done":""}" data-act="toggleSub" data-id="${tk.id}" data-i="${i}" ${can?"":"disabled"} aria-label="${esc(s.t)}">${s.d?tick:""}</button><div class="grow ${s.d?"struck":""}">${esc(s.t)}</div></div>`).join("")||`<p class="empty">${t("nothing")}</p>`}</div>
+  <div class="panel"><h3 style="margin-bottom:6px">${t("subtasks")}</h3><div class="rows">${tk.subs.map((s,i)=>`<div class="row"><button type="button" class="check ${s.d?"done":""}" data-act="toggleSub" data-id="${tk.id}" data-i="${i}" ${can?"":"disabled"} aria-label="${esc(s.t)}">${s.d?tick:""}</button>${can?`<input class="subedit ${s.d?"struck":""}" data-act="subText" data-id="${tk.id}" data-i="${i}" value="${esc(s.t)}" aria-label="${S.lang==="de"?"Unteraufgabe bearbeiten":"Edit subtask"}"><button type="button" class="chipx subdel" data-act="delSub" data-id="${tk.id}" data-i="${i}" aria-label="${S.lang==="de"?"Unteraufgabe löschen":"Delete subtask"}">✕</button>`:`<div class="grow ${s.d?"struck":""}">${esc(s.t)}</div>`}</div>`).join("")||`<p class="empty">${t("nothing")}</p>`}</div>
    ${can?`<form data-form="sub" data-id="${tk.id}" style="display:flex;gap:8px;margin-top:8px"><div class="field" style="flex:1"><input id="sub-${tk.id}" name="t" placeholder="${t("addSub")}" aria-label="${t("addSub")}"></div><button class="btn" type="submit">${t("add")}</button></form>`:""}</div>
+  <div class="panel"><h3 style="margin-bottom:6px">${S.lang==="de"?"Notizen":"Notes"}</h3>${can?`<textarea class="tnote" data-act="taskNote" data-id="${tk.id}" rows="4" placeholder="${S.lang==="de"?"Notizen zur Aufgabe, speichert beim Verlassen des Felds":"Notes, saved when you leave the field"}" aria-label="${S.lang==="de"?"Notizen":"Notes"}">${esc(tk.note||"")}</textarea>`:(tk.note?`<p class="tnote-ro">${esc(tk.note)}</p>`:`<p class="empty">${t("nothing")}</p>`)}</div>
   ${linksPanel("task",tk.id,tk.links,can)}
-  <div class="panel"><h3 style="margin-bottom:6px">${t("comments")}</h3>${tk.comments.map(c=>`<div class="row">${avatarHtml(mem(c.by)||{name:nm(c.by)})}<div class="grow"><div class="log">${esc(nm(c.by))} · ${fmt(c.at)}</div><div>${esc(c.text)}</div></div></div>`).join("")}
+  <div class="panel"><h3 style="margin-bottom:6px">${t("comments")}</h3>${tk.comments.map((c,ci)=>{const mine=c.by===S.me,ed=S.editC&&S.editC.id===tk.id&&S.editC.i===ci;return `<div class="row">${avatarHtml(mem(c.by)||{name:nm(c.by)})}<div class="grow"><div class="log">${esc(nm(c.by))} · ${fmt(c.at)}${c.edited?(S.lang==="de"?" · bearbeitet":" · edited"):""}</div>${ed?`<form data-form="editComment" data-id="${tk.id}" data-i="${ci}" style="display:flex;gap:8px;margin-top:4px"><div class="field" style="flex:1"><input name="text" value="${esc(c.text)}" aria-label="${S.lang==="de"?"Kommentar bearbeiten":"Edit comment"}" required></div><button class="btn small" type="submit">${t("save")}</button></form>`:`<div>${esc(c.text)}</div>`}${(mine||isLeader())&&!ed?`<div class="cact">${mine?`<button type="button" class="link" data-act="editC" data-id="${tk.id}" data-i="${ci}">${S.lang==="de"?"Bearbeiten":"Edit"}</button>`:""}<button type="button" class="link" data-act="delC" data-id="${tk.id}" data-i="${ci}">${S.lang==="de"?"Löschen":"Delete"}</button></div>`:""}</div></div>`}).join("")}
    <form data-form="comment" data-id="${tk.id}" style="display:flex;gap:8px;margin-top:8px"><div class="field" style="flex:1"><input id="com-${tk.id}" name="text" placeholder="${t("comment")}" aria-label="${t("comment")}"></div><button class="btn" type="submit">${t("add")}</button></form></div>`},
 member(id){const m=mem(id);if(!m)return "";const tk=D.tasks.filter(x=>x.owners.includes(id)&&x.status!=="done");
   const mine=id===S.me;
@@ -1252,6 +1264,9 @@ document.addEventListener("click",e=>{
   if(act==="closeBg"&&e.target!==a)return;
   if(act==="projLeadDel"){setProjLead(v,id,false);return}
   if(act==="newSong"){S.sheet={type:"newSong"};render();return}
+  if(act==="delSub"){const c=clone(task(id));c.subs.splice(Number(i),1);saveTask(c);return}
+  if(act==="editC"){S.editC={id,i:Number(i)};render();return}
+  if(act==="delC"){const tk=task(id),c=tk&&tk.comments[Number(i)];if(!c)return;if(a.dataset.sure!=="1"){a.dataset.sure="1";a.textContent=S.lang==="de"?"Wirklich löschen?":"Really delete?";return}run(async()=>{put(D.tasks,await api("deleteComment",{id,index:Number(i),at:c.at,old:c.text}));toast(S.lang==="de"?"Gelöscht":"Deleted")});return}
   if(act==="taskVis"){const c=clone(task(id));c.vis=c.vis==="leaders"?"":"leaders";saveTask(c);return}
   const s=id&&song(id);
   switch(act){
@@ -1312,6 +1327,8 @@ document.addEventListener("click",e=>{
   render();
 });
 document.addEventListener("change",e=>{
+  const stx=e.target.closest("[data-act='subText']");if(stx&&D){const c=clone(task(stx.dataset.id)),v=stx.value.trim(),k=Number(stx.dataset.i);if(!c.subs[k])return;if(!v){stx.value=c.subs[k].t;return}if(v===c.subs[k].t)return;c.subs[k].t=v;saveTask(c);toast(t("saved"));return}
+  const tno=e.target.closest("[data-act='taskNote']");if(tno&&D){const c=clone(task(tno.dataset.id));if((c.note||"")===tno.value)return;c.note=tno.value;saveTask(c);toast(t("saved"));return}
   const sf=e.target.closest("[data-act='songFile']");if(sf&&D&&sf.files&&sf.files[0]){uploadSongFile(sf.dataset.id,sf.files[0]);sf.value="";return}
   const pla=e.target.closest("[data-act='projLeadAdd']");if(pla&&D){if(pla.value)setProjLead(pla.value,pla.dataset.id,true);return}
   const a=e.target.closest("[data-act='partOwner']");if(a&&D){const c=clone(song(a.dataset.id));c.parts[a.dataset.i].owner=a.value;saveSong(c)}
@@ -1345,6 +1362,7 @@ document.addEventListener("submit",e=>{
   case "writers":{const raw=(fd.get("w")||"").split(",").map(x=>x.trim()).filter(Boolean);const ids=raw.map(n=>{const m=D.members.find(x=>x.name.toLowerCase()===n.toLowerCase());return m?m.id:n});songOp(id,"writers",{writers:ids});return}
   case "prayer":{const tx=String(fd.get("text")||"").trim();if(!tx)return;run(async()=>{const r=await api("addPrayer",{kind:fd.get("kind"),text:tx,ref:fd.get("ref")||""});D.prayer=[r].concat(D.prayer||[]);toast(S.lang==="de"?"Geteilt 🙏":"Shared 🙏")});return}
   case "commentP":{const tx=String(fd.get("text")||"").trim();if(!tx)return;run(async()=>put(D.prayer,await api("commentPrayer",{id,text:tx})));return}
+  case "editComment":{const tk=task(id),k=Number(f.dataset.i),c=tk&&tk.comments[k],v=String(fd.get("text")||"").trim();if(!c||!v)return;S.editC=null;run(async()=>{put(D.tasks,await api("editComment",{id,index:k,at:c.at,old:c.text,text:v}));toast(t("saved"))});return}
   case "newSong":{const ti=String(fd.get("title")||"").trim();if(!ti)return;const sid=(ti.toLowerCase().replace(/ä/g,"ae").replace(/ö/g,"oe").replace(/ü/g,"ue").replace(/ß/g,"ss").replace(/[^a-z0-9]+/g,"").slice(0,20)||"song")+"_"+Date.now().toString(36).slice(-4);
     const st=String(fd.get("stage")||"writing");const sg={id:sid,title:ti,stage:STAGES.includes(st)?st:"writing",rec:"studio",leads:[],writers:[],key:"",tempo:"",meter:"",cello:false,gema:false,ccli:false,arr:{v:"open",i:"open"},parts:stdParts({}),releases:[],links:[],note:"",log:[]};
     S.sheet={type:"song",id:sid};saveSong(sg);toast(t("saved"));return}
