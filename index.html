@@ -310,11 +310,11 @@ img.avatar[data-act]{cursor:zoom-in}
 .titleedit input{font-weight:600}
 /* login feedback and band logo */
 .loadbar{height:4px;border-radius:99px;background:var(--line);overflow:hidden;margin-top:10px}
-.loadbar>div{height:100%;width:40%;background:var(--brand);border-radius:99px;animation:loadslide 1.1s ease-in-out infinite}
-@keyframes loadslide{0%{transform:translateX(-100%)}100%{transform:translateX(250%)}}
+.loadbar>div{height:100%;width:0;background:var(--brand);border-radius:99px;animation:loadfill 8s cubic-bezier(.1,.7,.3,1) forwards}
+@keyframes loadfill{to{width:92%}}
 .spin{display:inline-block;width:14px;height:14px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:spin .7s linear infinite;vertical-align:-2px;margin-right:6px}
 @keyframes spin{to{transform:rotate(360deg)}}
-@media (prefers-reduced-motion:reduce){.loadbar>div,.spin{animation-duration:3s}}
+@media (prefers-reduced-motion:reduce){.spin{animation-duration:3s}.loadbar>div{animation:none;width:60%}}
 .mark{background:#c22626 url("icon-192.png") center/cover no-repeat;color:transparent!important;overflow:hidden}
 /* editing own prayer posts */
 .pedit{display:grid;gap:8px;margin:6px 0 10px}
