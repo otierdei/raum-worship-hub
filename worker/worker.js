@@ -303,14 +303,19 @@ function sha_(s) {
     .map(b => ((b + 256) % 256).toString(16).padStart(2, "0")).join("");
 }
 function newToken_() { return (Utilities.getUuid() + Utilities.getUuid()).replace(/-/g, ""); }
-function newCode_() { let c = ""; for (let i = 0; i < 6; i++) c += Math.floor(Math.random() * 10); return c; }
+// Einladungscode: 8 Ziffern aus sicherem Zufall (crypto), nicht aus Math.random
+function newCode_() { let c = ""; while (c.length < 8) { const b = crypto.getRandomValues(new Uint8Array(16)); for (let i = 0; i < b.length && c.length < 8; i++) if (b[i] < 250) c += b[i] % 10; } return c; }
+// Anmeldungen laufen ab: Eintrag "hash~ablaufMs". Alte Einträge ohne Ablauf gelten bis LEGACY_TOKEN_END.
+const TOKEN_DAYS = 365, LEGACY_TOKEN_END = Date.parse("2027-02-28T00:00:00Z"), MAX_FAILS_IP = 20;
+const tokHash_ = e => String(e).split("~")[0];
+const tokLive_ = e => { const x = String(e).split("~")[1]; return x ? Number(x) > Date.now() : Date.now() < LEGACY_TOKEN_END; };
 function err_(code, msg) { const e = new Error(msg); e.code = code; return e; }
 function now_() { return new Date().toISOString(); }
 
 function memberByToken_(token) {
   if (!token) throw err_("auth", "Bitte neu anmelden.");
   const h = sha_(token);
-  const m = readAll_("members").find(x => x.active !== false && Array.isArray(x.token_hashes) && x.token_hashes.indexOf(h) >= 0);
+  const m = readAll_("members").find(x => x.active !== false && Array.isArray(x.token_hashes) && x.token_hashes.some(e => tokHash_(e) === h && tokLive_(e)));
   if (!m) throw err_("auth", "Anmeldung abgelaufen. Bitte mit deinem Link und Code neu anmelden.");
   return m;
 }
@@ -384,25 +389,30 @@ function cleanStatus_(s) { return STATUS.indexOf(s) >= 0 ? s : "open"; }
 /* ---------------- actions ---------------- */
 const ACTIONS = {
   ping: () => ({ service: "raum-worship-hub", time: now_() }),
-  names: () => readAll_("members").filter(m => m.active !== false).map(m => ({ id: m.id, name: m.name })),
+  // Keine öffentliche Namensliste mehr: nur der eigene Name zum persönlichen Einladungslink (?m=<id>)
+  names: (b) => { const id = String((b && b.member) || ""); if (!id) return []; return readAll_("members").filter(m => m.active !== false && m.id === id).map(m => ({ id: m.id, name: m.name })); },
 
   login: (b) => {
     const id = String(b.member || "");
     const code = String(b.code || "").replace(/\D/g, "");
     const cache = CacheService.getScriptCache();
-    const key = "fail_" + id;
-    const fails = Number(cache.get(key) || 0);
-    if (fails >= MAX_FAILS) throw err_("locked", "Zu viele falsche Versuche. Bitte in 15 Minuten nochmal.");
+    const key = "fail_" + id, ipKey = "failip_" + String(b.__ip || "unknown");
+    const fails = Number(cache.get(key) || 0), ipFails = Number(cache.get(ipKey) || 0);
+    if (fails >= MAX_FAILS || ipFails >= MAX_FAILS_IP) throw err_("locked", "Zu viele falsche Versuche. Bitte in 15 Minuten nochmal.");
     const m = get_("members", id);
     const ok = m && m.active !== false && m.invite_hash && m.invite_hash === sha_(id + ":" + code) && new Date(m.invite_expires) > new Date();
     if (!ok) {
       cache.put(key, String(fails + 1), 900);
+      cache.put(ipKey, String(ipFails + 1), 900);
       throw err_("bad_code", "Code stimmt nicht oder ist abgelaufen. Frag die Leitung nach einem neuen Code.");
     }
     cache.remove(key);
     const token = newToken_();
-    const hashes = (Array.isArray(m.token_hashes) ? m.token_hashes : []).concat([sha_(token)]).slice(-6);
+    const hashes = (Array.isArray(m.token_hashes) ? m.token_hashes : []).filter(tokLive_).concat([sha_(token) + "~" + (Date.now() + TOKEN_DAYS * 864e5)]).slice(-6);
     m.token_hashes = hashes;
+    // Code ist nach dem ersten Login nur noch eine Stunde gültig (für ein zweites Gerät), danach verbraucht
+    const soon = new Date(Date.now() + 3600e3).toISOString();
+    if (!m.invite_expires || m.invite_expires > soon) m.invite_expires = soon;
     put_("members", m);
     log_(m, "login", "members", m.id, "Gerät angemeldet");
     return { token: token, data: bootstrap_(m) };
@@ -439,7 +449,7 @@ const ACTIONS = {
   logout: (b, me) => {
     const m = get_("members", me.id);
     const h = sha_(b.token);
-    m.token_hashes = (m.token_hashes || []).filter(x => x !== h);
+    m.token_hashes = (m.token_hashes || []).filter(x => tokHash_(x) !== h);
     put_("members", m);
     return { done: true };
   },
@@ -1333,7 +1343,12 @@ export default {
     if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: cors });
     if (request.method === "GET") return send(JSON.stringify({ ok: true, data: ACTIONS.ping() }));
     if (request.method !== "POST") return new Response("Method not allowed", { status: 405, headers: cors });
-    try { return send(await wRun_(env, await request.text())); }
+    try {
+      // IP des Aufrufers für die Login Sperre: wird vom Server gesetzt, ein mitgeschickter Wert zählt nicht
+      let text = await request.text();
+      try { const j = JSON.parse(text); if (j && typeof j === "object" && !Array.isArray(j)) { j.__ip = request.headers.get("CF-Connecting-IP") || "unknown"; text = JSON.stringify(j); } } catch (e) {}
+      return send(await wRun_(env, text));
+    }
     catch (e) { return send(JSON.stringify({ ok: false, error: "server", message: "Serverfehler: " + e.message })); }
   }
 };
