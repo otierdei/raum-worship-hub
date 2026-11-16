@@ -306,7 +306,7 @@ function newToken_() { return (Utilities.getUuid() + Utilities.getUuid()).replac
 // Einladungscode: 8 Ziffern aus sicherem Zufall (crypto), nicht aus Math.random
 function newCode_() { let c = ""; while (c.length < 8) { const b = crypto.getRandomValues(new Uint8Array(16)); for (let i = 0; i < b.length && c.length < 8; i++) if (b[i] < 250) c += b[i] % 10; } return c; }
 // Anmeldungen laufen ab: Eintrag "hash~ablaufMs". Alte Einträge ohne Ablauf gelten bis LEGACY_TOKEN_END.
-const TOKEN_DAYS = 365, LEGACY_TOKEN_END = Date.parse("2027-02-28T00:00:00Z"), MAX_FAILS_IP = 20;
+const TOKEN_DAYS = 365, LEGACY_TOKEN_END = Date.parse("2027-02-28T00:00:00Z"), MAX_FAILS_IP = 20, MAX_FAILS_CODEONLY = 60;
 const tokHash_ = e => String(e).split("~")[0];
 const tokLive_ = e => { const x = String(e).split("~")[1]; return x ? Number(x) > Date.now() : Date.now() < LEGACY_TOKEN_END; };
 function err_(code, msg) { const e = new Error(msg); e.code = code; return e; }
@@ -396,17 +396,20 @@ const ACTIONS = {
     const id = String(b.member || "");
     const code = String(b.code || "").replace(/\D/g, "");
     const cache = CacheService.getScriptCache();
-    const key = "fail_" + id, ipKey = "failip_" + String(b.__ip || "unknown");
+    // Ohne id (installierte App auf dem iPhone kennt den Einladungslink nicht): Anmeldung nur mit dem 8 stelligen Code.
+    // Dafür gilt statt der Sperre pro Mitglied eine Sperre über alle solchen Versuche zusammen.
+    const key = id ? "fail_" + id : "fail_codeonly", ipKey = "failip_" + String(b.__ip || "unknown");
     const fails = Number(cache.get(key) || 0), ipFails = Number(cache.get(ipKey) || 0);
-    if (fails >= MAX_FAILS || ipFails >= MAX_FAILS_IP) throw err_("locked", "Zu viele falsche Versuche. Bitte in 15 Minuten nochmal.");
-    const m = get_("members", id);
-    const ok = m && m.active !== false && m.invite_hash && m.invite_hash === sha_(id + ":" + code) && new Date(m.invite_expires) > new Date();
+    if (fails >= (id ? MAX_FAILS : MAX_FAILS_CODEONLY) || ipFails >= MAX_FAILS_IP) throw err_("locked", "Zu viele falsche Versuche. Bitte in 15 Minuten nochmal.");
+    const fits = x => x && x.active !== false && x.invite_hash && x.invite_hash === sha_(x.id + ":" + code) && new Date(x.invite_expires) > new Date();
+    const m = id ? get_("members", id) : (code.length === 8 ? readAll_("members").find(fits) : null);
+    const ok = fits(m);
     if (!ok) {
       cache.put(key, String(fails + 1), 900);
       cache.put(ipKey, String(ipFails + 1), 900);
       throw err_("bad_code", "Code stimmt nicht oder ist abgelaufen. Frag die Leitung nach einem neuen Code.");
     }
-    cache.remove(key);
+    if (id) cache.remove(key);
     const token = newToken_();
     const hashes = (Array.isArray(m.token_hashes) ? m.token_hashes : []).filter(tokLive_).concat([sha_(token) + "~" + (Date.now() + TOKEN_DAYS * 864e5)]).slice(-6);
     m.token_hashes = hashes;
