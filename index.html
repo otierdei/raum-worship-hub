@@ -666,12 +666,29 @@ textarea.subedit{resize:none;overflow:hidden;line-height:1.35;white-space:pre-wr
 .yesp{display:inline-flex;align-items:center;gap:5px}
 .yesp .avatar{width:22px;height:22px;font-size:.6rem}
 
+/* 16.11.2026 Datenschutz: Link auf der Login Seite, unter Mehr und im Seitenmenü, Ansicht ohne Anmeldung im Gate */
+#gate.legalgate{display:block;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:calc(20px + env(safe-area-inset-top,0px)) 16px calc(32px + env(safe-area-inset-bottom,0px))}
+.legal{width:min(760px,100%);margin:0 auto;display:flex;flex-direction:column;gap:14px}
+.legal .grid{gap:12px}
+.legal .vtext,.legal .vlist{font-size:.95rem;overflow-wrap:anywhere}
+.legalh{font:400 2.5rem/.95 var(--poster);text-transform:uppercase;margin:4px 0 0}
+.legalback{align-self:flex-start;min-height:44px;display:inline-flex;align-items:center}
+.legalstand{margin:0;font-size:.875rem}
+.legal a{color:var(--accent)}
+.legalmiss{font-weight:600}
+.gatelegal,.morelegal,.sidelegalnav{display:flex;flex-wrap:wrap;gap:4px 18px}
+.gatelegal{justify-content:center;margin-top:-4px}
+.morelegal{padding:0 4px}
+.gatelegal .link,.morelegal .link,.sidelegalnav .link{min-height:44px;display:inline-flex;align-items:center;font-size:1rem;color:var(--muted)}
+.gatelegal .link:hover,.morelegal .link:hover,.sidelegalnav .link:hover{color:var(--accent)}
+.sidelegal{margin-top:auto;padding:0 10px}
 </style>
 
 <div class="app">
   <aside class="side">
     <div class="brand"><div class="mark">R</div><b>Raum Hub</b></div>
     <nav class="nav" id="sidenav"></nav>
+    <div class="sidelegal" id="sidelegal"></div>
   </aside>
   <main>
     <div class="top">
@@ -692,7 +709,7 @@ textarea.subedit{resize:none;overflow:hidden;line-height:1.35;white-space:pre-wr
 <script>
 /* ---------- i18n ---------- */
 const T={
-de:{dashboard:"Start",songs:"Songs",tasks:"Aufgaben",sessions:"Sessions",projects:"Projekte",ideas:"Ideen",members:"Mitglieder",vision:"Vision & Werte",prayer:"Gebet & Impulse",more:"Mehr",
+de:{dashboard:"Start",songs:"Songs",tasks:"Aufgaben",sessions:"Sessions",projects:"Projekte",ideas:"Ideen",members:"Mitglieder",vision:"Vision & Werte",prayer:"Gebet & Impulse",more:"Mehr",privacy:"Datenschutz",back:"Zurück",
 proto:"Prototyp mit Beispieldaten",viewAs:"Ansicht als",nextSession:"Nächste Session",coming:"Kommst du?",yes:"Ja",no:"Nein",maybe:"Vielleicht",
 overdue:"Überfällig",myTasks:"Meine Aufgaben",allTasks:"Alle",open:"Offen",inprog:"In Arbeit",done:"Erledigt",songsByStage:"Songs nach Phase",
 releases:"Anstehende Releases",nothing:"Nichts offen.",due:"fällig",today:"heute",prio:{high:"Hoch",mid:"Mittel",low:"Niedrig"},priority:"Priorität",
@@ -713,7 +730,7 @@ nextStepsNote:"Die echte App lädt diese Daten aus dem Google Sheet. Änderungen
 expense:"Ausgaben",balance:"Stand",addSub:"Teilaufgabe hinzufügen",attendees:"Anwesend",yesCount:"Zusagen",
 liveNote:"Live Recording: Tracks und Click aus der Studioproduktion laufen live mit.",lineup:"Live Lineup",event:"Event",
 moveOnHint:"Weiter erst, wenn dieser Schritt unten erledigt ist.",releasesTitle:"Releases",money:"Finanzen",invoices:"Rechnungen",invoiceNew:"Rechnung erfassen",vendor:"Von",invNr:"Rechnungsnr.",items:"Leistung",amount:"Betrag (€)",paid:"bezahlt",unpaid:"offen",startBalance:"Start",spent:"Ausgegeben",invHint:"Die PDF kommt in Drive in den Ordner Rechnungen. Bankdaten aus Rechnungen werden in der App nicht angezeigt.",forSong:"Für Song",date:"Datum",hello:"Willkommen bei Raum Hub",enterCode:"Gib deinen Code ein. Du bekommst ihn von der Leitung per WhatsApp.",enterCode8:"Gib deinen 8 stelligen Code ein. Du bekommst ihn von der Leitung per WhatsApp. Bei einem älteren Code mit 6 Ziffern öffne bitte deinen Einladungslink.",whoAreYou:"Wer bist du?",login:"Anmelden",logout:"Abmelden",loading:"Lädt…",noLink:"Öffne bitte deinen persönlichen Link aus WhatsApp.",invite:"Einladen",inviteTitle:"Einladung",inviteHint:"Schick das per WhatsApp. Der Code gilt 14 Tage und funktioniert im Browser und in der installierten App.",copy:"Kopieren",production:"Produktion",errSave:"Nicht gespeichert",offline:"Keine Verbindung. Bitte später nochmal.",pdfDone:"PDF liegt in Protokolle › Creative Sessions",memoLink:"Sprachmemo Link (Drive)",pdfLink:"PDF Link (Drive)",installHint:"Auf dem iPhone: Teilen › Zum Home Bildschirm. Danach in der App einmal den Code eingeben.",leadDoes:"Lead Vocal baut es",celloQ:"Cello in diesem Song",links:"Drive Links",addLink:"Link hinzufügen",linkLabel:"Bezeichnung",linkUrl:"Drive Link (https://…)",myParts:"Meine Songs und Parts",quick:"Drive Ordner",noParts:"Dir ist noch kein Part zugeteilt.",exportOld:"Meine Klicks aus älteren Versionen kopieren",exportHint:"Kopiert deine Änderungen aus den vorherigen Prototyp Versionen. Füge den Text danach im Chat mit Claude ein.",copied:"Kopiert. Jetzt im Chat einfügen.",selectCopy:"Text markieren und kopieren:",badUrl:"Bitte einen Link mit https:// eingeben.",helpers:"Hilfe",vocalArr:"Vocal Arrangement",instrArr:"Instrumental Arrangement"},
-en:{dashboard:"Home",songs:"Songs",tasks:"Tasks",sessions:"Sessions",projects:"Projects",ideas:"Ideas",members:"Members",vision:"Vision & values",prayer:"Prayer & thoughts",more:"More",
+en:{dashboard:"Home",songs:"Songs",tasks:"Tasks",sessions:"Sessions",projects:"Projects",ideas:"Ideas",members:"Members",vision:"Vision & values",prayer:"Prayer & thoughts",more:"More",privacy:"Privacy",back:"Back",
 proto:"Prototype with sample data",viewAs:"View as",nextSession:"Next session",coming:"Are you coming?",yes:"Yes",no:"No",maybe:"Maybe",
 overdue:"Overdue",myTasks:"My tasks",allTasks:"All",open:"Open",inprog:"In progress",done:"Done",songsByStage:"Songs by stage",
 releases:"Upcoming releases",nothing:"Nothing open.",due:"due",today:"today",prio:{high:"High",mid:"Medium",low:"Low"},priority:"Priority",
@@ -745,9 +762,112 @@ const STAGES=["idea","writing","rawdemo","arrangement","vocalarr","production","
 const DRIVE={file:id=>"https://drive.google.com/file/d/"+id+"/view"};
 /* ---------- state and API ---------- */
 const API="https://raumhub.othniel-erdei.workers.dev/";
+/* ---------- Datenschutzhinweis (16.11.2026) ---------- */
+// Kontaktadresse für den Datenschutzhinweis: nur hier ändern, alle Texte nutzen diese Konstante
+const LEGAL_MAIL="raumworship@gmail.com";
+// Text ohne Anmeldung erreichbar (Login Seite) und nach der Anmeldung unter Mehr. {MAIL} wird durch LEGAL_MAIL ersetzt.
+const LEGAL={
+de:{
+privacy:{title:"Datenschutzhinweis",intro:"Hier steht, welche Daten Raum Hub verarbeitet, wozu, wer sie sieht und welche Rechte du hast.",sections:[
+{h:"Verantwortlich",p:["Othniel Erdei, Am Bogen 15, 78647 Trossingen","E Mail: {MAIL}"]},
+{h:"Wofür Raum Hub da ist",p:["Raum Hub ist das interne Werkzeug der Band Raum Worship. Anmelden kann sich nur, wer von der Leitung einen persönlichen Einladungscode bekommen hat. Wir planen damit Songs, Aufgaben, Projekte, Treffen und Releases, teilen Gebetsanliegen und Impulse und machen die Finanzen der Band für alle Mitglieder sichtbar.","Ohne Profil und Anmeldung kannst du Raum Hub nicht nutzen. Alles, was du darüber hinaus einträgst, ist freiwillig. Es gibt keine automatisierten Entscheidungen und keine Profilbildung."]},
+{h:"Welche Daten verarbeitet werden",list:[
+"Profil: Rufname, auf Wunsch voller Name, Rolle (Leitung, Leitung Social Media oder Mitglied), Gruppen, Fähigkeiten, besondere Berechtigungen, ob dein Zugang aktiv ist, und auf Wunsch ein Profilbild.",
+"Anmeldung: Dein Einladungscode und die Anmeldeschlüssel deiner Geräte werden nur als Prüfwert (Hash) gespeichert, nicht im Klartext, jeweils mit Ablaufdatum. Es bleiben höchstens sechs Geräte gespeichert.",
+"Schutz vor falschen Codes: Gibt jemand einen falschen Code ein, zählt die App die Fehlversuche für den Zugang und für die IP Adresse, von der die Anfrage kommt. Nach zu vielen Fehlversuchen ist die Anmeldung für 15 Minuten gesperrt.",
+"Protokoll: Bei Anmeldungen und Änderungen speichert die App, wer wann was getan hat, mit einer kurzen Beschreibung, zum Beispiel Songtitel, Aufgabentitel, den Anfang eines Kommentars, eine Zusage oder Absage, Absender und Betrag einer Rechnung. Daraus entsteht auch die Übersicht „Was ist neu“ für die anderen Mitglieder.",
+"Songs: Titel, Phase, Tonart, Tempo, Takt, Lead, Writer mit Änderungsverlauf, GEMA und CCLI Status, Parts mit Zuständigen, Arrangement, Releases mit Streaming Links, Notizen und Links.",
+"Aufgaben und Projekte: Titel, Zuständige, Fälligkeit, Status, Priorität, Teilaufgaben, Notizen, Kommentare mit Name und Datum, Links.",
+"Treffen: Datum, Uhrzeit, Ort, Eingeladene, Zusagen und Absagen mit Namen, Anwesende, Agenda und Protokoll.",
+"Ideen: Titel, Text oder Lyrics, Link zu einem Sprachmemo und wer die Idee eingetragen hat.",
+"Gebet und Impulse: Art des Beitrags, Text, Bibelstelle, Datum, wer ihn geteilt hat, wer mitbetet, Reaktionen, Kommentare und ob ein Anliegen als erhört markiert ist.",
+"Finanzen: Startbetrag und Rechnungen mit Absender, Nummer, Datum, Leistung, Betrag, Status, zugehörigem Song und Datei.",
+"Dateien: Hochgeladene Rechnungen und Demos sowie Protokolle als PDF liegen in Google Drive. In der App steht nur ein Verweis darauf.",
+"Vision und Werte der Band, gepflegt von der Leitung."]},
+{h:"Wer was sieht",p:["Alle angemeldeten Mitglieder sehen die Mitgliederliste mit Profil und Profilbild, Songs, Aufgaben, Treffen mit Zusagen, Projekte, Ideen, Gebet und Impulse, die Finanzen sowie Vision und Werte.","Leiter Treffen und Aufgaben, für die nur die Leitung zuständig ist, sieht nur die Leitung. Nur die Leitung sieht außerdem, bis wann ein Einladungscode gilt und wie viele Geräte angemeldet sind, öffnet Rechnungsdateien und verwaltet Mitglieder und Einladungen."]},
+{h:"Zweck und Rechtsgrundlage",list:[
+"Nutzung der App durch Mitglieder (Profil, Anmeldung, Inhalte, Protokoll, Dateien): Art. 6 Abs. 1 lit. b DSGVO. Wir organisieren damit die gemeinsame Bandarbeit, an der du mitwirkst.",
+"Sicherheit und Schutz vor Missbrauch (Prüfwerte statt Klartext, Sperre nach Fehlversuchen mit IP Adresse, technische Protokolle der Dienste): Art. 6 Abs. 1 lit. f DSGVO. Unser berechtigtes Interesse ist, dass nur Mitglieder Zugang haben und die App sicher läuft.",
+"Gebetsanliegen, Impulse und ähnliche Beiträge können religiöse Überzeugungen oder Angaben zur Gesundheit erkennen lassen. Das sind besondere Kategorien personenbezogener Daten nach Art. 9 DSGVO. Solche Angaben gibt es in der App nur, weil Mitglieder sie freiwillig eintragen. Wir stützen uns dafür auf deine Einwilligung (Art. 9 Abs. 2 lit. a DSGVO), die du mit dem Teilen gibst. Du musst nichts davon teilen, alle anderen Bereiche der App kannst du genauso nutzen. Nenne andere Personen bitte nur, wenn sie damit einverstanden sind."]},
+{h:"Empfänger und Dienste",p:["Wir verkaufen keine Daten und geben sie nicht für Werbung weiter. Für den Betrieb nutzen wir diese Dienste:"],list:[
+"Cloudflare, Inc. (USA): betreibt den Server der App (Cloudflare Worker) und die Datenbank (Cloudflare D1). Die Datenbank ist nach unserer Einrichtung in der EU angelegt. Cloudflare speichert für den Betrieb technische Protokolle der Aufrufe, etwa Zeitpunkt, Anfrage und Antwort.",
+"GitHub, Inc. (USA): liefert die Seite der App über GitHub Pages aus. GitHub speichert nach eigenen Angaben die IP Adresse der Besucher zu Sicherheitszwecken.",
+"Google (Google Ireland Limited und Google LLC, USA): Über ein Google Konto der Band legt die App hochgeladene Rechnungen und Demos sowie Protokolle als PDF in Google Drive ab und liest Rechnungen und Leiterprotokolle zum Anzeigen wieder aus. Sicherungskopien der Datenbank werden als Google Tabelle in einem privaten Drive Ordner der Leitung abgelegt.",
+"Links zu Google Drive, Streamingdiensten oder anderen Seiten öffnest du selbst. Erst dann wird die fremde Seite geladen, und es gelten die Datenschutzbestimmungen des jeweiligen Anbieters."],after:["Dabei können Daten in die USA übermittelt werden. Nach unserem Kenntnisstand sind Cloudflare, GitHub und Google unter dem EU US Data Privacy Framework zertifiziert, für das die EU Kommission einen Angemessenheitsbeschluss erlassen hat (Art. 45 DSGVO). Soweit dieser nicht greift, stützen die Anbieter Übermittlungen nach eigenen Angaben auf Standardvertragsklauseln der EU Kommission (Art. 46 DSGVO)."]},
+{h:"Wie lange Daten gespeichert werden",list:[
+"Anmeldung auf einem Gerät: 365 Tage, oder bis du dich dort abmeldest oder die Leitung deinen Zugang deaktiviert. Ältere Anmeldungen ohne Ablaufdatum gelten bis zum 28.02.2027.",
+"Einladungscode: 14 Tage. Nach der ersten Anmeldung gilt er nur noch eine Stunde, damit du ein zweites Gerät anmelden kannst.",
+"Zähler für Fehlversuche mit IP Adresse: 15 Minuten. Danach gilt der Eintrag nicht mehr und wird bei der nächsten Änderung der Sperrliste aus der Datenbank entfernt.",
+"Technische Protokolle bei Cloudflare: wenige Tage, nach Angaben von Cloudflare höchstens 7 Tage.",
+"Profil, Inhalte und Dateien: bis sie gelöscht werden. Wenn du die Band verlässt, deaktiviert die Leitung deinen Zugang, und alle deine Geräte sind sofort abgemeldet. Auf Wunsch löschen wir dein Profil und deine Beiträge.",
+"Protokolleinträge: Die App löscht sie bisher nicht automatisch. Auf Wunsch entfernen wir Einträge zu deiner Person."]},
+{h:"Speicherung auf deinem Gerät",p:["Raum Hub setzt keine Cookies, nutzt keine Analyse oder Tracking Dienste, zeigt keine Werbung, verschickt keine Push Benachrichtigungen und lädt keine Schriften oder Skripte von fremden Servern.","Im Speicher deines Browsers (localStorage) legt die App ab: deinen Anmeldeschlüssel, die Mitglieds ID aus deinem Einladungslink, eine Kopie der App Daten für einen schnellen Start, Entwürfe von Protokollen, den Zeitpunkt deines letzten Besuchs für „Was ist neu“, welche Bereiche du eingeklappt hast, und die Sprache. Ein Service Worker legt die Dateien der App (Seite, Symbole, Bilder, Schriften) im Cache ab, damit sie schneller lädt. Die Daten der Band legt er dort nicht ab.","Diese Speicherung ist für die von dir genutzten Funktionen nötig (§ 25 Abs. 2 Nr. 2 TDDDG). Beim Abmelden löscht die App auf diesem Gerät den Anmeldeschlüssel, die Datenkopie und die Protokollentwürfe. Die übrigen Einträge kannst du in den Einstellungen deines Browsers löschen."]},
+{h:"Deine Rechte",p:["Du hast das Recht auf Auskunft (Art. 15 DSGVO), Berichtigung (Art. 16), Löschung (Art. 17), Einschränkung der Verarbeitung (Art. 18) und Datenübertragbarkeit (Art. 20). Einer Verarbeitung nach Art. 6 Abs. 1 lit. f DSGVO kannst du aus Gründen, die sich aus deiner besonderen Situation ergeben, widersprechen (Art. 21). Eine Einwilligung kannst du jederzeit mit Wirkung für die Zukunft widerrufen (Art. 7 Abs. 3), zum Beispiel indem du deinen Beitrag löschst oder uns schreibst.","Melde dich dafür bei der Leitung oder per E Mail: {MAIL}","Einiges kannst du selbst tun:"],list:[
+"eigene Beiträge in Gebet und Impulse bearbeiten und löschen",
+"eigene Kommentare bei Aufgaben bearbeiten und löschen",
+"dein Profilbild ändern oder entfernen",
+"dich auf einem Gerät abmelden (unter Mehr, Einstellungen)"],after:["Du kannst dich außerdem bei einer Datenschutz Aufsichtsbehörde beschweren (Art. 77 DSGVO), zum Beispiel bei: Der Landesbeauftragte für den Datenschutz und die Informationsfreiheit Baden Württemberg."]}],
+stand:"Stand: 16.11.2026"}},
+en:{
+privacy:{title:"Privacy notice",intro:"This page explains which data Raum Hub processes, why, who can see it and what rights you have. The German version is the binding one.",sections:[
+{h:"Controller",p:["Othniel Erdei, Am Bogen 15, 78647 Trossingen, Germany","Email: {MAIL}"]},
+{h:"What Raum Hub is for",p:["Raum Hub is the internal tool of the band Raum Worship. Only people who received a personal invite code from the leadership can log in. We use it to plan songs, tasks, projects, meetings and releases, to share prayer requests and thoughts, and to make the band's finances visible to all members.","You cannot use Raum Hub without a profile and a login. Everything else you enter is voluntary. There is no automated decision making and no profiling."]},
+{h:"Which data is processed",list:[
+"Profile: short name, full name if you want, role (leadership, social media leadership or member), groups, skills, special permissions, whether your access is active, and a profile picture if you want.",
+"Login: your invite code and the login keys of your devices are stored only as a check value (hash), never in plain text, each with an expiry date. At most six devices are kept.",
+"Protection against wrong codes: if someone enters a wrong code, the app counts the failed attempts for the account and for the IP address the request comes from. After too many failed attempts, login is blocked for 15 minutes.",
+"Activity log: for logins and changes the app stores who did what and when, with a short description, for example a song title, a task title, the start of a comment, a yes or no to a meeting, the sender and amount of an invoice. The \"What's new\" overview for other members is built from this.",
+"Songs: title, stage, key, tempo, meter, lead, writers with change history, GEMA and CCLI status, parts with owners, arrangement, releases with streaming links, notes and links.",
+"Tasks and projects: title, owners, due date, status, priority, subtasks, notes, comments with name and date, links.",
+"Meetings: date, time, place, invited people, yes and no answers with names, attendees, agenda and minutes.",
+"Ideas: title, text or lyrics, link to a voice memo and who added the idea.",
+"Prayer and thoughts: type of post, text, Bible reference, date, who shared it, who is praying along, reactions, comments and whether a request is marked as answered.",
+"Finances: starting balance and invoices with sender, number, date, service, amount, status, related song and file.",
+"Files: uploaded invoices and demos as well as minutes as PDF are stored in Google Drive. The app only keeps a reference to them.",
+"Vision and values of the band, kept by the leadership."]},
+{h:"Who can see what",p:["All logged in members see the member list with profile and picture, songs, tasks, meetings with answers, projects, ideas, prayer and thoughts, the finances and the vision and values.","Leadership meetings and tasks that only leaders are responsible for are visible to the leadership only. Only the leadership also sees until when an invite code is valid and how many devices are logged in, opens invoice files and manages members and invites."]},
+{h:"Purpose and legal basis",list:[
+"Use of the app by members (profile, login, content, activity log, files): Art. 6(1)(b) GDPR. We use it to organise the shared work of the band that you take part in.",
+"Security and protection against misuse (hashes instead of plain text, login block with IP address after failed attempts, technical logs of the services): Art. 6(1)(f) GDPR. Our legitimate interest is that only members have access and the app runs securely.",
+"Prayer requests, thoughts and similar posts can reveal religious beliefs or health information. These are special categories of personal data under Art. 9 GDPR. Such information is only in the app because members enter it voluntarily. We rely on your consent (Art. 9(2)(a) GDPR), which you give by sharing. You do not have to share any of it, and you can use every other part of the app in the same way. Please only mention other people if they agree."]},
+{h:"Recipients and services",p:["We do not sell data and do not pass it on for advertising. To run the app we use these services:"],list:[
+"Cloudflare, Inc. (USA): runs the app's server (Cloudflare Worker) and database (Cloudflare D1). According to our setup the database is located in the EU. Cloudflare keeps technical logs of requests for operation, such as time, request and response.",
+"GitHub, Inc. (USA): delivers the app's page through GitHub Pages. According to GitHub, visitors' IP addresses are logged for security purposes.",
+"Google (Google Ireland Limited and Google LLC, USA): through a Google account of the band, the app stores uploaded invoices and demos as well as minutes as PDF in Google Drive and reads invoices and leadership minutes back for viewing. Backup copies of the database are stored as a Google Sheet in a private Drive folder of the leadership.",
+"You open links to Google Drive, streaming services or other sites yourself. Only then is the other site loaded, and that provider's privacy policy applies."],after:["Data may be transferred to the USA. To our knowledge Cloudflare, GitHub and Google are certified under the EU US Data Privacy Framework, for which the EU Commission adopted an adequacy decision (Art. 45 GDPR). Where it does not apply, the providers state that they base transfers on the EU Commission's standard contractual clauses (Art. 46 GDPR)."]},
+{h:"How long data is kept",list:[
+"Login on a device: 365 days, or until you log out there or the leadership deactivates your access. Older logins without an expiry date are valid until 28.02.2027.",
+"Invite code: 14 days. After the first login it stays valid for one more hour only, so you can log in a second device.",
+"Failed attempt counter with IP address: 15 minutes. After that the entry no longer counts and is removed from the database with the next change to the block list.",
+"Technical logs at Cloudflare: a few days, at most 7 days according to Cloudflare.",
+"Profile, content and files: until they are deleted. If you leave the band, the leadership deactivates your access and all your devices are logged out immediately. On request we delete your profile and your posts.",
+"Activity log entries: the app does not delete them automatically yet. On request we remove entries about you."]},
+{h:"Storage on your device",p:["Raum Hub sets no cookies, uses no analytics or tracking, shows no ads, sends no push notifications and loads no fonts or scripts from other servers.","In your browser's storage (localStorage) the app keeps: your login key, the member ID from your invite link, a copy of the app data for a quick start, drafts of minutes, the time of your last visit for \"What's new\", which sections you collapsed, and the language. A service worker caches the app's files (page, icons, images, fonts) so it loads faster. It does not cache the band's data.","This storage is needed for the features you use (Section 25(2) No. 2 TDDDG). When you log out, the app deletes the login key, the data copy and the drafts on this device. You can delete the other entries in your browser settings."]},
+{h:"Your rights",p:["You have the right of access (Art. 15 GDPR), rectification (Art. 16), erasure (Art. 17), restriction of processing (Art. 18) and data portability (Art. 20). You can object to processing based on Art. 6(1)(f) GDPR on grounds relating to your particular situation (Art. 21). You can withdraw consent at any time with effect for the future (Art. 7(3)), for example by deleting your post or writing to us.","Contact the leadership or send an email: {MAIL}","Some things you can do yourself:"],list:[
+"edit and delete your own posts in prayer and thoughts",
+"edit and delete your own comments on tasks",
+"change or remove your profile picture",
+"log out on a device (under More, Settings)"],after:["You can also lodge a complaint with a data protection supervisory authority (Art. 77 GDPR), for example: Der Landesbeauftragte für den Datenschutz und die Informationsfreiheit Baden Württemberg."]}],
+stand:"Last updated: 16.11.2026"}}};
+const LEGAL_KEYS=["privacy"];
+function legalMail(){return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(LEGAL_MAIL)?`<a href="mailto:${esc(LEGAL_MAIL)}">${esc(LEGAL_MAIL)}</a>`:`<span class="legalmiss">${esc(LEGAL_MAIL)}</span>`}
+const legalTxt=s=>esc(s).replace(/\{MAIL\}/g,legalMail());
+// gate: true auf der Login Seite (eigene Überschrift und Zurück zur Anmeldung), sonst Ansicht unter Mehr
+function legalPage(k,gate){const L=(LEGAL[S.lang]||LEGAL.de)[k];if(!L)return "";
+  const back=`<button type="button" class="link legalback" data-legal="">‹ ${gate?esc(t("back")):esc(t("more"))}</button>`;
+  return `<div class="legal">${gate?`${back}<h1 class="legalh">${esc(L.title)}</h1>`:""}${L.intro?`<p class="vtext">${legalTxt(L.intro)}</p>`:""}<div class="grid">${L.sections.map(x=>`<section class="panel"><h2>${esc(x.h)}</h2>${(x.p||[]).map(p=>`<p class="vtext">${legalTxt(p)}</p>`).join("")}${(x.list||[]).length?`<ul class="vlist">${x.list.map(i=>`<li>${legalTxt(i)}</li>`).join("")}</ul>`:""}${(x.after||[]).map(p=>`<p class="vtext" style="margin-top:10px">${legalTxt(p)}</p>`).join("")}</section>`).join("")}</div><p class="log legalstand">${esc(L.stand)}</p>${back}</div>`}
+function legalLinks(cls){return `<nav class="${cls}" aria-label="${S.lang==="de"?"Datenschutz":"Privacy"}">${LEGAL_KEYS.map(k=>`<button type="button" class="link" data-legal="${k}">${esc(t(k))}</button>`).join("")}</nav>`}
+// ohne Anmeldung im Gate, mit Anmeldung als eigene Ansicht; "" führt zurück
+function openLegal(k){k=LEGAL_KEYS.includes(k)?k:"";
+  if(D){S.view=k||"more";S.sheet=null;try{history.replaceState(null,"",location.pathname+location.search+"#"+S.view)}catch(_){}render();window.scrollTo(0,0);return}
+  S.legal=k||null;if(!k&&LEGAL_KEYS.includes(S.view))S.view="dashboard";try{history.replaceState(null,"",location.pathname+location.search+(k?"#"+k:""))}catch(_){}
+  renderGate();const g=document.getElementById("gate");if(g)g.scrollTop=0;const f=g&&g.querySelector(k?".legalh":'[data-legal="privacy"]');if(f){if(k)f.setAttribute("tabindex","-1");try{f.focus({preventScroll:true})}catch(_){}}}
 const LS={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
 let D=null;
-const S={lang:"de",me:null,view:(location.hash||"#dashboard").slice(1),taskFilter:"mine",sessFilter:"upcoming",sheet:null,busy:false};
+const S={lang:"de",me:null,view:(location.hash||"#dashboard").slice(1),taskFilter:"mine",sessFilter:"upcoming",sheet:null,busy:false,legal:null};
+// Datenschutz über #privacy auch ohne Anmeldung direkt aufrufbar
+if(S.view==="privacy")S.legal="privacy";
+window.addEventListener("hashchange",()=>{if(location.hash==="#privacy"&&!D&&!S.legal)openLegal("privacy")});
 function persist(){LS.set("rw-lang",S.lang)}
 async function api(action,body){
   const r=await fetch(API,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(Object.assign({action,token:LS.get("rw-token")},body||{}))});
@@ -882,8 +1002,9 @@ function shell(){
   const c=myOpenCount(), badge=c?`<span class="badge">${c}</span>`:"";
   document.body.dataset.area=areaOf(S.view);
   document.getElementById("sidenav").innerHTML=NAV().map(k=>`<button type="button" data-nav="${k}" data-area="${areaOf(k)}" ${S.view===k?'aria-current="page"':""}>${icon(k)}${t(k)}${k==="tasks"?badge:""}</button>`).join("");
-  const moreViews=["projects","ideas","prayer","members","vision","money","more"];
+  const moreViews=["projects","ideas","prayer","members","vision","money","more","privacy"];
   document.getElementById("bottomnav").innerHTML=BOTTOM.map(k=>{const cur=k==="more"?moreViews.includes(S.view):S.view===k;return `<button type="button" data-nav="${k}" data-area="${areaOf(k==="more"&&cur?S.view:k)}" ${cur?'aria-current="page"':""}>${icon(k)}<span>${t(k)}</span>${k==="tasks"?badge:""}</button>`}).join("");
+  {const sl=document.getElementById("sidelegal");if(sl)sl.innerHTML=legalLinks("sidelegalnav")}
   document.getElementById("title").textContent=t(S.view);document.getElementById("title").hidden=S.view==="dashboard";
 }
 function render(){if(!D){renderGate();return}document.getElementById("gate").hidden=true;try{localStorage.setItem("rw-data",JSON.stringify(D))}catch(e){}if(!T.de[S.view]||(false))S.view="dashboard";shell();const v=document.getElementById("view");v.innerHTML=(VIEWS[S.view]||VIEWS.dashboard)();renderSheet();const sr=document.getElementById("sheetRoot");if(sr)sr.dataset.area=S.sheet?((S.sheet.type==="session"&&typeof isLeitung==="function"&&isLeitung(sess(S.sheet.id)))?"leitung":sheetArea(S.sheet.type)):areaOf(S.view);if(typeof applyCollapse==="function")applyCollapse();numberPanels();persist()}
@@ -1098,10 +1219,11 @@ ideas(){
 members(){
   return `<div class="panel"><div class="rows">${D.members.map(m=>`<div class="row">${avatarHtml(m)}<div class="grow"><button type="button" class="link title" data-act="openMember" data-id="${m.id}" style="color:inherit">${esc(m.name)}</button>${m.full?` <span class="muted" style="font-size:.85rem">(${esc(m.full)})</span>`:""}<div class="muted" style="font-size:.82rem">${esc(m.groups.join(", "))}</div>${(m.skills||[]).length?`<div class="skills">${esc(m.skills.join(" · "))}</div>`:""}</div>${isLeader()?`<button type="button" class="btn small" data-act="prodToggle" data-id="${m.id}" title="${S.lang==="de"?"Erlaubt diesem Mitglied, alle Songs zu bearbeiten: Phasen, Parts und Arrangement":"Lets this member edit all songs"}" aria-pressed="${(m.perms||[]).includes("songs")}">${(m.perms||[]).includes("songs")?"✓ ":""}${S.lang==="de"?"Darf Songs bearbeiten":"Can edit songs"}</button><button type="button" class="btn small" data-act="invite" data-id="${m.id}">${t("invite")}</button>`:((m.perms||[]).includes("songs")?`<span class="chip warn">${S.lang==="de"?"bearbeitet Songs":"edits songs"}</span>`:"")}<span class="chip ${m.role==="leader"?"acc":m.role==="middle"?"warn":""}">${t("roles."+m.role)}</span></div>`).join("")}</div></div>`},
 vision(){return visionPage()},
+privacy(){return legalPage("privacy",false)},
 prayer(){return prayerPage()},
 more(){
   return `<div class="grid"><div class="panel"><div class="rows">${["projects","ideas","prayer","members","vision","money"].map(k=>`<div class="row"><button type="button" class="link" data-nav="${k}" style="display:flex;gap:10px;align-items:center;color:inherit">${icon(k)}${t(k)}</button></div>`).join("")}</div></div>
-  ${quickPanel()}<div class="panel"><h2>${S.lang==="de"?"Profilbild":"Profile picture"}</h2><div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">${avatarHtml(me(),"big")}<label class="btn">${S.lang==="de"?"Bild auswählen":"Choose picture"}<input type="file" accept="image/*" data-act="avatarFile" hidden></label>${me().avatar?`<button type="button" class="btn" data-act="avatarRemove">${S.lang==="de"?"Entfernen":"Remove"}</button>`:""}</div><p class="note" style="margin-top:8px">${S.lang==="de"?"Wird automatisch quadratisch zugeschnitten und verkleinert.":"Cropped to a square and resized automatically."}</p></div><div class="panel"><h2>${t("settings")}</h2><p class="note">${t("installHint")}</p><button type="button" class="btn" data-act="logout">${t("logout")}</button></div></div>`}};
+  ${quickPanel()}<div class="panel"><h2>${S.lang==="de"?"Profilbild":"Profile picture"}</h2><div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">${avatarHtml(me(),"big")}<label class="btn">${S.lang==="de"?"Bild auswählen":"Choose picture"}<input type="file" accept="image/*" data-act="avatarFile" hidden></label>${me().avatar?`<button type="button" class="btn" data-act="avatarRemove">${S.lang==="de"?"Entfernen":"Remove"}</button>`:""}</div><p class="note" style="margin-top:8px">${S.lang==="de"?"Wird automatisch quadratisch zugeschnitten und verkleinert.":"Cropped to a square and resized automatically."}</p></div><div class="panel"><h2>${t("settings")}</h2><p class="note">${t("installHint")}</p><button type="button" class="btn" data-act="logout">${t("logout")}</button></div>${legalLinks("morelegal")}</div>`}};
 
 /* ---------- sheets (detail panels) ---------- */
 function renderSheet(){
@@ -1183,6 +1305,8 @@ if(params.get("m"))LS.set("rw-member",params.get("m"));
 let NAMES=null;
 async function renderGate(){
   const g=document.getElementById("gate");g.hidden=false;
+  if(S.legal){g.classList.add("legalgate");g.innerHTML=legalPage(S.legal,true);return}
+  g.classList.remove("legalgate");
   const token=LS.get("rw-token");
   if(token){g.innerHTML=`<div class="gatebox"><div class="mark">R</div><p class="muted">${t("loading")}</p></div>`;return}
   const mid=LS.get("rw-member");
@@ -1191,7 +1315,7 @@ async function renderGate(){
   g.innerHTML=`<form class="gatebox" data-form="login"><div class="mark">R</div><h1>${t("hello")}</h1>
   ${who?`<p class="muted">${esc(who.name)}</p>`:""}<input type="hidden" name="member" value="${who?esc(who.id):""}">
   <div class="field"><label class="label" for="login-code">${t(who?"enterCode":"enterCode8")}</label><input id="login-code" name="code" class="codein" inputmode="numeric" autocomplete="one-time-code" maxlength="8" pattern="${who?"[0-9]{6,8}":"[0-9]{8}"}" required></div>
-  <button class="btn primary" type="submit" id="loginBtn">${t("login")}</button><div class="loadbar" id="loginBar" hidden><div></div></div><p class="log" id="loginErr"></p></form>`;
+  <button class="btn primary" type="submit" id="loginBtn">${t("login")}</button><div class="loadbar" id="loginBar" hidden><div></div></div><p class="log" id="loginErr"></p>${legalLinks("gatelegal")}</form>`;
 }
 function cached(){try{const c=JSON.parse(LS.get("rw-data")||"null");return c&&c.me&&c.me.id===LS.get("rw-member")?c:null}catch(e){return null}}
 function forget(){LS.del("rw-token");LS.del("rw-data");try{Object.keys(localStorage).filter(k=>k.startsWith("rw-proto-")).forEach(k=>localStorage.removeItem(k))}catch(e){}D=null}
@@ -1257,7 +1381,7 @@ const isPhone=()=>!!(window.matchMedia&&window.matchMedia("(max-width:760px)").m
 function applyCollapse(){
   const phone=isPhone();
   document.querySelectorAll("#view .panel").forEach((p,i)=>{
-    const h=p.querySelector(":scope>.panel-head>h2, :scope>h2");if(!h)return;
+    const h=p.querySelector(":scope>.panel-head>h2, :scope>h2");if(!h||p.closest(".legal"))return;
     const key=S.view+":"+h.textContent.trim();p.dataset.ckey=key;
     const c=key in COLL?COLL[key]:((phone&&i>0&&S.view!=="dashboard")||p.dataset.defc==="1");p.classList.toggle("collapsed",c);
     h.setAttribute("role","button");h.tabIndex=0;h.setAttribute("aria-expanded",String(!c));h.classList.add("ctoggle");
@@ -1275,6 +1399,7 @@ document.addEventListener("change",e=>{const f=e.target.closest&&e.target.closes
 document.addEventListener("click",e=>{
   const ct=e.target.closest("h2.ctoggle");if(ct){toggleCollapse(ct);return}
   const nav=e.target.closest("[data-nav]");if(nav){S.view=nav.dataset.nav;S.sheet=null;try{history.replaceState(null,"",location.pathname+location.search+"#"+S.view)}catch(_){}render();window.scrollTo(0,0);return}
+  const lg=e.target.closest("[data-legal]");if(lg){openLegal(lg.dataset.legal);return}
   const lang=e.target.closest("[data-lang]");if(lang){S.lang=lang.dataset.lang;persist();render();return}
   const a=e.target.closest("[data-act]");if(!a||!D)return;const {act,id,v,i,ri}=a.dataset;
   if(act==="closeBg"&&e.target!==a)return;
