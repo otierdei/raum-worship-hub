@@ -682,6 +682,12 @@ textarea.subedit{resize:none;overflow:hidden;line-height:1.35;white-space:pre-wr
 .gatelegal .link,.morelegal .link,.sidelegalnav .link{min-height:44px;display:inline-flex;align-items:center;font-size:1rem;color:var(--muted)}
 .gatelegal .link:hover,.morelegal .link:hover,.sidelegalnav .link:hover{color:var(--accent)}
 .sidelegal{margin-top:auto;padding:0 10px}
+
+/* 17.11.2026 Leiste unten: fest am unteren Rand, deckend (Oti, iPhone Screenshot). Die schwebende Glasleiste war für runde Ecken gedacht; eckig ließ sie Inhalt darunter und durch die Unschärfe rot durchscheinen */
+@media (max-width:899px){
+  .bottom{left:0;right:0;bottom:0;padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px));border:0;border-top:1px solid var(--line);background:var(--surface);-webkit-backdrop-filter:none;backdrop-filter:none;box-shadow:none}
+  .bottom button[aria-current="page"],.bottom button[aria-current="page"][data-area]{background:var(--sunk)}
+}
 </style>
 
 <div class="app">
