@@ -1202,7 +1202,7 @@ function pushToD1() {
 
 /* ---------------- Rückweg: Daten aus Cloudflare D1 in ein NEUES Sheet holen (nur im Editor ausführen) ---------------- */
 // Überschreibt nichts. Legt im privaten Ordner Raum Leitung ein neues Sheet an. Für den Rückweg danach SHEET_ID auf dieses Sheet setzen.
-function pullFromD1() {
+function pullFromD1(opts) {
   const stamp = Utilities.formatDate(new Date(), tz_(), "yyyy-MM-dd") + " " + Utilities.formatDate(new Date(), tz_(), "HH:mm");
   const book = SpreadsheetApp.create("Raum Worship Hub Daten aus D1 " + stamp);
   try { DriveApp.getFileById(book.getId()).moveTo(DriveApp.getFolderById(P.getProperty("LEITUNG_FOLDER"))); } catch (e) {}
@@ -1212,7 +1212,9 @@ function pullFromD1() {
     return String(v);
   };
   const report = {};
-  const tabs = Object.keys(FIELDS);
+  // Wöchentliche Sicherung ohne Gebet und Änderungsprotokoll (Otis Entscheidung 18.11.2026, Datenschutz); der Rückweg ohne opts nimmt weiter alles mit
+  const skip = (opts && opts.skip) || [];
+  const tabs = Object.keys(FIELDS).filter(t => skip.indexOf(t) < 0);
   tabs.forEach((tab, i) => {
     const cols = FIELDS[tab];
     const rows = d1Query_("SELECT * FROM \"" + tab + "\"" + (tab === "log" ? " ORDER BY \"seq\"" : ""));
@@ -1240,7 +1242,7 @@ function pullFromD1() {
 }
 // Für den wöchentlichen Zeitauslöser: Sicherung aus D1; wenn Zahlen abweichen, schlägt der Lauf fehl und Google schickt eine Fehler Mail.
 function weeklyBackup() {
-  const r = pullFromD1();
+  const r = pullFromD1({ skip: ["prayer", "log"] });
   if (!r.ok) throw new Error("Sicherung aus D1 unvollständig: " + JSON.stringify(r));
   return r;
 }
