@@ -68,3 +68,16 @@ test('ohne id: Anmeldung nur mit 8 stelligem Code, 6 stellig geht nicht, eigene 
   assert.equal((await call(e2, { action: 'login', code: '12345678' }, '8.9.9.9')).error, 'locked');
   assert.equal((await call(e2, { action: 'login', member: 'm3', code: '12345678' }, '8.9.9.8')).ok, true);
 });
+test('fertige Projekte ablegen und wieder öffnen (18.11.2026), nur Leitung und Mitte', async () => {
+  const env = makeEnv();
+  const lt = (await call(env, { action: 'login', member: 'm1', code: '123456' })).data.token;
+  const mt = (await call(env, { action: 'login', member: 'm2', code: '654321' })).data.token;
+  assert.equal((await call(env, { action: 'saveProject', token: lt, project: { id: 'p1', title: 'Social Media', when: 'laufend', note: '' } })).ok, true);
+  assert.deepEqual((await call(env, { action: 'bootstrap', token: lt })).data.projectsDone, []);
+  assert.equal((await call(env, { action: 'setProjectDone', token: mt, id: 'p1', done: true })).ok, false, 'Mitglied darf nicht');
+  assert.deepEqual((await call(env, { action: 'setProjectDone', token: lt, id: 'p1', done: true })).data.done, ['p1']);
+  assert.deepEqual((await call(env, { action: 'bootstrap', token: mt })).data.projectsDone, ['p1']);
+  assert.ok((await call(env, { action: 'bootstrap', token: lt })).data.projects.some((p) => p.id === 'p1'), 'Projekt bleibt erhalten');
+  assert.equal((await call(env, { action: 'setProjectDone', token: lt, id: 'gibtsnicht', done: true })).ok, false);
+  assert.deepEqual((await call(env, { action: 'setProjectDone', token: lt, id: 'p1', done: false })).data.done, []);
+});

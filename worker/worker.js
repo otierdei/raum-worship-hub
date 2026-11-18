@@ -370,6 +370,8 @@ function bootstrap_(me) {
   };
   const st = {}; readAll_("settings").forEach(x => { st[x.key] = x.value; });
   data.vision = st.vision && typeof st.vision === "object" ? st.vision : null;
+  // fertige Projekte (18.11.2026): IDs in settings, damit die Tabelle projects keine neue Spalte braucht
+  data.projectsDone = Array.isArray(st.projects_done) ? st.projects_done.map(String) : [];
   // finances are open for every member to read (transparency, decided 09.10.); only leaders change them
   data.money = { start: Number(st.start_balance || 0), startNote: st.start_note || "", invoices: readAll_("invoices").map(r => Object.assign(r, { amount: Number(r.amount || 0) })) };
   return data;
@@ -880,6 +882,16 @@ const ACTIONS = {
     const m = get_("members", b.id);
     need_(!!m, "Mitglied nicht gefunden.");
     return { id: m.id, image: loadBigAvatar_(m.id) || m.avatar_lg || m.avatar || "" };
+  },
+  setProjectDone: (b, me) => {
+    need_(canAll_(me));
+    const id = String(b.id || ""), p = get_("projects", id);
+    need_(!!p, "Projekt nicht gefunden.");
+    let l = setting_("projects_done"); l = Array.isArray(l) ? l.map(String).filter(x => x !== id) : [];
+    if (b.done) l.push(id);
+    setting_("projects_done", l);
+    log_(me, b.done ? "projectDone" : "projectReopen", "projects", id, p.title);
+    return { done: l };
   },
   saveVision: (b, me) => {
     need_(isLeader_(me), "Die Vision pflegt nur die Leitung.");
