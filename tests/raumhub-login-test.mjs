@@ -81,3 +81,35 @@ test('fertige Projekte ablegen und wieder öffnen (18.11.2026), nur Leitung und 
   assert.equal((await call(env, { action: 'setProjectDone', token: lt, id: 'gibtsnicht', done: true })).ok, false);
   assert.deepEqual((await call(env, { action: 'setProjectDone', token: lt, id: 'p1', done: false })).data.done, []);
 });
+test('Gebet: ausdrückliche Einwilligung nötig, Widerruf löscht eigene Beiträge, Kommentare und Zusagen (18.11.2026)', async () => {
+  const env = makeEnv();
+  const lt = (await call(env, { action: 'login', member: 'm1', code: '123456' })).data.token;
+  const mt = (await call(env, { action: 'login', member: 'm2', code: '654321' })).data.token;
+  assert.equal((await call(env, { action: 'bootstrap', token: lt })).data.prayerConsent, null);
+  assert.equal((await call(env, { action: 'addPrayer', token: lt, kind: 'anliegen', text: 'Bitte betet' })).ok, false, 'ohne Einwilligung nicht');
+  assert.equal((await call(env, { action: 'prayerConsent', token: lt, on: true, text_version: 'alt' })).ok, false, 'alte Textfassung nicht');
+  assert.equal((await call(env, { action: 'prayerConsent', token: lt, on: true, text_version: '2026-11-18' })).ok, true);
+  assert.equal((await call(env, { action: 'bootstrap', token: lt })).data.prayerConsent.v, '2026-11-18');
+  const p1 = (await call(env, { action: 'addPrayer', token: lt, kind: 'anliegen', text: 'Lea Anliegen' })).data.id;
+  await call(env, { action: 'prayerConsent', token: mt, on: true, text_version: '2026-11-18' });
+  const p2 = (await call(env, { action: 'addPrayer', token: mt, kind: 'dank', text: 'Tom Dank' })).data.id;
+  await call(env, { action: 'commentPrayer', token: lt, id: p2, text: 'Amen' });
+  await call(env, { action: 'reactPrayer', token: lt, id: p2, pray: true });
+  const w = (await call(env, { action: 'prayerConsent', token: lt, on: false })).data;
+  assert.equal(w.deleted, 1); assert.equal(w.changed, 1);
+  const d = (await call(env, { action: 'bootstrap', token: mt })).data;
+  assert.ok(!d.prayer.some((p) => p.id === p1), 'eigener Beitrag gelöscht');
+  const t = d.prayer.find((p) => p.id === p2); assert.equal(t.comments.length, 0); assert.deepEqual(t.pray, []);
+  assert.equal((await call(env, { action: 'commentPrayer', token: lt, id: p2, text: 'nochmal' })).ok, false, 'nach Widerruf wieder gesperrt');
+});
+test('Protokoll: Einträge älter als 24 Monate werden gelöscht', async () => {
+  const env = makeEnv();
+  await call(env, { action: 'login', member: 'm1', code: '123456' });
+  env.DB.raw.prepare('INSERT INTO log (at, by, action, entity, id, summary) VALUES (?,?,?,?,?,?)').run('2020-01-01T00:00:00.000Z', 'm1', 'x', 'songs', 's', 'alt');
+  const tasks = []; const ctx = { waitUntil: (p) => tasks.push(p) };
+  const real = Math.random; Math.random = () => 0;
+  try { await mod.default.fetch(new Request('https://w.test/', { method: 'POST', headers: { Origin: 'https://otierdei.github.io' }, body: JSON.stringify({ action: 'names' }) }), env, ctx); } finally { Math.random = real; }
+  await Promise.all(tasks);
+  assert.equal(env.DB.raw.prepare("SELECT count(*) AS n FROM log WHERE summary = 'alt'").get().n, 0);
+  assert.ok(env.DB.raw.prepare('SELECT count(*) AS n FROM log').get().n >= 1, 'neue Einträge bleiben');
+});

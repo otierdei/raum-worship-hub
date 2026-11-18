@@ -293,6 +293,9 @@ function storeInvoiceFile_(r, up) {
   return "drive:" + file.getId();
 }
 function demoFolder_() { const d = (DRIVE_QUICK || []).find(x => x && x[0] === "Demos"); return d ? String(d[1] || "") : ""; }
+const PRAYER_CONSENT_V = "2026-11-18";
+function prayerConsentOf_(me) { const m = setting_("prayer_consent"); return m && typeof m === "object" && m[me.id] ? m[me.id] : null; }
+function needConsent_(me) { need_(!!prayerConsentOf_(me), "Bitte zuerst oben bei Gebet und Impulse einwilligen."); }
 function log_(me, action, entity, id, summary) {
   sheet_("log").appendRow([new Date().toISOString(), me ? me.id : "system", action, entity, id || "", String(summary || "").slice(0, 300)]);
 }
@@ -372,6 +375,8 @@ function bootstrap_(me) {
   data.vision = st.vision && typeof st.vision === "object" ? st.vision : null;
   // fertige Projekte (18.11.2026): IDs in settings, damit die Tabelle projects keine neue Spalte braucht
   data.projectsDone = Array.isArray(st.projects_done) ? st.projects_done.map(String) : [];
+  // ausdrückliche Einwilligung für Gebet und Impulse (Art. 9 Abs. 2 lit. a DSGVO, 18.11.2026)
+  data.prayerConsent = prayerConsentOf_(me);
   // finances are open for every member to read (transparency, decided 09.10.); only leaders change them
   data.money = { start: Number(st.start_balance || 0), startNote: st.start_note || "", invoices: readAll_("invoices").map(r => Object.assign(r, { amount: Number(r.amount || 0) })) };
   return data;
@@ -745,7 +750,25 @@ const ACTIONS = {
     return i;
   },
   /* prayer and spiritual input: everyone can share, react and comment; the author or a leader can delete */
+  // Einwilligung erteilen oder widerrufen. Widerruf löscht eigene Beiträge, Kommentare, Gebetszusagen und Reaktionen (Art. 7 Abs. 3, Art. 17 Abs. 1 lit. b DSGVO)
+  prayerConsent: (b, me) => {
+    let m = setting_("prayer_consent"); m = m && typeof m === "object" && !Array.isArray(m) ? m : {};
+    if (b.on) { need_(b.text_version === PRAYER_CONSENT_V, "Bitte die App neu laden."); m[me.id] = { at: now_(), v: PRAYER_CONSENT_V }; setting_("prayer_consent", m); log_(me, "consent", "prayer", me.id, "Einwilligung erteilt"); return { consent: m[me.id] }; }
+    delete m[me.id]; setting_("prayer_consent", m);
+    let posts = 0, other = 0;
+    readAll_("prayer").forEach(p => {
+      if (p.by === me.id) { del_("prayer", p.id); posts++; return; }
+      let ch = false;
+      const c = Array.isArray(p.comments) ? p.comments : [], c2 = c.filter(x => x && x.by !== me.id); if (c2.length !== c.length) { p.comments = c2; ch = true; }
+      const pr = Array.isArray(p.pray) ? p.pray : [], pr2 = pr.filter(x => x !== me.id); if (pr2.length !== pr.length) { p.pray = pr2; ch = true; }
+      const r = p.reacts && typeof p.reacts === "object" ? p.reacts : {}; Object.keys(r).forEach(k => { const l = Array.isArray(r[k]) ? r[k] : []; const l2 = l.filter(x => x !== me.id); if (l2.length !== l.length) { ch = true; if (l2.length) r[k] = l2; else delete r[k]; } }); p.reacts = r;
+      if (ch) { put_("prayer", p); other++; }
+    });
+    log_(me, "consentWithdrawn", "prayer", me.id, posts + " Beiträge gelöscht");
+    return { consent: null, deleted: posts, changed: other };
+  },
   addPrayer: (b, me) => {
+    needConsent_(me);
     const kind = PRAYER_KINDS.indexOf(b.kind) >= 0 ? b.kind : "impuls";
     const text = String(b.text || "").trim().slice(0, 6000);
     need_(!!text, "Bitte etwas schreiben.");
@@ -756,6 +779,7 @@ const ACTIONS = {
     return p;
   },
   reactPrayer: (b, me) => {
+    needConsent_(me);
     const p = get_("prayer", b.id);
     need_(!!p, "Beitrag nicht gefunden.");
     if (b.pray) {
@@ -773,6 +797,7 @@ const ACTIONS = {
     return p;
   },
   commentPrayer: (b, me) => {
+    needConsent_(me);
     const p = get_("prayer", b.id);
     need_(!!p, "Beitrag nicht gefunden.");
     const text = String(b.text || "").trim().slice(0, 1000);
@@ -791,6 +816,7 @@ const ACTIONS = {
   },
   // only the author edits a post, so nobody's words are changed in their name
   editPrayer: (b, me) => {
+    needConsent_(me);
     const p = get_("prayer", b.id);
     need_(!!p, "Beitrag nicht gefunden.");
     need_(p.by === me.id, "Bearbeiten kann nur, wer es geteilt hat.");
@@ -1322,6 +1348,8 @@ function wFill_(r, results) {
 
 /* ---------------- Cloudflare Einstieg ---------------- */
 let W_READY_ = false;
+// Protokolleinträge werden nach 24 Monaten gelöscht (Otis Entscheidung 18.11.2026, Art. 5 Abs. 1 lit. e DSGVO)
+const LOG_KEEP_DAYS_ = 730;
 async function wFileOps_(env, ops) {
   if (!env.APPS_SCRIPT_URL || !env.FILE_SECRET) throw new Error("Dateidienst ist nicht eingerichtet (APPS_SCRIPT_URL, FILE_SECRET).");
   const res = await fetch(env.APPS_SCRIPT_URL, { method: "POST", headers: { "Content-Type": "text/plain" }, body: JSON.stringify({ action: "fileOps", secret: env.FILE_SECRET, ops }), redirect: "follow" });
@@ -1350,7 +1378,8 @@ async function wRun_(env, text) {
   return JSON.stringify({ ok: false, error: "conflict", message: "Gerade ändern viele gleichzeitig. Bitte nochmal versuchen." });
 }
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
+    if (ctx && env.DB && Math.random() < 0.02) ctx.waitUntil(env.DB.batch([env.DB.prepare("DELETE FROM \"log\" WHERE \"at\" < ?").bind(new Date(Date.now() - LOG_KEEP_DAYS_ * 864e5).toISOString())]).catch(() => {}));
     const origin = request.headers.get("Origin") || "";
     const allowed = String(env.ALLOWED_ORIGINS || "").split(",").map(s => s.trim()).filter(Boolean);
     const cors = { "Access-Control-Allow-Origin": allowed.indexOf(origin) >= 0 ? origin : (allowed[0] || ""), "Access-Control-Allow-Methods": "GET, POST, OPTIONS", "Access-Control-Allow-Headers": "Content-Type", "Vary": "Origin" };
